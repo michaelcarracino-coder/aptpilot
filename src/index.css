@@ -1,0 +1,107 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&display=swap');
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --navy:       #0D1B2A;
+  --navy2:      #0D2A3A;
+  --teal:       #0A9396;
+  --teal-hover: #089296;
+  --teal-light: #94D2BD;
+  --teal-pale:  #E8F6F6;
+  --off-white:  #F0F4F8;
+  --white:      #FFFFFF;
+  --gray:       #64748B;
+  --gray-light: #E2E8F0;
+  --gray-mid:   #CBD5E1;
+  --text:       #1E293B;
+  --shadow:     0 4px 24px rgba(13,27,42,0.09);
+  --shadow-lg:  0 8px 40px rgba(13,27,42,0.14);
+  --radius:     12px;
+  --radius-sm:  8px;
+}
+
+html, body, #root {
+  height: 100%;
+  font-family: 'DM Sans', sans-serif;
+  background: var(--off-white);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+}
+
+a { text-decoration: none; color: inherit; }
+button { cursor: pointer; font-family: inherit; }
+input, select, textarea { font-family: inherit; }
+
+.serif { font-family: 'DM Serif Display', serif; }
+
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
+  padding: 0.75rem 1.75rem; border-radius: var(--radius-sm);
+  font-size: 0.92rem; font-weight: 600; border: none;
+  transition: all 0.18s; white-space: nowrap;
+}
+.btn-primary   { background: var(--teal); color: #fff; box-shadow: 0 4px 14px rgba(10,147,150,0.28); }
+.btn-primary:hover { background: var(--teal-hover); transform: translateY(-1px); box-shadow: 0 6px 18px rgba(10,147,150,0.36); }
+.btn-dark      { background: var(--navy); color: #fff; }
+.btn-dark:hover { background: #0f2233; transform: translateY(-1px); }
+.btn-outline   { background: transparent; color: var(--gray); border: 1.5px solid var(--gray-light); }
+.btn-outline:hover { border-color: var(--navy); color: var(--navy); }
+.btn-ghost     { background: transparent; color: #94A3B8; border: 1px solid rgba(255,255,255,0.12); }
+.btn-ghost:hover { color: #fff; border-color: rgba(255,255,255,0.28); }
+.btn-lg        { padding: 0.9rem 2.2rem; font-size: 1rem; }
+.btn-sm        { padding: 0.45rem 1rem; font-size: 0.82rem; }
+
+.card {
+  background: var(--white); border-radius: var(--radius);
+  box-shadow: var(--shadow); padding: 1.75rem;
+}
+
+.field { display: flex; flex-direction: column; gap: 0.4rem; }
+.field label { font-size: 0.8rem; font-weight: 600; color: #475569; text-transform: uppercase; letter-spacing: 0.04em; }
+.field input, .field select, .field textarea {
+  border: 1.5px solid var(--gray-light); border-radius: var(--radius-sm);
+  padding: 0.65rem 0.9rem; font-size: 0.92rem; color: var(--text);
+  background: var(--white); outline: none; transition: border-color 0.18s;
+}
+.field input:focus, .field select:focus, .field textarea:focus { border-color: var(--teal); }
+.field textarea { resize: vertical; min-height: 80px; }
+.field .error { font-size: 0.78rem; color: #EF4444; margin-top: 0.2rem; }
+
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+.grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; }
+@media (max-width: 600px) { .grid-2, .grid-3 { grid-template-columns: 1fr; } }
+
+.nav {
+  background: var(--navy); height: 64px;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 2.5rem; position: sticky; top: 0; z-index: 200;
+}
+.nav-logo { font-family: 'DM Serif Display', serif; font-size: 1.5rem; color: #fff; }
+.nav-logo span { color: var(--teal); }
+.nav-links { display: flex; align-items: center; gap: 0.5rem; }
+.nav-link {
+  padding: 0.4rem 0.9rem; border-radius: 6px; font-size: 0.85rem;
+  font-weight: 500; color: #94A3B8; background: transparent; border: none;
+  transition: all 0.15s;
+}
+.nav-link:hover { color: #fff; background: rgba(255,255,255,0.08); }
+.nav-link.active { background: var(--teal); color: #fff; }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.45; }
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+.fade-up { animation: fadeUp 0.45s ease both; }
+.spinner {
+  width: 20px; height: 20px; border-radius: 50%;
+  border: 2.5px solid rgba(255,255,255,0.3);
+  border-top-color: #fff; animation: spin 0.7s linear infinite;
+}
