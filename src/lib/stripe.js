@@ -1,4 +1,9 @@
 export const PRICES = {
+  standard: {
+    id: import.meta.env.VITE_STRIPE_PRICE_STANDARD,
+    amount: 299,
+    label: 'Standard Plan',
+  },
   core: {
     id: import.meta.env.VITE_STRIPE_PRICE_CORE,
     amount: 399,
@@ -6,7 +11,7 @@ export const PRICES = {
   },
   pro: {
     id: import.meta.env.VITE_STRIPE_PRICE_PRO,
-    amount: 599,
+    amount: 499,
     label: 'Pro Plan',
   },
 }

@@ -23,7 +23,7 @@ export default function Checkout() {
   const handlePay = async () => {
     if (!search) return
     setPaying(true)
-    const priceId = search.tier === 'pro' ? PRICES.pro.id : PRICES.core.id
+    const priceId = search.tier === 'pro' ? PRICES.pro.id : search.tier === 'standard' ? PRICES.standard.id : PRICES.core.id
     await redirectToCheckout(priceId, user.id, user.email)
     setPaying(false)
   }
@@ -34,8 +34,8 @@ export default function Checkout() {
     </div>
   )
 
-  const price = search?.tier === 'pro' ? 599 : 399
-  const planName = search?.tier === 'pro' ? 'Pro Plan' : 'Core Plan'
+  const price = search?.tier === 'pro' ? 499 : search?.tier === 'standard' ? 299 : 399
+  const planName = search?.tier === 'pro' ? 'Pro Plan' : search?.tier === 'standard' ? 'Standard Plan' : 'Core Plan'
 
   return (
     <div style={{ minHeight:'calc(100vh - 64px)', display:'flex', alignItems:'center', justifyContent:'center', padding:'2rem' }}>

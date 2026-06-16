@@ -83,8 +83,8 @@ const styles = `
   text-align: center; margin-bottom: 0.5rem;
 }
 .pricing-sub { text-align: center; color: #64748B; font-size: 0.95rem; margin-bottom: 3rem; }
-.pricing-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
-@media (max-width: 640px) { .pricing-grid { grid-template-columns: 1fr; } }
+.pricing-grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.25rem; }
+@media (max-width: 900px) { .pricing-grid-3 { grid-template-columns: 1fr; } }
 .price-card {
   border-radius: 16px; padding: 2rem;
   background: #0D2A3A; border: 1.5px solid rgba(255,255,255,0.08);
@@ -356,14 +356,14 @@ export default function Landing() {
 
       <section className="pricing-section">
         <div className="pricing-inner">
-          <h2>Simple, Flat-Fee Pricing</h2>
-          <p className="pricing-sub">Pay once. No hidden fees. No commission. Save thousands vs. a broker.</p>
-          <div className="pricing-grid">
+          <h2>Simple, Transparent Pricing</h2>
+          <p className="pricing-sub">Pay once. No subscription. No commission. Save thousands vs. a broker.</p>
+          <div className="pricing-grid-3">
             <div className="price-card">
-              <div className="price-name">Core</div>
-              <div className="price-amt">$399 <span>one-time</span></div>
+              <div className="price-name">Standard</div>
+              <div className="price-amt">$299 <span>one-time</span></div>
               <div className="price-features">
-                {['Full listing search across all platforms','Automated tour scheduling','Personalized tour agenda','One-click application submission','Real-time application tracking'].map(f => (
+                {['Full listing search across all platforms','Personalized tour agenda','Automated tour scheduling','Real-time listing alerts','Dedicated email support','Move-in checklist & resources'].map(f => (
                   <div className="price-feat" key={f}>{f}</div>
                 ))}
               </div>
@@ -373,15 +373,27 @@ export default function Landing() {
             </div>
             <div className="price-card featured">
               <div className="price-popular">Most Popular</div>
-              <div className="price-name">Pro</div>
-              <div className="price-amt">$599 <span>one-time</span></div>
+              <div className="price-name">Core</div>
+              <div className="price-amt">$399 <span>one-time</span></div>
               <div className="price-features">
-                {['Everything in Core','Off-market listings access','Agent network sourcing','Priority tour scheduling','Dedicated support'].map(f => (
+                {['Everything in Standard','Auto-filled applications submitted for you','Negotiation support on your behalf','Real-time application status updates','Landlord & agent follow-up handled','Priority tour scheduling'].map(f => (
                   <div className="price-feat" key={f}>{f}</div>
                 ))}
               </div>
               <div className="price-cta">
                 <button className="btn btn-primary" style={{ width:'100%' }} onClick={() => navigate('/signup')}>Get Started</button>
+              </div>
+            </div>
+            <div className="price-card">
+              <div className="price-name">Pro</div>
+              <div className="price-amt">$499 <span>one-time</span></div>
+              <div className="price-features">
+                {['Everything in Core','1-on-1 with a real NYC broker','24/7 broker access via phone & text','Prioritized scheduling for last-minute tours','Broker-led negotiation & lease review','White-glove move-in coordination'].map(f => (
+                  <div className="price-feat" key={f}>{f}</div>
+                ))}
+              </div>
+              <div className="price-cta">
+                <button className="btn btn-outline" style={{ width:'100%', color:'#fff', borderColor:'rgba(255,255,255,0.2)' }} onClick={() => navigate('/signup')}>Get Started</button>
               </div>
             </div>
           </div>

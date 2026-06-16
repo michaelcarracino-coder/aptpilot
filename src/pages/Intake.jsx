@@ -28,8 +28,8 @@ const css = `
 .upload-area { border:2px dashed var(--gray-light); border-radius:10px; padding:1.5rem; text-align:center; cursor:pointer; transition:all 0.2s; }
 .upload-area:hover { border-color:var(--teal); background:var(--teal-pale); }
 .doc-item { display:flex;align-items:center;gap:0.7rem;background:var(--teal-pale);border-radius:8px;padding:0.5rem 0.75rem;font-size:0.85rem;color:var(--navy);margin-top:0.5rem; }
-.tier-grid { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
-@media(max-width:500px){ .tier-grid{grid-template-columns:1fr;} }
+.tier-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:0.75rem; }
+@media(max-width:700px){ .tier-grid{grid-template-columns:1fr;} }
 .tier-card { border:2px solid var(--gray-light); border-radius:12px; padding:1.25rem; cursor:pointer; transition:all 0.18s; position:relative; }
 .tier-card.on { border-color:var(--teal); background:var(--teal-pale); }
 .tier-badge { position:absolute;top:-10px;right:12px;background:var(--teal);color:#fff;font-size:0.7rem;font-weight:700;padding:0.2rem 0.6rem;border-radius:100px;text-transform:uppercase;letter-spacing:0.05em; }
@@ -188,8 +188,9 @@ export default function Intake() {
               <div className="section-label"><span className="section-label-icon">💳</span>Choose Your Plan</div>
               <div className="tier-grid">
                 {[
-                  { id:'core', name:'Core', price:'$399', feats:['Full listing search','Automated scheduling','Tour agenda','One-click apply','Status tracking'] },
-                  { id:'pro', name:'Pro', price:'$599', badge:'Most Popular', feats:['Everything in Core','Off-market listings','Agent network','Priority scheduling','Dedicated support'] },
+                  { id:'standard', name:'Standard', price:'$299', feats:['Full listing search','Tour agenda','Automated scheduling','Real-time alerts','Dedicated support'] },
+                  { id:'core', name:'Core', price:'$399', badge:'Most Popular', feats:['Everything in Standard','Auto-filled applications','Negotiation support','Application tracking','Priority scheduling'] },
+                  { id:'pro', name:'Pro', price:'$499', feats:['Everything in Core','1-on-1 NYC broker','24/7 broker access','Last-minute tour priority','Lease review'] },
                 ].map(t => (
                   <div key={t.id} className={`tier-card ${form.tier === t.id ? 'on' : ''}`} onClick={() => set('tier', t.id)}>
                     {t.badge && <div className="tier-badge">{t.badge}</div>}
@@ -202,9 +203,9 @@ export default function Intake() {
             </div>
             <div className="section-card">
               <div className="section-label"><span className="section-label-icon">✅</span>Order Summary</div>
-              <div className="order-row"><span style={{ color:'var(--gray)' }}>{form.tier === 'pro' ? 'Pro Plan' : 'Core Plan'}</span><span>{form.tier === 'pro' ? '$599' : '$399'}</span></div>
+              <div className="order-row"><span style={{ color:'var(--gray)' }}>{form.tier === 'pro' ? 'Pro Plan' : form.tier === 'standard' ? 'Standard Plan' : 'Core Plan'}</span><span>{form.tier === 'pro' ? '$499' : form.tier === 'standard' ? '$299' : '$399'}</span></div>
               {form.chauffeur && <div className="order-row"><span style={{ color:'var(--gray)' }}>Chauffeur Add-On</span><span>Per booking</span></div>}
-              <div className="order-row"><span>Total Due Today</span><span style={{ color:'var(--teal)', fontFamily:"'DM Serif Display',serif", fontSize:'1.2rem' }}>{form.tier === 'pro' ? '$599' : '$399'}</span></div>
+              <div className="order-row"><span>Total Due Today</span><span style={{ color:'var(--teal)', fontFamily:"'Cormorant Garamond',serif", fontSize:'1.2rem' }}>{form.tier === 'pro' ? '$499' : form.tier === 'standard' ? '$299' : '$399'}</span></div>
             </div>
           </div>
         )}
