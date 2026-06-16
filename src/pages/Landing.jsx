@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom'
+import { useState } from 'react'
 
 const styles = `
 .landing {
@@ -25,7 +26,7 @@ const styles = `
   animation: fadeUp 0.5s ease both;
 }
 .landing-title {
-  font-family: 'DM Serif Display', serif;
+  font-family: 'Cormorant Garamond', serif;
   font-size: clamp(2.8rem, 6vw, 5rem);
   color: #fff; text-align: center; line-height: 1.1;
   max-width: 820px; margin-bottom: 1.25rem;
@@ -46,14 +47,13 @@ const styles = `
   animation: fadeUp 0.5s 0.4s ease both;
 }
 .stat { text-align: center; }
-.stat-val { font-family: 'DM Serif Display', serif; font-size: 2.1rem; color: #94D2BD; }
+.stat-val { font-family: 'Cormorant Garamond', serif; font-size: 2.1rem; color: #94D2BD; }
 .stat-lbl { font-size: 0.8rem; color: #64748B; margin-top: 0.25rem; }
-
 .how-section {
   padding: 5rem 2rem; max-width: 1000px; margin: 0 auto; width: 100%;
 }
 .how-section h2 {
-  font-family: 'DM Serif Display', serif; font-size: 2.2rem; color: var(--navy);
+  font-family: 'Cormorant Garamond', serif; font-size: 2.2rem; color: var(--navy);
   text-align: center; margin-bottom: 0.5rem;
 }
 .how-sub { text-align: center; color: var(--gray); font-size: 0.95rem; margin-bottom: 3rem; }
@@ -72,13 +72,10 @@ const styles = `
 .step-icon { font-size: 1.8rem; margin-bottom: 0.75rem; }
 .step-title { font-weight: 700; font-size: 1rem; color: var(--navy); margin-bottom: 0.4rem; }
 .step-desc { font-size: 0.85rem; color: var(--gray); line-height: 1.6; }
-
-.pricing-section {
-  background: var(--navy); padding: 5rem 2rem;
-}
+.pricing-section { background: var(--navy); padding: 5rem 2rem; }
 .pricing-inner { max-width: 860px; margin: 0 auto; }
 .pricing-inner h2 {
-  font-family: 'DM Serif Display', serif; font-size: 2.2rem; color: #fff;
+  font-family: 'Cormorant Garamond', serif; font-size: 2.2rem; color: #fff;
   text-align: center; margin-bottom: 0.5rem;
 }
 .pricing-sub { text-align: center; color: #64748B; font-size: 0.95rem; margin-bottom: 3rem; }
@@ -97,12 +94,43 @@ const styles = `
   white-space: nowrap;
 }
 .price-name { font-size: 0.8rem; font-weight: 700; color: var(--teal); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.75rem; }
-.price-amt { font-family: 'DM Serif Display', serif; font-size: 3rem; color: #fff; line-height: 1; }
-.price-amt span { font-family: 'DM Sans', sans-serif; font-size: 0.9rem; color: #64748B; font-weight: 400; }
+.price-amt { font-family: 'Cormorant Garamond', serif; font-size: 3rem; color: #fff; line-height: 1; }
+.price-amt span { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 0.9rem; color: #64748B; font-weight: 400; }
 .price-features { margin-top: 1.5rem; display: flex; flex-direction: column; gap: 0.5rem; }
 .price-feat { font-size: 0.85rem; color: #CBD5E1; display: flex; gap: 0.5rem; align-items: flex-start; }
 .price-feat::before { content: '✓'; color: var(--teal); font-weight: 700; flex-shrink: 0; margin-top: 1px; }
 .price-cta { margin-top: 1.75rem; width: 100%; text-align: center; }
+.calc-section { padding: 5rem 2rem; background: var(--off-white); }
+.calc-inner { max-width: 780px; margin: 0 auto; }
+.calc-inner h2 {
+  font-family: 'Cormorant Garamond', serif; font-size: 2.2rem; color: var(--navy);
+  text-align: center; margin-bottom: 0.5rem;
+}
+.calc-sub { text-align: center; color: var(--gray); font-size: 0.95rem; margin-bottom: 2.5rem; }
+.calc-card {
+  background: white; border-radius: 16px; box-shadow: var(--shadow);
+  padding: 2.5rem; display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;
+}
+@media(max-width:640px){ .calc-card { grid-template-columns: 1fr; } }
+.calc-label { font-size: 0.8rem; font-weight: 600; color: #475569; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 0.5rem; }
+.calc-input {
+  width: 100%; border: 2px solid var(--gray-light); border-radius: 10px;
+  padding: 0.8rem 1rem; font-size: 1.5rem; font-family: 'Cormorant Garamond', serif;
+  color: var(--navy); font-weight: 600; outline: none; transition: border-color 0.18s;
+}
+.calc-input:focus { border-color: var(--teal); }
+.calc-slider { width: 100%; margin-top: 0.75rem; accent-color: var(--teal); cursor: pointer; }
+.calc-result {
+  background: var(--navy); border-radius: 12px; padding: 1.75rem;
+  display: flex; flex-direction: column; justify-content: center; gap: 1rem;
+}
+.calc-result-row { display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0; border-bottom: 1px solid rgba(255,255,255,0.08); }
+.calc-result-row:last-child { border: none; }
+.calc-result-label { font-size: 0.85rem; color: #94A3B8; }
+.calc-result-val { font-family: 'Cormorant Garamond', serif; font-size: 1.4rem; color: white; font-weight: 500; }
+.calc-result-val.savings { color: #94D2BD; font-size: 1.8rem; }
+.calc-cta-wrap { text-align: center; margin-top: 1.75rem; }
+.calc-note { font-size: 0.78rem; color: var(--gray); margin-top: 0.75rem; text-align: center; }
 `
 
 const STEPS = [
@@ -113,6 +141,68 @@ const STEPS = [
   { icon: '🚀', title: 'One-click applications', desc: 'Your documents are pre-uploaded. Hit apply and we submit instantly to the landlord.' },
   { icon: '📊', title: 'Track your status', desc: 'Real-time updates on every application until you get your keys.' },
 ]
+
+function SavingsCalc({ navigate }) {
+  const [rent, setRent] = useState(3500)
+  const brokerFee = Math.round(rent * 1.0833 * 100) / 100
+  const aptPilot = 399
+  const savings = brokerFee - aptPilot
+
+  return (
+    <section className="calc-section">
+      <div className="calc-inner">
+        <h2>How Much Will You Save?</h2>
+        <p className="calc-sub">See exactly what AptPilot saves you vs. a traditional broker.</p>
+        <div className="calc-card">
+          <div>
+            <div className="calc-label">Your Monthly Rent</div>
+            <input
+              className="calc-input"
+              type="text"
+              value={"$" + rent.toLocaleString()}
+              onChange={e => {
+                const val = parseInt(e.target.value.replace(/[^0-9]/g, '')) || 0
+                if (val <= 20000) setRent(val)
+              }}
+            />
+            <input
+              className="calc-slider"
+              type="range"
+              min={1500}
+              max={15000}
+              step={100}
+              value={rent}
+              onChange={e => setRent(Number(e.target.value))}
+            />
+            <div style={{ display:'flex', justifyContent:'space-between', fontSize:'0.78rem', color:'var(--gray)', marginTop:'0.3rem' }}>
+              <span>$1,500</span><span>$15,000</span>
+            </div>
+          </div>
+          <div className="calc-result">
+            <div className="calc-result-row">
+              <span className="calc-result-label">Traditional Broker Fee</span>
+              <span className="calc-result-val">${brokerFee.toLocaleString()}</span>
+            </div>
+            <div className="calc-result-row">
+              <span className="calc-result-label">AptPilot Fee</span>
+              <span className="calc-result-val">$399</span>
+            </div>
+            <div className="calc-result-row">
+              <span className="calc-result-label">You Save</span>
+              <span className="calc-result-val savings">${savings.toLocaleString()}</span>
+            </div>
+          </div>
+        </div>
+        <div className="calc-cta-wrap">
+          <button className="btn btn-primary btn-lg" onClick={() => navigate('/signup')}>
+            Save ${savings.toLocaleString()} — Start My Search →
+          </button>
+          <p className="calc-note">One-time flat fee. No hidden costs. No commission.</p>
+        </div>
+      </div>
+    </section>
+  )
+}
 
 export default function Landing() {
   const navigate = useNavigate()
@@ -151,6 +241,8 @@ export default function Landing() {
           ))}
         </div>
       </section>
+
+      <SavingsCalc navigate={navigate} />
 
       <section className="pricing-section">
         <div className="pricing-inner">
