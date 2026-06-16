@@ -49,6 +49,7 @@ const styles = `
 .stat { text-align: center; }
 .stat-val { font-family: 'Cormorant Garamond', serif; font-size: 2.1rem; color: #94D2BD; }
 .stat-lbl { font-size: 0.8rem; color: #64748B; margin-top: 0.25rem; }
+
 .how-section {
   padding: 5rem 2rem; max-width: 1000px; margin: 0 auto; width: 100%;
 }
@@ -72,7 +73,10 @@ const styles = `
 .step-icon { font-size: 1.8rem; margin-bottom: 0.75rem; }
 .step-title { font-weight: 700; font-size: 1rem; color: var(--navy); margin-bottom: 0.4rem; }
 .step-desc { font-size: 0.85rem; color: var(--gray); line-height: 1.6; }
-.pricing-section { background: var(--navy); padding: 5rem 2rem; }
+
+.pricing-section {
+  background: var(--navy); padding: 5rem 2rem;
+}
 .pricing-inner { max-width: 860px; margin: 0 auto; }
 .pricing-inner h2 {
   font-family: 'Cormorant Garamond', serif; font-size: 2.2rem; color: #fff;
@@ -100,8 +104,14 @@ const styles = `
 .price-feat { font-size: 0.85rem; color: #CBD5E1; display: flex; gap: 0.5rem; align-items: flex-start; }
 .price-feat::before { content: '✓'; color: var(--teal); font-weight: 700; flex-shrink: 0; margin-top: 1px; }
 .price-cta { margin-top: 1.75rem; width: 100%; text-align: center; }
-.calc-section { padding: 5rem 2rem; background: var(--off-white); }
-.calc-inner { max-width: 780px; margin: 0 auto; }
+
+.calc-section {
+  padding: 5rem 2rem;
+  background: var(--off-white);
+}
+.calc-inner {
+  max-width: 780px; margin: 0 auto;
+}
 .calc-inner h2 {
   font-family: 'Cormorant Garamond', serif; font-size: 2.2rem; color: var(--navy);
   text-align: center; margin-bottom: 0.5rem;
@@ -131,6 +141,34 @@ const styles = `
 .calc-result-val.savings { color: #94D2BD; font-size: 1.8rem; }
 .calc-cta-wrap { text-align: center; margin-top: 1.75rem; }
 .calc-note { font-size: 0.78rem; color: var(--gray); margin-top: 0.75rem; text-align: center; }
+
+.faq-section { padding: 5rem 2rem; background: white; }
+.faq-inner { max-width: 780px; margin: 0 auto; }
+.faq-inner h2 {
+  font-family: 'Cormorant Garamond', serif; font-size: 2.2rem; color: var(--navy);
+  text-align: center; margin-bottom: 0.5rem;
+}
+.faq-sub { text-align: center; color: var(--gray); font-size: 0.95rem; margin-bottom: 3rem; }
+.faq-list { display: flex; flex-direction: column; gap: 0.75rem; }
+.faq-item {
+  border: 1.5px solid var(--gray-light); border-radius: 12px;
+  overflow: hidden; transition: border-color 0.2s;
+}
+.faq-item.open { border-color: var(--teal); }
+.faq-question {
+  width: 100%; display: flex; justify-content: space-between; align-items: center;
+  padding: 1.1rem 1.5rem; background: white; border: none; cursor: pointer;
+  font-family: 'Plus Jakarta Sans', sans-serif; font-size: 0.95rem; font-weight: 600;
+  color: var(--navy); text-align: left; transition: background 0.15s;
+}
+.faq-item.open .faq-question { background: var(--teal-pale); color: var(--teal); }
+.faq-icon { font-size: 1.2rem; flex-shrink: 0; margin-left: 1rem; transition: transform 0.2s; color: var(--gray); }
+.faq-item.open .faq-icon { transform: rotate(45deg); color: var(--teal); }
+.faq-answer {
+  max-height: 0; overflow: hidden; transition: max-height 0.3s ease, padding 0.2s;
+  padding: 0 1.5rem; color: var(--gray); font-size: 0.9rem; line-height: 1.7;
+}
+.faq-item.open .faq-answer { max-height: 300px; padding: 0.75rem 1.5rem 1.25rem; }
 `
 
 const STEPS = [
@@ -141,6 +179,74 @@ const STEPS = [
   { icon: '🚀', title: 'One-click applications', desc: 'Your documents are pre-uploaded. Hit apply and we submit instantly to the landlord.' },
   { icon: '📊', title: 'Track your status', desc: 'Real-time updates on every application until you get your keys.' },
 ]
+
+
+
+const FAQS = [
+  {
+    q: "Is AptPilot legal in New York City?",
+    a: "Yes. AptPilot is a technology platform, not a licensed broker. We automate tasks you authorize us to perform on your behalf — searching listings, scheduling tours, and submitting applications with your documents. We do not negotiate lease terms or represent you in a legal capacity. Think of us as a very smart personal assistant."
+  },
+  {
+    q: "What listing platforms do you search?",
+    a: "AptPilot searches across all major NYC listing platforms including StreetEasy, Zillow, Apartments.com, Rent.com, and more. Pro plan members also get access to off-market listings sourced through our agent and owner network."
+  },
+  {
+    q: "What happens if I don't find an apartment I like?",
+    a: "We keep searching and scheduling tours until you find the right place. Your search stays active until you sign a lease or cancel. If you genuinely can't find anything that fits your criteria within 60 days, contact our support team and we'll work with you on a solution."
+  },
+  {
+    q: "How does the application submission work?",
+    a: "You upload your documents once — pay stubs, tax returns, bank statements, and ID. When you find an apartment you love, you click Apply in your dashboard and AptPilot auto-fills and submits the application to the landlord using your pre-uploaded documents. You review and confirm before anything is sent."
+  },
+  {
+    q: "Will landlords and agents accept AI-scheduled tours?",
+    a: "Yes — tour requests are sent professionally on your behalf via email and phone, the same way any person or assistant would reach out. Landlords and agents receive a normal tour request and respond accordingly. In our experience, the vast majority confirm without issue."
+  },
+  {
+    q: "How is AptPilot different from StreetEasy or Zillow?",
+    a: "StreetEasy and Zillow are search portals — they show you listings but leave all the work to you. AptPilot actually does the work: contacts agents, books tours, builds your agenda, and submits applications. It's the difference between a map and a chauffeur."
+  },
+  {
+    q: "Is my personal and financial information secure?",
+    a: "Absolutely. All documents and personal data are encrypted in transit and at rest using AES-256 encryption. We never sell your data and only share it with landlords and platforms as part of applications you explicitly authorize. You can request deletion of all your data at any time."
+  },
+  {
+    q: "What does the Pro plan include that Core doesn't?",
+    a: "Pro adds access to off-market listings (apartments not listed publicly), priority tour scheduling so your requests go to the front of the queue, agent network sourcing, and dedicated 1-on-1 support. It's designed for renters with tighter timelines or higher-end requirements."
+  },
+  {
+    q: "What is the Tour Chauffeur add-on?",
+    a: "For an additional per-booking fee, AptPilot will automatically arrange a chauffeured car to take you between all your tours on your tour day. The driver is booked based on your tour schedule and you receive full pickup details in your dashboard. We partner with licensed car services in NYC."
+  },
+  {
+    q: "What if I want a refund?",
+    a: "If AptPilot fails to schedule a single tour within 7 days of your search launching (assuming you have reasonable criteria and availability), we'll issue a full refund. Outside of that, all sales are final given the work we put in from day one of your search. Contact support@aptpilot.com with any concerns."
+  },
+]
+
+function FAQ() {
+  const [open, setOpen] = useState(null)
+  return (
+    <section className="faq-section">
+      <div className="faq-inner">
+        <h2>Frequently Asked Questions</h2>
+        <p className="faq-sub">Everything you need to know before getting started.</p>
+        <div className="faq-list">
+          {FAQS.map((faq, i) => (
+            <div key={i} className={`faq-item ${open === i ? 'open' : ''}`}>
+              <button className="faq-question" onClick={() => setOpen(open === i ? null : i)}>
+                {faq.q}
+                <span className="faq-icon">+</span>
+              </button>
+              <div className="faq-answer">{faq.a}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+}
 
 function SavingsCalc({ navigate }) {
   const [rent, setRent] = useState(3500)
@@ -242,7 +348,11 @@ export default function Landing() {
         </div>
       </section>
 
+
+      {/* SAVINGS CALCULATOR */}
       <SavingsCalc navigate={navigate} />
+
+      <FAQ />
 
       <section className="pricing-section">
         <div className="pricing-inner">
@@ -278,5 +388,3 @@ export default function Landing() {
         </div>
       </section>
     </>
-  )
-}
