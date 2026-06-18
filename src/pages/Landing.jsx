@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 const styles = `
 .landing {
@@ -169,6 +169,44 @@ const styles = `
   padding: 0 1.5rem; color: var(--gray); font-size: 0.9rem; line-height: 1.7;
 }
 .faq-item.open .faq-answer { max-height: 300px; padding: 0.75rem 1.5rem 1.25rem; }
+
+.exit-overlay {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(13,27,42,0.75); backdrop-filter: blur(4px);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 1000; animation: fadeUp 0.3s ease both;
+  padding: 1.5rem;
+}
+.exit-modal {
+  background: white; border-radius: 20px; max-width: 480px; width: 100%;
+  padding: 2.5rem; position: relative; text-align: center;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  animation: fadeUp 0.35s 0.05s ease both;
+}
+.exit-close {
+  position: absolute; top: 1.1rem; right: 1.1rem;
+  width: 32px; height: 32px; border-radius: 50%;
+  background: var(--off-white); border: none; cursor: pointer;
+  font-size: 1.1rem; color: var(--gray); display: flex; align-items: center; justify-content: center;
+  transition: all 0.15s;
+}
+.exit-close:hover { background: var(--gray-light); color: var(--navy); }
+.exit-icon { font-size: 2.5rem; margin-bottom: 1rem; }
+.exit-modal h3 {
+  font-family: 'Cormorant Garamond', serif; font-size: 1.75rem; color: var(--navy);
+  margin-bottom: 0.6rem; line-height: 1.2;
+}
+.exit-modal p { color: var(--gray); font-size: 0.92rem; margin-bottom: 1.5rem; line-height: 1.6; }
+.exit-form { display: flex; flex-direction: column; gap: 0.75rem; }
+.exit-input {
+  width: 100%; border: 1.5px solid var(--gray-light); border-radius: 10px;
+  padding: 0.85rem 1rem; font-size: 0.95rem; outline: none;
+  transition: border-color 0.18s; font-family: 'Plus Jakarta Sans', sans-serif;
+}
+.exit-input:focus { border-color: var(--teal); }
+.exit-note { font-size: 0.74rem; color: #94A3B8; margin-top: 0.85rem; }
+.exit-success { padding: 1rem 0; }
+.exit-success-icon { font-size: 2.5rem; margin-bottom: 0.75rem; }
 `
 
 const STEPS = [
@@ -310,9 +348,92 @@ function SavingsCalc({ navigate }) {
   )
 }
 
+
+function ExitIntentModal({ show, onClose }) {
+  const [email, setEmail] = useState('')
+  const [submitted, setSubmitted] = useState(false)
+  const [error, setError] = useState('')
+
+  if (!show) return null
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    if (!email.includes('@')) { setError('Please enter a valid email'); return }
+    setError('')
+    try {
+      await fetch('/api/capture-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, source: 'exit_intent' }),
+      })
+    } catch (err) {
+      console.error('Email capture failed:', err)
+    }
+    setSubmitted(true)
+  }
+
+  return (
+    <div className="exit-overlay" onClick={onClose}>
+      <div className="exit-modal" onClick={e => e.stopPropagation()}>
+        <button className="exit-close" onClick={onClose}>✕</button>
+        {!submitted ? (
+          <>
+            <div className="exit-icon">📋</div>
+            <h3>Wait — don't leave empty-handed!</h3>
+            <p>Get our free NYC Apartment Hunting Checklist — everything you need to know before signing a lease, straight to your inbox.</p>
+            <form className="exit-form" onSubmit={handleSubmit}>
+              <input
+                className="exit-input"
+                type="email"
+                placeholder="you@email.com"
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+                required
+              />
+              {error && <p style={{ color:'#EF4444', fontSize:'0.8rem', margin:0 }}>{error}</p>}
+              <button className="btn btn-primary" type="submit" style={{ justifyContent:'center', padding:'0.85rem' }}>
+                Send Me The Checklist →
+              </button>
+            </form>
+            <p className="exit-note">No spam. Unsubscribe anytime.</p>
+          </>
+        ) : (
+          <div className="exit-success">
+            <div className="exit-success-icon">✅</div>
+            <h3>You're in!</h3>
+            <p>Check your inbox — your free NYC Apartment Checklist is on its way.</p>
+            <button className="btn btn-dark" onClick={onClose} style={{ marginTop:'0.5rem' }}>Continue Browsing</button>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
 export default function Landing() {
   const navigate = useNavigate()
+  const [showExitModal, setShowExitModal] = useState(false)
+  const [hasShown, setHasShown] = useState(false)
+
+  useEffect(() => {
+    const alreadyShown = sessionStorage.getItem('aptpilot_exit_shown')
+    if (alreadyShown) { setHasShown(true); return }
+
+    const handleMouseLeave = (e) => {
+      if (e.clientY <= 0 && !hasShown) {
+        setShowExitModal(true)
+        setHasShown(true)
+        sessionStorage.setItem('aptpilot_exit_shown', 'true')
+      }
+    }
+
+    document.addEventListener('mouseleave', handleMouseLeave)
+    return () => document.removeEventListener('mouseleave', handleMouseLeave)
+  }, [hasShown])
+
   return (
+    <>
+    <ExitIntentModal show={showExitModal} onClose={() => setShowExitModal(false)} />
     <>
       <style>{styles}</style>
 
@@ -399,6 +520,7 @@ export default function Landing() {
           </div>
         </div>
       </section>
+    </>
     </>
   )
 }
