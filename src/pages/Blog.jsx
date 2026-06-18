@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom'
-import { BLOG_POSTS } from '../data/blogPosts'
+import { useState, useEffect } from 'react'
+import { supabase } from '../lib/supabase'
 
 const css = `
 .blog-page { max-width: 980px; margin: 0 auto; padding: 3rem 1.5rem 5rem; animation: fadeUp 0.4s ease both; }
@@ -34,10 +35,26 @@ const css = `
   font-size: 0.75rem; color: #94A3B8; display: flex; gap: 0.6rem; align-items: center;
   border-top: 1px solid var(--gray-light); padding-top: 0.85rem;
 }
+.blog-empty { text-align: center; color: var(--gray); padding: 3rem 0; }
 `
 
 export default function Blog() {
   const navigate = useNavigate()
+  const [posts, setPosts] = useState([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    async function load() {
+      const { data } = await supabase
+        .from('blog_posts')
+        .select('*')
+        .eq('published', true)
+        .order('created_at', { ascending: false })
+      setPosts(data || [])
+      setLoading(false)
+    }
+    load()
+  }, [])
 
   return (
     <>
@@ -47,23 +64,28 @@ export default function Blog() {
           <h1>The AptPilot Journal</h1>
           <p>Renting tips, neighborhood guides, and everything you need to know about navigating NYC's apartment market.</p>
         </div>
-        <div className="blog-grid">
-          {BLOG_POSTS.map(post => (
-            <div className="blog-card" key={post.slug} onClick={() => navigate(`/blog/${post.slug}`)}>
-              <div className="blog-card-img">{post.image}</div>
-              <div className="blog-card-body">
-                <div className="blog-card-cat">{post.category}</div>
-                <div className="blog-card-title">{post.title}</div>
-                <div className="blog-card-excerpt">{post.excerpt}</div>
-                <div className="blog-card-meta">
-                  <span>{new Date(post.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
-                  <span>·</span>
-                  <span>{post.readTime}</span>
+
+        {loading ? (
+          <div className="blog-empty">Loading articles...</div>
+        ) : posts.length === 0 ? (
+          <div className="blog-empty">New articles coming soon — check back shortly.</div>
+        ) : (
+          <div className="blog-grid">
+            {posts.map(post => (
+              <div className="blog-card" key={post.slug} onClick={() => navigate(`/blog/${post.slug}`)}>
+                <div className="blog-card-img">{post.image}</div>
+                <div className="blog-card-body">
+                  <div className="blog-card-cat">{post.category}</div>
+                  <div className="blog-card-title">{post.title}</div>
+                  <div className="blog-card-excerpt">{post.excerpt}</div>
+                  <div className="blog-card-meta">
+                    <span>{new Date(post.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
     </>
   )

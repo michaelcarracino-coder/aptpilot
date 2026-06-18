@@ -1,5 +1,6 @@
-import { useParams, useNavigate, Navigate } from 'react-router-dom'
-import { BLOG_POSTS } from '../data/blogPosts'
+import { useParams, useNavigate } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { supabase } from '../lib/supabase'
 
 const css = `
 .post-page { max-width: 680px; margin: 0 auto; padding: 3rem 1.5rem 5rem; animation: fadeUp 0.4s ease both; }
@@ -41,6 +42,7 @@ const css = `
   font-family: 'Cormorant Garamond', serif; font-size: 1.5rem; color: white; margin-bottom: 0.6rem;
 }
 .post-cta p { color: #94A3B8; font-size: 0.9rem; margin-bottom: 1.25rem; }
+.post-loading, .post-notfound { text-align: center; color: var(--gray); padding: 4rem 0; }
 `
 
 function renderContent(content) {
@@ -61,9 +63,25 @@ function renderContent(content) {
 export default function BlogPost() {
   const { slug } = useParams()
   const navigate = useNavigate()
-  const post = BLOG_POSTS.find(p => p.slug === slug)
+  const [post, setPost] = useState(null)
+  const [loading, setLoading] = useState(true)
 
-  if (!post) return <Navigate to="/blog" replace />
+  useEffect(() => {
+    async function load() {
+      const { data } = await supabase
+        .from('blog_posts')
+        .select('*')
+        .eq('slug', slug)
+        .eq('published', true)
+        .single()
+      setPost(data)
+      setLoading(false)
+    }
+    load()
+  }, [slug])
+
+  if (loading) return (<><style>{css}</style><div className="post-loading">Loading article...</div></>)
+  if (!post) return (<><style>{css}</style><div className="post-notfound">Article not found. <button className="btn btn-outline" onClick={() => navigate('/blog')} style={{ marginTop:'1rem' }}>Back to Journal</button></div></>)
 
   return (
     <>
@@ -73,9 +91,7 @@ export default function BlogPost() {
         <div className="post-cat">{post.category}</div>
         <h1 className="post-title">{post.title}</h1>
         <div className="post-meta">
-          <span>{new Date(post.date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</span>
-          <span>·</span>
-          <span>{post.readTime}</span>
+          <span>{new Date(post.created_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</span>
         </div>
         <div className="post-hero">{post.image}</div>
         <div className="post-body">
