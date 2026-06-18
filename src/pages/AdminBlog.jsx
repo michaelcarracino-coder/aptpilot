@@ -29,7 +29,7 @@ const css = `
 `
 
 export default function AdminBlog() {
-  const { user } = useAuth()
+  const { user, loading: authLoading } = useAuth()
   const [posts, setPosts] = useState([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -100,6 +100,9 @@ export default function AdminBlog() {
   }
 
   // Gate: only the admin email can access this page
+  if (authLoading) {
+    return <div style={{ display:'flex', alignItems:'center', justifyContent:'center', height:'calc(100vh - 64px)' }}><div className="spinner" style={{ borderColor:'rgba(10,147,150,0.3)', borderTopColor:'var(--teal)', width:32, height:32 }} /></div>
+  }
   if (!user) return <Navigate to="/login" replace />
   if (user.email !== ADMIN_EMAIL) return <Navigate to="/" replace />
 
