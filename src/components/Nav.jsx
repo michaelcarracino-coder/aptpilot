@@ -18,6 +18,7 @@ export default function Nav() {
       </div>
 
       <div className="nav-links">
+        <button className={`nav-link ${pathname === '/blog' || pathname.startsWith('/blog/') ? 'active' : ''}`} onClick={() => navigate('/blog')}>Blog</button>
         {!user && (
           <>
             <button className="nav-link" onClick={() => navigate('/login')}>Log In</button>

@@ -7,6 +7,8 @@ import Signup     from './pages/Signup'
 import Intake     from './pages/Intake'
 import Checkout   from './pages/Checkout'
 import Dashboard  from './pages/Dashboard'
+import Blog       from './pages/Blog'
+import BlogPost   from './pages/BlogPost'
 
 function PrivateRoute({ children }) {
   const { user, loading } = useAuth()
@@ -29,6 +31,8 @@ function AppRoutes() {
       <Nav />
       <Routes>
         <Route path="/"          element={<Landing />} />
+        <Route path="/blog"      element={<Blog />} />
+        <Route path="/blog/:slug" element={<BlogPost />} />
         <Route path="/login"     element={user ? <Navigate to="/dashboard" /> : <Login />} />
         <Route path="/signup"    element={user ? <Navigate to="/intake" /> : <Signup />} />
         <Route path="/intake"    element={<PrivateRoute><Intake /></PrivateRoute>} />
