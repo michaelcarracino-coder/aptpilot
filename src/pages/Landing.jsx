@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 import { useState, useEffect } from 'react'
+import SEO from '../components/SEO'
 
 const styles = `
 .landing {
@@ -433,6 +434,11 @@ export default function Landing() {
 
   return (
     <>
+    <SEO
+      title="AptPilot — NYC Apartment Search Without a Broker Fee"
+      description="Avoid the NYC broker fee. AptPilot searches every listing, books your tours, and submits applications automatically — starting at $299 flat fee."
+      canonical="https://aptpilot.vercel.app/"
+    />
     <ExitIntentModal show={showExitModal} onClose={() => setShowExitModal(false)} />
     <>
       <style>{styles}</style>

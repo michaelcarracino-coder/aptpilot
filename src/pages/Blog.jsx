@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
+import SEO from '../components/SEO'
 
 const css = `
 .blog-page { max-width: 980px; margin: 0 auto; padding: 3rem 1.5rem 5rem; animation: fadeUp 0.4s ease both; }
@@ -58,6 +59,11 @@ export default function Blog() {
 
   return (
     <>
+      <SEO
+        title="NYC Apartment Hunting Tips & Guides | AptPilot Journal"
+        description="Expert tips on avoiding broker fees, NYC neighborhood guides, and rental application checklists. Everything you need to navigate NYC's apartment market."
+        canonical="https://aptpilot.vercel.app/blog"
+      />
       <style>{css}</style>
       <div className="blog-page">
         <div className="blog-header">

@@ -1,6 +1,7 @@
 import { useParams, useNavigate } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
+import SEO from '../components/SEO'
 
 const css = `
 .post-page { max-width: 680px; margin: 0 auto; padding: 3rem 1.5rem 5rem; animation: fadeUp 0.4s ease both; }
@@ -85,6 +86,11 @@ export default function BlogPost() {
 
   return (
     <>
+      <SEO
+        title={`${post.title} | AptPilot`}
+        description={post.excerpt}
+        canonical={`https://aptpilot.vercel.app/blog/${post.slug}`}
+      />
       <style>{css}</style>
       <div className="post-page">
         <button className="post-back" onClick={() => navigate('/blog')}>← Back to Journal</button>
