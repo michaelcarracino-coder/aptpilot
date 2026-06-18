@@ -33,6 +33,9 @@ export default function Login() {
           <div className="field">
             <label>Password</label>
             <input type="password" placeholder="••••••••" value={password} onChange={e => setPassword(e.target.value)} required />
+            <p style={{ textAlign:'right', marginTop:'0.3rem' }}>
+              <Link to="/forgot-password" style={{ color:'var(--teal)', fontSize:'0.82rem', fontWeight:600 }}>Forgot password?</Link>
+            </p>
           </div>
           {error && <p style={{ color:'#EF4444', fontSize:'0.82rem', background:'#FEF2F2', padding:'0.6rem 0.9rem', borderRadius:'7px' }}>{error}</p>}
           <button className="btn btn-primary" type="submit" disabled={loading} style={{ marginTop:'0.5rem', justifyContent:'center' }}>
