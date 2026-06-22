@@ -4,7 +4,7 @@ import { Navigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 
 // IMPORTANT: replace this with your actual email — only this account can access /admin/blog
-const ADMIN_EMAIL = 'michael.carracino@gmail.com'
+const ADMIN_EMAIL = 'aptpilot1@gmail.com'
 
 const css = `
 .admin-page { max-width: 900px; margin: 0 auto; padding: 2.5rem 1.5rem 5rem; animation: fadeUp 0.4s ease both; }

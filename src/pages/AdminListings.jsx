@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext'
 import { Navigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 
-const ADMIN_EMAIL = 'michael.carracino@gmail.com'
+const ADMIN_EMAIL = 'aptpilot1@gmail.com'
 
 const css = `
 .admin-listings { max-width: 1000px; margin: 0 auto; padding: 2rem 1.5rem 5rem; }

@@ -51,7 +51,7 @@ export default async function handler(req, res) {
       },
       body: JSON.stringify({
         from: 'AptPilot <notifications@aptpilot.vercel.app>',
-        to: ['michael.carracino@gmail.com'],
+        to: ['aptpilot1@gmail.com'],
         subject: `🏠 New Search — ${userEmail} | $${criteria.min_budget}–$${criteria.max_budget}/mo | ${(criteria.neighborhoods || []).slice(0,2).join(', ')}`,
         html: emailBody,
       }),

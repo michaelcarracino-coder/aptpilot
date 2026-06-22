@@ -33,7 +33,7 @@ export default function Nav() {
             {!profile?.paid && (
               <button className={`nav-link ${pathname === '/intake' ? 'active' : ''}`} onClick={() => navigate('/intake')}>My Search</button>
             )}
-            {user.email === 'michael.carracino@gmail.com' && (
+            {user.email === 'aptpilot1@gmail.com' && (
               <>
                 <button className={`nav-link ${pathname === '/admin/listings' ? 'active' : ''}`} onClick={() => navigate('/admin/listings')}>Listings</button>
                 <button className={`nav-link ${pathname === '/admin/blog' ? 'active' : ''}`} onClick={() => navigate('/admin/blog')}>Blog Admin</button>
