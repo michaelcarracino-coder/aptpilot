@@ -71,7 +71,7 @@ export default function Intake() {
 
   const handleSubmit = async () => {
     setSaving(true)
-    const { error } = await supabase.from('searches').insert({
+    const { data, error } = await supabase.from('searches').insert({
       user_id:       user.id,
       move_in:       form.moveIn || null,
       min_bed:       form.minBed,
@@ -86,7 +86,24 @@ export default function Intake() {
       phone:         form.phone,
     })
     setSaving(false)
-    if (!error) navigate('/checkout')
+    if (!error) {
+      // Notify admin of new search
+      try {
+        await fetch('/api/notify-new-search', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            searchId: data?.[0]?.id || 'unknown',
+            userId: user.id,
+            userEmail: user.email,
+            criteria: form,
+          }),
+        })
+      } catch (e) {
+        console.error('Notification failed:', e)
+      }
+      navigate('/checkout')
+    }
   }
 
   return (
