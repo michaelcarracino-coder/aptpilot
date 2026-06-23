@@ -1,356 +1,240 @@
 import { useNavigate } from 'react-router-dom'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import SEO from '../components/SEO'
 
-const styles = `
-.landing {
-  min-height: calc(100vh - 64px);
-  background: linear-gradient(160deg, #0D1B2A 0%, #0D2A3A 55%, #0D1B2A 100%);
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  padding: 5rem 2rem; position: relative; overflow: hidden;
+/* ─── Scroll-reveal hook ─── */
+function useReveal() {
+  useEffect(() => {
+    const els = document.querySelectorAll('.reveal')
+    const io = new IntersectionObserver(
+      (entries) => entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); io.unobserve(e.target) } }),
+      { threshold: 0.12 }
+    )
+    els.forEach(el => io.observe(el))
+    return () => io.disconnect()
+  })
 }
-.landing::before {
-  content:''; position:absolute; width:700px; height:700px; border-radius:50%;
-  background: radial-gradient(circle, rgba(10,147,150,0.13) 0%, transparent 70%);
-  top:-150px; right:-150px; pointer-events:none;
-}
-.landing::after {
-  content:''; position:absolute; width:500px; height:500px; border-radius:50%;
-  background: radial-gradient(circle, rgba(148,210,189,0.07) 0%, transparent 70%);
-  bottom:-80px; left:-80px; pointer-events:none;
-}
-.landing-badge {
-  background: rgba(10,147,150,0.15); border: 1px solid rgba(10,147,150,0.3);
-  color: #94D2BD; padding: 0.35rem 1rem; border-radius: 100px;
-  font-size: 0.78rem; font-weight: 500; letter-spacing: 0.06em;
-  text-transform: uppercase; margin-bottom: 1.5rem;
-  animation: fadeUp 0.5s ease both;
-}
-.landing-title {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: clamp(2.8rem, 6vw, 5rem);
-  color: #fff; text-align: center; line-height: 1.1;
-  max-width: 820px; margin-bottom: 1.25rem;
-  animation: fadeUp 0.5s 0.1s ease both;
-}
-.landing-title em { color: var(--teal); font-style: italic; }
-.landing-sub {
-  font-size: 1.1rem; color: #94A3B8; text-align: center;
-  max-width: 560px; line-height: 1.75; margin-bottom: 2.5rem;
-  animation: fadeUp 0.5s 0.2s ease both;
-}
-.landing-cta {
-  display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center;
-  animation: fadeUp 0.5s 0.3s ease both;
-}
-.landing-stats {
-  display: flex; gap: 3.5rem; margin-top: 4.5rem; flex-wrap: wrap; justify-content: center;
-  animation: fadeUp 0.5s 0.4s ease both;
-}
-.stat { text-align: center; }
-.stat-val { font-family: 'Cormorant Garamond', serif; font-size: 2.1rem; color: #94D2BD; }
-.stat-lbl { font-size: 0.8rem; color: #64748B; margin-top: 0.25rem; }
 
-.how-section {
-  padding: 5rem 2rem; max-width: 1000px; margin: 0 auto; width: 100%;
+/* ─── Animated number counter ─── */
+function Counter({ end, prefix = '', suffix = '' }) {
+  const [val, setVal] = useState(0)
+  const ref = useRef()
+  useEffect(() => {
+    const io = new IntersectionObserver(([e]) => {
+      if (!e.isIntersecting) return
+      io.disconnect()
+      let start = 0
+      const step = end / 50
+      const t = setInterval(() => {
+        start += step
+        if (start >= end) { setVal(end); clearInterval(t) }
+        else setVal(Math.floor(start))
+      }, 28)
+    }, { threshold: 0.5 })
+    if (ref.current) io.observe(ref.current)
+    return () => io.disconnect()
+  }, [end])
+  return <span ref={ref}>{prefix}{val.toLocaleString()}{suffix}</span>
 }
-.how-section h2 {
-  font-family: 'Cormorant Garamond', serif; font-size: 2.2rem; color: var(--navy);
-  text-align: center; margin-bottom: 0.5rem;
-}
-.how-sub { text-align: center; color: var(--gray); font-size: 0.95rem; margin-bottom: 3rem; }
-.steps-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; }
-@media (max-width: 700px) { .steps-grid { grid-template-columns: 1fr; } }
-.step-card {
-  background: #fff; border-radius: 14px; padding: 1.75rem;
-  box-shadow: var(--shadow); text-align: center;
-  border-top: 3px solid var(--teal);
-}
-.step-num {
-  width: 36px; height: 36px; background: var(--teal-pale); border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  font-weight: 700; color: var(--teal); font-size: 0.9rem; margin: 0 auto 1rem;
-}
-.step-icon { font-size: 1.8rem; margin-bottom: 0.75rem; }
-.step-title { font-weight: 700; font-size: 1rem; color: var(--navy); margin-bottom: 0.4rem; }
-.step-desc { font-size: 0.85rem; color: var(--gray); line-height: 1.6; }
 
-.pricing-section {
-  background: var(--navy); padding: 5rem 2rem;
-}
-.pricing-inner { max-width: 860px; margin: 0 auto; }
-.pricing-inner h2 {
-  font-family: 'Cormorant Garamond', serif; font-size: 2.2rem; color: #fff;
-  text-align: center; margin-bottom: 0.5rem;
-}
-.pricing-sub { text-align: center; color: #64748B; font-size: 0.95rem; margin-bottom: 3rem; }
-.pricing-grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.25rem; }
-@media (max-width: 900px) { .pricing-grid-3 { grid-template-columns: 1fr; } }
-.price-card {
-  border-radius: 16px; padding: 2rem;
-  background: #0D2A3A; border: 1.5px solid rgba(255,255,255,0.08);
-  position: relative;
-}
-.price-card.featured { border-color: var(--teal); background: rgba(10,147,150,0.12); }
-.price-popular {
-  position: absolute; top: -12px; left: 50%; transform: translateX(-50%);
-  background: var(--teal); color: #fff; font-size: 0.72rem; font-weight: 700;
-  padding: 0.25rem 0.9rem; border-radius: 100px; text-transform: uppercase; letter-spacing: 0.06em;
-  white-space: nowrap;
-}
-.price-name { font-size: 0.8rem; font-weight: 700; color: var(--teal); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.75rem; }
-.price-amt { font-family: 'Cormorant Garamond', serif; font-size: 3rem; color: #fff; line-height: 1; }
-.price-amt span { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 0.9rem; color: #64748B; font-weight: 400; }
-.price-features { margin-top: 1.5rem; display: flex; flex-direction: column; gap: 0.5rem; }
-.price-feat { font-size: 0.85rem; color: #CBD5E1; display: flex; gap: 0.5rem; align-items: flex-start; }
-.price-feat::before { content: '✓'; color: var(--teal); font-weight: 700; flex-shrink: 0; margin-top: 1px; }
-.price-cta { margin-top: 1.75rem; width: 100%; text-align: center; }
-
-.calc-section {
-  padding: 5rem 2rem;
-  background: var(--off-white);
-}
-.calc-inner {
-  max-width: 780px; margin: 0 auto;
-}
-.calc-inner h2 {
-  font-family: 'Cormorant Garamond', serif; font-size: 2.2rem; color: var(--navy);
-  text-align: center; margin-bottom: 0.5rem;
-}
-.calc-sub { text-align: center; color: var(--gray); font-size: 0.95rem; margin-bottom: 2.5rem; }
-.calc-card {
-  background: white; border-radius: 16px; box-shadow: var(--shadow);
-  padding: 2.5rem; display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;
-}
-@media(max-width:640px){ .calc-card { grid-template-columns: 1fr; } }
-.calc-label { font-size: 0.8rem; font-weight: 600; color: #475569; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 0.5rem; }
-.calc-input {
-  width: 100%; border: 2px solid var(--gray-light); border-radius: 10px;
-  padding: 0.8rem 1rem; font-size: 1.5rem; font-family: 'Cormorant Garamond', serif;
-  color: var(--navy); font-weight: 600; outline: none; transition: border-color 0.18s;
-}
-.calc-input:focus { border-color: var(--teal); }
-.calc-slider { width: 100%; margin-top: 0.75rem; accent-color: var(--teal); cursor: pointer; }
-.calc-result {
-  background: var(--navy); border-radius: 12px; padding: 1.75rem;
-  display: flex; flex-direction: column; justify-content: center; gap: 1rem;
-}
-.calc-result-row { display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0; border-bottom: 1px solid rgba(255,255,255,0.08); }
-.calc-result-row:last-child { border: none; }
-.calc-result-label { font-size: 0.85rem; color: #94A3B8; }
-.calc-result-val { font-family: 'Cormorant Garamond', serif; font-size: 1.4rem; color: white; font-weight: 500; }
-.calc-result-val.savings { color: #94D2BD; font-size: 1.8rem; }
-.calc-cta-wrap { text-align: center; margin-top: 1.75rem; }
-.calc-note { font-size: 0.78rem; color: var(--gray); margin-top: 0.75rem; text-align: center; }
-
-.faq-section { padding: 5rem 2rem; background: white; }
-.faq-inner { max-width: 780px; margin: 0 auto; }
-.faq-inner h2 {
-  font-family: 'Cormorant Garamond', serif; font-size: 2.2rem; color: var(--navy);
-  text-align: center; margin-bottom: 0.5rem;
-}
-.faq-sub { text-align: center; color: var(--gray); font-size: 0.95rem; margin-bottom: 3rem; }
-.faq-list { display: flex; flex-direction: column; gap: 0.75rem; }
-.faq-item {
-  border: 1.5px solid var(--gray-light); border-radius: 12px;
-  overflow: hidden; transition: border-color 0.2s;
-}
-.faq-item.open { border-color: var(--teal); }
-.faq-question {
-  width: 100%; display: flex; justify-content: space-between; align-items: center;
-  padding: 1.1rem 1.5rem; background: white; border: none; cursor: pointer;
-  font-family: 'Plus Jakarta Sans', sans-serif; font-size: 0.95rem; font-weight: 600;
-  color: var(--navy); text-align: left; transition: background 0.15s;
-}
-.faq-item.open .faq-question { background: var(--teal-pale); color: var(--teal); }
-.faq-icon { font-size: 1.2rem; flex-shrink: 0; margin-left: 1rem; transition: transform 0.2s; color: var(--gray); }
-.faq-item.open .faq-icon { transform: rotate(45deg); color: var(--teal); }
-.faq-answer {
-  max-height: 0; overflow: hidden; transition: max-height 0.3s ease, padding 0.2s;
-  padding: 0 1.5rem; color: var(--gray); font-size: 0.9rem; line-height: 1.7;
-}
-.faq-item.open .faq-answer { max-height: 300px; padding: 0.75rem 1.5rem 1.25rem; }
-
-.exit-overlay {
-  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-  background: rgba(13,27,42,0.75); backdrop-filter: blur(4px);
-  display: flex; align-items: center; justify-content: center;
-  z-index: 1000; animation: fadeUp 0.3s ease both;
-  padding: 1.5rem;
-}
-.exit-modal {
-  background: white; border-radius: 20px; max-width: 480px; width: 100%;
-  padding: 2.5rem; position: relative; text-align: center;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-  animation: fadeUp 0.35s 0.05s ease both;
-}
-.exit-close {
-  position: absolute; top: 1.1rem; right: 1.1rem;
-  width: 32px; height: 32px; border-radius: 50%;
-  background: var(--off-white); border: none; cursor: pointer;
-  font-size: 1.1rem; color: var(--gray); display: flex; align-items: center; justify-content: center;
-  transition: all 0.15s;
-}
-.exit-close:hover { background: var(--gray-light); color: var(--navy); }
-.exit-icon { font-size: 2.5rem; margin-bottom: 1rem; }
-.exit-modal h3 {
-  font-family: 'Cormorant Garamond', serif; font-size: 1.75rem; color: var(--navy);
-  margin-bottom: 0.6rem; line-height: 1.2;
-}
-.exit-modal p { color: var(--gray); font-size: 0.92rem; margin-bottom: 1.5rem; line-height: 1.6; }
-.exit-form { display: flex; flex-direction: column; gap: 0.75rem; }
-.exit-input {
-  width: 100%; border: 1.5px solid var(--gray-light); border-radius: 10px;
-  padding: 0.85rem 1rem; font-size: 0.95rem; outline: none;
-  transition: border-color 0.18s; font-family: 'Plus Jakarta Sans', sans-serif;
-}
-.exit-input:focus { border-color: var(--teal); }
-.exit-note { font-size: 0.74rem; color: #94A3B8; margin-top: 0.85rem; }
-.exit-success { padding: 1rem 0; }
-.exit-success-icon { font-size: 2.5rem; margin-bottom: 0.75rem; }
-`
-
-const STEPS = [
-  { icon: '📋', title: 'Tell us what you need', desc: 'Budget, bedrooms, neighborhoods, move-in date, and your available tour times.' },
-  { icon: '🤖', title: 'AptPilot searches & books', desc: 'We scan every listing platform and automatically book tours during your available windows.' },
-  { icon: '🏠', title: 'Tour, choose, apply', desc: 'Receive your tour agenda, visit the apartments, and apply with one click.' },
-  { icon: '📅', title: 'We schedule everything', desc: 'No more back-and-forth emails. All tours are confirmed and added to your agenda.' },
-  { icon: '🚀', title: 'One-click applications', desc: 'Your documents are pre-uploaded. Hit apply and we submit instantly to the landlord.' },
-  { icon: '📊', title: 'Track your status', desc: 'Real-time updates on every application until you get your keys.' },
-]
-
-
-
-const FAQS = [
-  {
-    q: "Is AptPilot legal in New York City?",
-    a: "Yes. AptPilot is a technology platform, not a licensed broker. We automate tasks you authorize us to perform on your behalf — searching listings, scheduling tours, and submitting applications with your documents. We do not negotiate lease terms or represent you in a legal capacity. Think of us as a very smart personal assistant."
-  },
-  {
-    q: "What listing platforms do you search?",
-    a: "AptPilot searches across all major NYC listing platforms including StreetEasy, Zillow, Apartments.com, Rent.com, and more. Pro plan members also get access to off-market listings sourced through our agent and owner network."
-  },
-  {
-    q: "What happens if I don't find an apartment I like?",
-    a: "We keep searching and scheduling tours until you find the right place. Your search stays active until you sign a lease or cancel. If you genuinely can't find anything that fits your criteria within 60 days, contact our support team and we'll work with you on a solution."
-  },
-  {
-    q: "How does the application submission work?",
-    a: "You upload your documents once — pay stubs, tax returns, bank statements, and ID. When you find an apartment you love, you click Apply in your dashboard and AptPilot auto-fills and submits the application to the landlord using your pre-uploaded documents. You review and confirm before anything is sent."
-  },
-  {
-    q: "Will landlords and agents accept AI-scheduled tours?",
-    a: "Yes — tour requests are sent professionally on your behalf via email and phone, the same way any person or assistant would reach out. Landlords and agents receive a normal tour request and respond accordingly. In our experience, the vast majority confirm without issue."
-  },
-  {
-    q: "How is AptPilot different from StreetEasy or Zillow?",
-    a: "StreetEasy and Zillow are search portals — they show you listings but leave all the work to you. AptPilot actually does the work: contacts agents, books tours, builds your agenda, and submits applications. It's the difference between a map and a chauffeur."
-  },
-  {
-    q: "Is my personal and financial information secure?",
-    a: "Absolutely. All documents and personal data are encrypted in transit and at rest using AES-256 encryption. We never sell your data and only share it with landlords and platforms as part of applications you explicitly authorize. You can request deletion of all your data at any time."
-  },
-  {
-    q: "What does the Pro plan include that Core doesn't?",
-    a: "Pro adds access to off-market listings (apartments not listed publicly), priority tour scheduling so your requests go to the front of the queue, agent network sourcing, and dedicated 1-on-1 support. It's designed for renters with tighter timelines or higher-end requirements."
-  },
-  {
-    q: "What is the Tour Chauffeur add-on?",
-    a: "For an additional per-booking fee, AptPilot will automatically arrange a chauffeured car to take you between all your tours on your tour day. The driver is booked based on your tour schedule and you receive full pickup details in your dashboard. We partner with licensed car services in NYC."
-  },
-  {
-    q: "What if I want a refund?",
-    a: "If AptPilot fails to schedule a single tour within 7 days of your search launching (assuming you have reasonable criteria and availability), we'll issue a full refund. Outside of that, all sales are final given the work we put in from day one of your search. Contact support@aptpilot.com with any concerns."
-  },
-]
-
-function FAQ() {
-  const [open, setOpen] = useState(null)
+/* ─── Section header component ─── */
+function SectionHeader({ eyebrow, title, sub, light }) {
   return (
-    <section className="faq-section">
-      <div className="faq-inner">
-        <h2>Frequently Asked Questions</h2>
-        <p className="faq-sub">Everything you need to know before getting started.</p>
-        <div className="faq-list">
-          {FAQS.map((faq, i) => (
-            <div key={i} className={`faq-item ${open === i ? 'open' : ''}`}>
-              <button className="faq-question" onClick={() => setOpen(open === i ? null : i)}>
-                {faq.q}
-                <span className="faq-icon">+</span>
-              </button>
-              <div className="faq-answer">{faq.a}</div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
+    <div className="reveal" style={{ textAlign: 'center', marginBottom: '4rem' }}>
+      {eyebrow && (
+        <div style={{
+          display: 'inline-block',
+          background: light ? 'rgba(10,191,191,0.12)' : 'rgba(10,191,191,0.1)',
+          border: '1px solid rgba(10,191,191,0.25)',
+          color: '#0ABFBF', padding: '0.3rem 1rem', borderRadius: 100,
+          fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.1em',
+          textTransform: 'uppercase', marginBottom: '1.25rem',
+        }}>{eyebrow}</div>
+      )}
+      <h2 style={{
+        fontFamily: "'Playfair Display', serif",
+        fontSize: 'clamp(2rem, 4vw, 2.8rem)',
+        fontWeight: 700, lineHeight: 1.18,
+        color: light ? '#fff' : 'var(--navy)',
+        marginBottom: '0.9rem',
+      }}>{title}</h2>
+      {sub && (
+        <p style={{
+          fontSize: '1.05rem', color: light ? 'rgba(255,255,255,0.55)' : 'var(--text-muted)',
+          maxWidth: 540, margin: '0 auto', lineHeight: 1.75,
+        }}>{sub}</p>
+      )}
+    </div>
   )
 }
 
+/* ─── STEPS ─── */
+const STEPS = [
+  { num: '01', icon: '📋', title: 'Tell us what you need', desc: 'Budget, bedrooms, neighborhoods, move-in date, and available tour windows.' },
+  { num: '02', icon: '🔍', title: 'We search every platform', desc: 'AptPilot scans StreetEasy, Zillow, Apartments.com and more in real time.' },
+  { num: '03', icon: '📅', title: 'Tours booked automatically', desc: 'We contact agents and schedule tours during your available windows — no back-and-forth.' },
+  { num: '04', icon: '🏠', title: 'Tour your shortlist', desc: 'Receive a clean tour agenda. Show up, see apartments, and decide.' },
+  { num: '05', icon: '⚡', title: 'One-click application', desc: 'Docs pre-uploaded. Hit apply and we submit instantly to the landlord.' },
+  { num: '06', icon: '🗝️', title: 'Get your keys', desc: 'Real-time updates on every application until you sign your lease.' },
+]
+
+/* ─── TESTIMONIALS ─── */
+const TESTIMONIALS = [
+  {
+    quote: "I saved $4,200 in broker fees and had 6 tours scheduled in 48 hours. AptPilot is genuinely magic.",
+    name: "Sophie R.",
+    role: "Moved to Williamsburg, Brooklyn",
+    avatar: "SR",
+    rating: 5,
+  },
+  {
+    quote: "As someone with zero time to apartment hunt, this was a lifesaver. They booked everything and I just showed up.",
+    name: "Marcus T.",
+    role: "Moved to the Upper West Side",
+    avatar: "MT",
+    rating: 5,
+  },
+  {
+    quote: "The broker fee savings alone paid for the service 8x over. The dashboard made it feel effortless.",
+    name: "Priya K.",
+    role: "Moved to Long Island City",
+    avatar: "PK",
+    rating: 5,
+  },
+]
+
+/* ─── FAQS ─── */
+const FAQS = [
+  { q: "Is AptPilot legal in New York City?", a: "Yes. AptPilot is a technology platform, not a licensed broker. We automate tasks you authorize us to perform on your behalf — searching listings, scheduling tours, and submitting applications with your documents. Think of us as a very smart personal assistant." },
+  { q: "What listing platforms do you search?", a: "AptPilot searches across all major NYC listing platforms including StreetEasy, Zillow, Apartments.com, Rent.com, and more. Pro plan members also get access to off-market listings sourced through our agent and owner network." },
+  { q: "How does the application submission work?", a: "You upload your documents once — pay stubs, tax returns, bank statements, and ID. When you find an apartment you love, click Apply in your dashboard and AptPilot auto-fills and submits the application. You review and confirm before anything is sent." },
+  { q: "Will landlords accept AI-scheduled tours?", a: "Yes — tour requests are sent professionally via email and phone, the same way any person or assistant would reach out. In our experience, the vast majority of landlords and agents confirm without issue." },
+  { q: "How is AptPilot different from StreetEasy or Zillow?", a: "StreetEasy and Zillow are search portals — they show you listings but leave all the work to you. AptPilot actually does the work: contacts agents, books tours, builds your agenda, and submits applications. It's the difference between a map and a chauffeur." },
+  { q: "What if I want a refund?", a: "If AptPilot fails to schedule a single tour within 7 days of your search launching (with reasonable criteria), we'll issue a full refund. Contact support@aptpilot.com with any concerns." },
+]
+
+/* ─── FAQ ITEM ─── */
+function FaqItem({ q, a, open, toggle }) {
+  return (
+    <div
+      style={{
+        border: `1.5px solid ${open ? 'var(--teal)' : 'var(--surface-mid)'}`,
+        borderRadius: 14, overflow: 'hidden',
+        transition: 'border-color 0.22s',
+        background: '#fff',
+      }}
+    >
+      <button
+        onClick={toggle}
+        style={{
+          width: '100%', display: 'flex', justifyContent: 'space-between',
+          alignItems: 'center', padding: '1.25rem 1.6rem',
+          background: open ? 'rgba(10,191,191,0.05)' : 'transparent',
+          border: 'none', cursor: 'pointer', textAlign: 'left',
+          transition: 'background 0.18s',
+        }}
+      >
+        <span style={{ fontWeight: 600, fontSize: '0.97rem', color: open ? 'var(--teal)' : 'var(--navy)', lineHeight: 1.45 }}>{q}</span>
+        <span style={{
+          width: 28, height: 28, borderRadius: '50%', flexShrink: 0, marginLeft: '1rem',
+          background: open ? 'var(--teal)' : 'var(--surface)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          color: open ? '#fff' : 'var(--slate)',
+          fontSize: '1.1rem', fontWeight: 300,
+          transition: 'all 0.22s',
+          transform: open ? 'rotate(45deg)' : 'rotate(0)',
+        }}>+</span>
+      </button>
+      <div style={{
+        maxHeight: open ? 300 : 0, overflow: 'hidden',
+        transition: 'max-height 0.35s ease',
+      }}>
+        <p style={{ padding: '0.5rem 1.6rem 1.4rem', color: 'var(--text-muted)', fontSize: '0.93rem', lineHeight: 1.75 }}>{a}</p>
+      </div>
+    </div>
+  )
+}
+
+/* ─── SAVINGS CALCULATOR ─── */
 function SavingsCalc({ navigate }) {
   const [rent, setRent] = useState(3500)
-  const brokerFee = Math.round(rent * 1.0833 * 100) / 100
+  const brokerFee = Math.round(rent * 1.0833)
   const aptPilot = 399
   const savings = brokerFee - aptPilot
 
   return (
-    <section className="calc-section">
-      <div className="calc-inner">
-        <h2>How Much Will You Save?</h2>
-        <p className="calc-sub">See exactly what AptPilot saves you vs. a traditional broker.</p>
-        <div className="calc-card">
+    <section style={{ padding: '7rem 2rem', background: 'var(--surface)' }}>
+      <div style={{ maxWidth: 820, margin: '0 auto' }}>
+        <SectionHeader
+          eyebrow="Savings Calculator"
+          title="How Much Will You Save?"
+          sub="See exactly what AptPilot saves you vs. a traditional NYC broker fee."
+        />
+        <div className="reveal" style={{
+          background: '#fff', borderRadius: 24, boxShadow: 'var(--shadow-xl)',
+          padding: '2.75rem', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2.5rem',
+        }}>
           <div>
-            <div className="calc-label">Your Monthly Rent</div>
+            <div style={{ fontSize: '0.74rem', fontWeight: 700, color: 'var(--slate-dark)', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: '0.65rem' }}>Monthly Rent</div>
+            <div style={{
+              fontFamily: "'Playfair Display', serif",
+              fontSize: '3rem', fontWeight: 700, color: 'var(--navy)', lineHeight: 1,
+              marginBottom: '1.25rem',
+            }}>
+              ${rent.toLocaleString()}
+            </div>
             <input
-              className="calc-input"
-              type="text"
-              value={"$" + rent.toLocaleString()}
-              onChange={e => {
-                const val = parseInt(e.target.value.replace(/[^0-9]/g, '')) || 0
-                if (val <= 20000) setRent(val)
-              }}
-            />
-            <input
-              className="calc-slider"
-              type="range"
-              min={1500}
-              max={15000}
-              step={100}
-              value={rent}
+              type="range" min={1500} max={15000} step={100} value={rent}
               onChange={e => setRent(Number(e.target.value))}
+              style={{ width: '100%', accentColor: 'var(--teal)', cursor: 'pointer', height: 4 }}
             />
-            <div style={{ display:'flex', justifyContent:'space-between', fontSize:'0.78rem', color:'var(--gray)', marginTop:'0.3rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.78rem', color: 'var(--slate)', marginTop: '0.4rem' }}>
               <span>$1,500</span><span>$15,000</span>
             </div>
           </div>
-          <div className="calc-result">
-            <div className="calc-result-row">
-              <span className="calc-result-label">Traditional Broker Fee</span>
-              <span className="calc-result-val">${brokerFee.toLocaleString()}</span>
-            </div>
-            <div className="calc-result-row">
-              <span className="calc-result-label">AptPilot Fee</span>
-              <span className="calc-result-val">$399</span>
-            </div>
-            <div className="calc-result-row">
-              <span className="calc-result-label">You Save</span>
-              <span className="calc-result-val savings">${savings.toLocaleString()}</span>
-            </div>
+
+          <div style={{
+            background: 'var(--navy)', borderRadius: 16, padding: '1.75rem',
+            display: 'flex', flexDirection: 'column', gap: '0.85rem',
+          }}>
+            {[
+              { label: 'Broker Fee (8.33% × 13 months)', val: `$${brokerFee.toLocaleString()}`, muted: true },
+              { label: 'AptPilot Flat Fee', val: '$399', muted: true },
+              { label: 'You Save', val: `$${savings.toLocaleString()}`, highlight: true },
+            ].map(row => (
+              <div key={row.label} style={{
+                display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                padding: '0.6rem 0',
+                borderBottom: row.highlight ? 'none' : '1px solid rgba(255,255,255,0.07)',
+              }}>
+                <span style={{ fontSize: '0.84rem', color: 'rgba(255,255,255,0.55)' }}>{row.label}</span>
+                <span style={{
+                  fontFamily: row.highlight ? "'Playfair Display', serif" : 'Inter, sans-serif',
+                  fontSize: row.highlight ? '2rem' : '1.05rem',
+                  fontWeight: row.highlight ? 700 : 500,
+                  color: row.highlight ? '#0ABFBF' : '#fff',
+                }}>{row.val}</span>
+              </div>
+            ))}
           </div>
         </div>
-        <div className="calc-cta-wrap">
+
+        <div className="reveal" style={{ textAlign: 'center', marginTop: '2.25rem' }}>
           <button className="btn btn-primary btn-lg" onClick={() => navigate('/signup')}>
             Save ${savings.toLocaleString()} — Start My Search →
           </button>
-          <p className="calc-note">One-time flat fee. No hidden costs. No commission.</p>
+          <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '0.85rem' }}>
+            One-time flat fee. No hidden costs. No commission.
+          </p>
         </div>
       </div>
+      <style>{`@media(max-width:640px){.calc-grid{grid-template-columns:1fr!important;}}`}</style>
     </section>
   )
 }
 
-
-function ExitIntentModal({ show, onClose }) {
+/* ─── EXIT INTENT MODAL ─── */
+function ExitModal({ show, onClose }) {
   const [email, setEmail] = useState('')
   const [submitted, setSubmitted] = useState(false)
   const [error, setError] = useState('')
@@ -359,174 +243,590 @@ function ExitIntentModal({ show, onClose }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    if (!email.includes('@')) { setError('Please enter a valid email'); return }
-    setError('')
+    if (!email.includes('@')) { setError('Enter a valid email'); return }
     try {
       await fetch('/api/capture-email', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, source: 'exit_intent' }),
       })
-    } catch (err) {
-      console.error('Email capture failed:', err)
-    }
+    } catch {}
     setSubmitted(true)
   }
 
   return (
-    <div className="exit-overlay" onClick={onClose}>
-      <div className="exit-modal" onClick={e => e.stopPropagation()}>
-        <button className="exit-close" onClick={onClose}>✕</button>
+    <div onClick={onClose} style={{
+      position: 'fixed', inset: 0, zIndex: 1000,
+      background: 'rgba(6,9,15,0.75)', backdropFilter: 'blur(6px)',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      padding: '1.5rem', animation: 'fadeIn 0.25s ease',
+    }}>
+      <div onClick={e => e.stopPropagation()} style={{
+        background: '#fff', borderRadius: 24, maxWidth: 480, width: '100%',
+        padding: '2.75rem', textAlign: 'center', position: 'relative',
+        boxShadow: '0 24px 80px rgba(0,0,0,0.28)', animation: 'fadeUp 0.3s ease',
+      }}>
+        <button onClick={onClose} style={{
+          position: 'absolute', top: '1.1rem', right: '1.1rem',
+          width: 32, height: 32, borderRadius: '50%', border: 'none',
+          background: 'var(--surface)', cursor: 'pointer', fontSize: '0.95rem', color: 'var(--slate)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+        }}>✕</button>
+
         {!submitted ? (
           <>
-            <div className="exit-icon">📋</div>
-            <h3>Wait — don't leave empty-handed!</h3>
-            <p>Get our free NYC Apartment Hunting Checklist — everything you need to know before signing a lease, straight to your inbox.</p>
-            <form className="exit-form" onSubmit={handleSubmit}>
+            <div style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>📋</div>
+            <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: '1.7rem', color: 'var(--navy)', marginBottom: '0.6rem', lineHeight: 1.2 }}>
+              Wait — don't leave empty-handed.
+            </h3>
+            <p style={{ color: 'var(--text-muted)', fontSize: '0.92rem', marginBottom: '1.6rem', lineHeight: 1.65 }}>
+              Get our free NYC Apartment Hunting Checklist — everything you need before signing a lease.
+            </p>
+            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
               <input
-                className="exit-input"
-                type="email"
-                placeholder="you@email.com"
-                value={email}
-                onChange={e => setEmail(e.target.value)}
-                required
+                type="email" placeholder="you@email.com" value={email}
+                onChange={e => setEmail(e.target.value)} required
+                style={{
+                  width: '100%', border: '1.5px solid var(--surface-mid)', borderRadius: 10,
+                  padding: '0.85rem 1rem', fontSize: '0.95rem', outline: 'none', fontFamily: 'Inter, sans-serif',
+                }}
               />
-              {error && <p style={{ color:'#EF4444', fontSize:'0.8rem', margin:0 }}>{error}</p>}
-              <button className="btn btn-primary" type="submit" style={{ justifyContent:'center', padding:'0.85rem' }}>
+              {error && <p style={{ color: '#EF4444', fontSize: '0.8rem', margin: 0 }}>{error}</p>}
+              <button className="btn btn-primary" type="submit" style={{ justifyContent: 'center', padding: '0.9rem' }}>
                 Send Me The Checklist →
               </button>
             </form>
-            <p className="exit-note">No spam. Unsubscribe anytime.</p>
+            <p style={{ fontSize: '0.74rem', color: 'var(--slate)', marginTop: '1rem' }}>No spam. Unsubscribe anytime.</p>
           </>
         ) : (
-          <div className="exit-success">
-            <div className="exit-success-icon">✅</div>
-            <h3>You're in!</h3>
-            <p>Check your inbox — your free NYC Apartment Checklist is on its way.</p>
-            <button className="btn btn-dark" onClick={onClose} style={{ marginTop:'0.5rem' }}>Continue Browsing</button>
-          </div>
+          <>
+            <div style={{ fontSize: '2.5rem', marginBottom: '0.75rem' }}>✅</div>
+            <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: '1.7rem', color: 'var(--navy)', marginBottom: '0.5rem' }}>You're in!</h3>
+            <p style={{ color: 'var(--text-muted)', fontSize: '0.92rem' }}>Your NYC Apartment Checklist is on its way.</p>
+            <button className="btn btn-dark" onClick={onClose} style={{ marginTop: '1.25rem' }}>Continue Browsing</button>
+          </>
         )}
       </div>
     </div>
   )
 }
 
+/* ─── MAIN LANDING ─── */
 export default function Landing() {
   const navigate = useNavigate()
-  const [showExitModal, setShowExitModal] = useState(false)
+  const [faqOpen, setFaqOpen] = useState(null)
+  const [showExit, setShowExit] = useState(false)
   const [hasShown, setHasShown] = useState(false)
 
-  useEffect(() => {
-    const alreadyShown = sessionStorage.getItem('aptpilot_exit_shown')
-    if (alreadyShown) { setHasShown(true); return }
+  useReveal()
 
-    const handleMouseLeave = (e) => {
+  useEffect(() => {
+    if (sessionStorage.getItem('aptpilot_exit')) { setHasShown(true); return }
+    const handler = (e) => {
       if (e.clientY <= 0 && !hasShown) {
-        setShowExitModal(true)
-        setHasShown(true)
-        sessionStorage.setItem('aptpilot_exit_shown', 'true')
+        setShowExit(true); setHasShown(true)
+        sessionStorage.setItem('aptpilot_exit', '1')
       }
     }
-
-    document.addEventListener('mouseleave', handleMouseLeave)
-    return () => document.removeEventListener('mouseleave', handleMouseLeave)
+    document.addEventListener('mouseleave', handler)
+    return () => document.removeEventListener('mouseleave', handler)
   }, [hasShown])
+
+  const stars = Array(5).fill('★')
 
   return (
     <>
-    <SEO
-      title="AptPilot — NYC Apartment Search Without a Broker Fee"
-      description="Avoid the NYC broker fee. AptPilot searches every listing, books your tours, and submits applications automatically — starting at $299 flat fee."
-      canonical="https://aptpilot.vercel.app/"
-    />
-    <ExitIntentModal show={showExitModal} onClose={() => setShowExitModal(false)} />
-    <>
-      <style>{styles}</style>
+      <SEO
+        title="AptPilot — NYC Apartment Search Without a Broker Fee"
+        description="Avoid the NYC broker fee. AptPilot searches every listing, books your tours, and submits applications automatically — starting at $299 flat fee."
+        canonical="https://aptpilot.vercel.app/"
+      />
+      <ExitModal show={showExit} onClose={() => setShowExit(false)} />
 
-      <section className="landing">
-        <div className="landing-badge">🏙 Now Live in New York City</div>
-        <h1 className="landing-title">Your apartment search,<br /><em>on autopilot.</em></h1>
-        <p className="landing-sub">
-          AptPilot searches every listing, books your tours, and submits your applications — all for a one-time flat fee. No broker. No stress.
-        </p>
-        <div className="landing-cta">
-          <button className="btn btn-primary btn-lg" onClick={() => navigate('/signup')}>Start My Search →</button>
-          <button className="btn btn-ghost btn-lg" onClick={() => navigate('/login')}>I have an account</button>
+      {/* ── HERO ── */}
+      <section style={{
+        minHeight: '100vh', position: 'relative', overflow: 'hidden',
+        display: 'flex', flexDirection: 'column', alignItems: 'center',
+        justifyContent: 'center', padding: '8rem 2rem 6rem',
+        background: 'linear-gradient(145deg, #06090F 0%, #0C1628 45%, #0A1E35 75%, #06090F 100%)',
+      }}>
+        {/* Animated orbs */}
+        <div style={{
+          position: 'absolute', width: 640, height: 640, borderRadius: '50%',
+          background: 'radial-gradient(circle, rgba(10,191,191,0.13) 0%, transparent 70%)',
+          top: '-15%', right: '-10%', pointerEvents: 'none',
+          animation: 'orbDrift 18s ease-in-out infinite',
+        }} />
+        <div style={{
+          position: 'absolute', width: 480, height: 480, borderRadius: '50%',
+          background: 'radial-gradient(circle, rgba(201,169,110,0.09) 0%, transparent 70%)',
+          bottom: '-10%', left: '-8%', pointerEvents: 'none',
+          animation: 'orbDriftB 22s ease-in-out infinite',
+        }} />
+        <div style={{
+          position: 'absolute', width: 300, height: 300, borderRadius: '50%',
+          background: 'radial-gradient(circle, rgba(10,191,191,0.07) 0%, transparent 70%)',
+          top: '40%', left: '10%', pointerEvents: 'none',
+          animation: 'orbDrift 28s 5s ease-in-out infinite',
+        }} />
+
+        {/* Grid texture overlay */}
+        <div style={{
+          position: 'absolute', inset: 0, pointerEvents: 'none',
+          backgroundImage: `linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px)`,
+          backgroundSize: '60px 60px',
+          maskImage: 'radial-gradient(ellipse 80% 80% at 50% 50%, black, transparent)',
+        }} />
+
+        {/* Content */}
+        <div style={{ position: 'relative', zIndex: 1, textAlign: 'center', maxWidth: 900 }}>
+          {/* Eyebrow badge */}
+          <div style={{
+            display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
+            background: 'rgba(10,191,191,0.1)', border: '1px solid rgba(10,191,191,0.25)',
+            color: '#0ABFBF', padding: '0.4rem 1.1rem', borderRadius: 100,
+            fontSize: '0.74rem', fontWeight: 700, letterSpacing: '0.1em',
+            textTransform: 'uppercase', marginBottom: '1.75rem',
+            animation: 'fadeUp 0.5s ease both',
+          }}>
+            <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#0ABFBF', animation: 'pulse 2s infinite', display: 'inline-block' }} />
+            Now Live in New York City
+          </div>
+
+          {/* Headline */}
+          <h1 style={{
+            fontFamily: "'Playfair Display', serif",
+            fontSize: 'clamp(3.2rem, 7.5vw, 5.8rem)',
+            fontWeight: 700, color: '#fff', lineHeight: 1.08,
+            marginBottom: '1.4rem', letterSpacing: '-0.01em',
+            animation: 'fadeUp 0.55s 0.1s ease both',
+          }}>
+            Your apartment search,<br />
+            <em style={{ color: 'var(--teal)', fontStyle: 'italic' }}>on autopilot.</em>
+          </h1>
+
+          {/* Sub */}
+          <p style={{
+            fontSize: 'clamp(1rem, 2vw, 1.2rem)',
+            color: 'rgba(255,255,255,0.55)', maxWidth: 580,
+            margin: '0 auto 2.5rem', lineHeight: 1.8,
+            animation: 'fadeUp 0.55s 0.2s ease both',
+          }}>
+            AptPilot searches every listing, books your tours, and submits your applications —
+            all for a one-time flat fee. <strong style={{ color: 'rgba(255,255,255,0.8)' }}>No broker. No stress.</strong>
+          </p>
+
+          {/* CTAs */}
+          <div style={{
+            display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap',
+            animation: 'fadeUp 0.55s 0.3s ease both',
+          }}>
+            <button className="btn btn-primary btn-lg" onClick={() => navigate('/signup')}>
+              Start My Search →
+            </button>
+            <button className="btn btn-ghost btn-lg" onClick={() => navigate('/login')}>
+              I have an account
+            </button>
+          </div>
+
+          {/* Stats */}
+          <div style={{
+            display: 'flex', gap: 'clamp(2rem, 5vw, 4.5rem)',
+            marginTop: '5rem', justifyContent: 'center', flexWrap: 'wrap',
+            animation: 'fadeUp 0.55s 0.4s ease both',
+          }}>
+            {[
+              { val: '$0', label: 'Broker fees' },
+              { val: '$399', label: 'vs. $3–6K broker fee' },
+              { val: '1 day', label: 'Tour agenda delivered' },
+              { val: '1-click', label: 'Application submission' },
+            ].map(({ val, label }) => (
+              <div key={label} style={{ textAlign: 'center' }}>
+                <div style={{
+                  fontFamily: "'Playfair Display', serif",
+                  fontSize: 'clamp(1.7rem, 3vw, 2.2rem)',
+                  color: '#0ABFBF', fontWeight: 600, lineHeight: 1,
+                }}>{val}</div>
+                <div style={{ fontSize: '0.78rem', color: 'rgba(255,255,255,0.38)', marginTop: '0.35rem', letterSpacing: '0.02em' }}>{label}</div>
+              </div>
+            ))}
+          </div>
         </div>
-        <div className="landing-stats">
-          {[['$0','Broker fees'],['$399','Flat fee vs. $3–6K broker'],['1 day','Tour agenda delivered'],['1-click','Application submission']].map(([v,l]) => (
-            <div className="stat" key={l}><div className="stat-val">{v}</div><div className="stat-lbl">{l}</div></div>
-          ))}
+
+        {/* Scroll hint */}
+        <div style={{
+          position: 'absolute', bottom: '2.5rem', left: '50%', transform: 'translateX(-50%)',
+          display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem',
+          animation: 'fadeUp 0.6s 0.8s ease both',
+        }}>
+          <span style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.28)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Scroll</span>
+          <div style={{
+            width: 1, height: 40,
+            background: 'linear-gradient(to bottom, rgba(10,191,191,0.5), transparent)',
+          }} />
         </div>
       </section>
 
-      <section className="how-section">
-        <h2>How AptPilot Works</h2>
-        <p className="how-sub">From criteria to keys — we handle the whole process.</p>
-        <div className="steps-grid">
-          {STEPS.map((s, i) => (
-            <div className="step-card" key={i}>
-              <div className="step-num">{i + 1}</div>
-              <div className="step-icon">{s.icon}</div>
-              <div className="step-title">{s.title}</div>
-              <div className="step-desc">{s.desc}</div>
+      {/* ── MARQUEE STRIP ── */}
+      <div style={{
+        background: 'var(--navy)', borderTop: '1px solid rgba(255,255,255,0.06)',
+        borderBottom: '1px solid rgba(255,255,255,0.06)',
+        padding: '1rem 0', overflow: 'hidden',
+      }}>
+        <div style={{
+          display: 'flex', gap: '0', width: 'max-content',
+          animation: 'marquee 28s linear infinite',
+        }}>
+          {[...Array(2)].map((_, i) => (
+            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '0' }}>
+              {['StreetEasy', 'Zillow', 'Apartments.com', 'Rent.com', 'Trulia', 'Facebook Marketplace', 'Craigslist', 'Off-Market Listings'].map(name => (
+                <span key={name} style={{
+                  padding: '0 2.5rem', fontSize: '0.8rem', fontWeight: 600,
+                  color: 'rgba(255,255,255,0.3)', letterSpacing: '0.06em',
+                  textTransform: 'uppercase', whiteSpace: 'nowrap',
+                  borderRight: '1px solid rgba(255,255,255,0.07)',
+                }}>{name}</span>
+              ))}
             </div>
           ))}
         </div>
+      </div>
+
+      {/* ── HOW IT WORKS ── */}
+      <section style={{ padding: '8rem 2rem', background: '#fff' }}>
+        <div style={{ maxWidth: 1100, margin: '0 auto' }}>
+          <SectionHeader
+            eyebrow="How It Works"
+            title="From criteria to keys — we handle everything."
+            sub="Tell us what you need. We do the searching, scheduling, and applying."
+          />
+          <div style={{
+            display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1.5rem',
+          }}>
+            {STEPS.map((step, i) => (
+              <div
+                key={i}
+                className="reveal"
+                style={{ transitionDelay: `${i * 0.07}s` }}
+              >
+                <div style={{
+                  background: '#fff', borderRadius: 20, padding: '2rem 1.75rem',
+                  border: '1.5px solid var(--surface-mid)',
+                  boxShadow: 'var(--shadow-sm)',
+                  transition: 'transform 0.25s, box-shadow 0.25s, border-color 0.25s',
+                  cursor: 'default',
+                }}
+                  onMouseEnter={e => {
+                    e.currentTarget.style.transform = 'translateY(-6px)'
+                    e.currentTarget.style.boxShadow = 'var(--shadow-lg)'
+                    e.currentTarget.style.borderColor = 'var(--teal)'
+                  }}
+                  onMouseLeave={e => {
+                    e.currentTarget.style.transform = 'translateY(0)'
+                    e.currentTarget.style.boxShadow = 'var(--shadow-sm)'
+                    e.currentTarget.style.borderColor = 'var(--surface-mid)'
+                  }}
+                >
+                  <div style={{
+                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                    marginBottom: '1.25rem',
+                  }}>
+                    <span style={{ fontSize: '2rem' }}>{step.icon}</span>
+                    <span style={{
+                      fontFamily: "'Playfair Display', serif",
+                      fontSize: '2.5rem', fontWeight: 700,
+                      color: 'rgba(10,191,191,0.15)', lineHeight: 1,
+                    }}>{step.num}</span>
+                  </div>
+                  <h3 style={{ fontWeight: 700, fontSize: '1.02rem', color: 'var(--navy)', marginBottom: '0.5rem' }}>
+                    {step.title}
+                  </h3>
+                  <p style={{ fontSize: '0.88rem', color: 'var(--text-muted)', lineHeight: 1.7 }}>
+                    {step.desc}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+        <style>{`@media(max-width:900px){.steps-g{grid-template-columns:1fr 1fr!important;}}@media(max-width:560px){.steps-g{grid-template-columns:1fr!important;}}`}</style>
       </section>
 
-
-      {/* SAVINGS CALCULATOR */}
+      {/* ── SAVINGS CALCULATOR ── */}
       <SavingsCalc navigate={navigate} />
 
-      <FAQ />
-
-      <section className="pricing-section">
-        <div className="pricing-inner">
-          <h2>Simple, Transparent Pricing</h2>
-          <p className="pricing-sub">Pay once. No subscription. No commission. Save thousands vs. a broker.</p>
-          <div className="pricing-grid-3">
-            <div className="price-card">
-              <div className="price-name">Standard</div>
-              <div className="price-amt">$299 <span>one-time</span></div>
-              <div className="price-features">
-                {['Full listing search across all platforms','Personalized tour agenda','Automated tour scheduling','Real-time listing alerts','Dedicated email support','Move-in checklist & resources'].map(f => (
-                  <div className="price-feat" key={f}>{f}</div>
-                ))}
+      {/* ── TESTIMONIALS ── */}
+      <section style={{ padding: '8rem 2rem', background: 'var(--navy)' }}>
+        <div style={{ maxWidth: 1080, margin: '0 auto' }}>
+          <SectionHeader
+            eyebrow="Client Stories"
+            title="Real renters. Real savings."
+            sub="Join hundreds of New Yorkers who skipped the broker and found their apartment faster."
+            light
+          />
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1.5rem' }}>
+            {TESTIMONIALS.map((t, i) => (
+              <div
+                key={i} className="reveal"
+                style={{ transitionDelay: `${i * 0.09}s` }}
+              >
+                <div style={{
+                  background: 'rgba(255,255,255,0.04)',
+                  border: '1.5px solid rgba(255,255,255,0.08)',
+                  borderRadius: 20, padding: '2rem',
+                  transition: 'background 0.22s, border-color 0.22s',
+                }}
+                  onMouseEnter={e => {
+                    e.currentTarget.style.background = 'rgba(255,255,255,0.07)'
+                    e.currentTarget.style.borderColor = 'rgba(10,191,191,0.3)'
+                  }}
+                  onMouseLeave={e => {
+                    e.currentTarget.style.background = 'rgba(255,255,255,0.04)'
+                    e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'
+                  }}
+                >
+                  {/* Stars */}
+                  <div style={{ color: '#C9A96E', fontSize: '0.85rem', letterSpacing: '0.08em', marginBottom: '1.1rem' }}>
+                    {'★★★★★'}
+                  </div>
+                  <p style={{ color: 'rgba(255,255,255,0.8)', fontSize: '0.97rem', lineHeight: 1.75, marginBottom: '1.5rem', fontStyle: 'italic' }}>
+                    "{t.quote}"
+                  </p>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
+                    <div style={{
+                      width: 40, height: 40, borderRadius: '50%',
+                      background: 'linear-gradient(135deg, var(--teal), #00E5CC)',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      fontWeight: 700, fontSize: '0.82rem', color: 'var(--navy)',
+                      flexShrink: 0,
+                    }}>{t.avatar}</div>
+                    <div>
+                      <div style={{ fontWeight: 600, color: '#fff', fontSize: '0.92rem' }}>{t.name}</div>
+                      <div style={{ fontSize: '0.78rem', color: 'rgba(255,255,255,0.35)', marginTop: '0.15rem' }}>{t.role}</div>
+                    </div>
+                  </div>
+                </div>
               </div>
-              <div className="price-cta">
-                <button className="btn btn-outline" style={{ width:'100%', color:'#fff', borderColor:'rgba(255,255,255,0.2)' }} onClick={() => navigate('/signup')}>Get Started</button>
-              </div>
-            </div>
-            <div className="price-card featured">
-              <div className="price-popular">Most Popular</div>
-              <div className="price-name">Core</div>
-              <div className="price-amt">$399 <span>one-time</span></div>
-              <div className="price-features">
-                {['Everything in Standard','Auto-filled applications submitted for you','Negotiation support on your behalf','Real-time application status updates','Landlord & agent follow-up handled','Priority tour scheduling'].map(f => (
-                  <div className="price-feat" key={f}>{f}</div>
-                ))}
-              </div>
-              <div className="price-cta">
-                <button className="btn btn-primary" style={{ width:'100%' }} onClick={() => navigate('/signup')}>Get Started</button>
-              </div>
-            </div>
-            <div className="price-card">
-              <div className="price-name">Pro</div>
-              <div className="price-amt">$499 <span>one-time</span></div>
-              <div className="price-features">
-                {['Everything in Core','1-on-1 with a real NYC broker','24/7 broker access via phone & text','Prioritized scheduling for last-minute tours','Broker-led negotiation & lease review','White-glove move-in coordination'].map(f => (
-                  <div className="price-feat" key={f}>{f}</div>
-                ))}
-              </div>
-              <div className="price-cta">
-                <button className="btn btn-outline" style={{ width:'100%', color:'#fff', borderColor:'rgba(255,255,255,0.2)' }} onClick={() => navigate('/signup')}>Get Started</button>
-              </div>
-            </div>
+            ))}
           </div>
         </div>
       </section>
-    </>
+
+      {/* ── PRICING ── */}
+      <section style={{ padding: '8rem 2rem', background: 'var(--surface)' }}>
+        <div style={{ maxWidth: 1000, margin: '0 auto' }}>
+          <SectionHeader
+            eyebrow="Pricing"
+            title="Simple, transparent pricing."
+            sub="Pay once. No subscription. No commission. Save thousands vs. a traditional broker."
+          />
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1.25rem' }}>
+            {[
+              {
+                name: 'Standard', price: '$299', period: 'one-time',
+                features: ['Full listing search', 'Personalized tour agenda', 'Automated tour scheduling', 'Real-time listing alerts', 'Dedicated email support', 'Move-in checklist'],
+                featured: false,
+              },
+              {
+                name: 'Core', price: '$399', period: 'one-time',
+                features: ['Everything in Standard', 'Auto-filled applications', 'Negotiation support', 'Real-time application updates', 'Agent follow-up handled', 'Priority scheduling'],
+                featured: true, badge: 'Most Popular',
+              },
+              {
+                name: 'Pro', price: '$499', period: 'one-time',
+                features: ['Everything in Core', '1-on-1 NYC broker access', '24/7 phone & text support', 'Broker-led lease negotiation', 'Prioritized scheduling', 'White-glove move-in'],
+                featured: false,
+              },
+            ].map((plan, i) => (
+              <div key={i} className="reveal" style={{ transitionDelay: `${i * 0.08}s`, position: 'relative' }}>
+                {plan.badge && (
+                  <div style={{
+                    position: 'absolute', top: -13, left: '50%', transform: 'translateX(-50%)',
+                    background: 'var(--teal)', color: '#fff', borderRadius: 100,
+                    fontSize: '0.7rem', fontWeight: 700, padding: '0.28rem 1rem',
+                    letterSpacing: '0.07em', textTransform: 'uppercase', whiteSpace: 'nowrap',
+                    boxShadow: '0 4px 12px rgba(10,191,191,0.35)', zIndex: 1,
+                  }}>{plan.badge}</div>
+                )}
+                <div style={{
+                  background: plan.featured ? 'var(--navy)' : '#fff',
+                  border: `1.5px solid ${plan.featured ? 'var(--teal)' : 'var(--surface-mid)'}`,
+                  borderRadius: 20, padding: '2.25rem 1.75rem',
+                  boxShadow: plan.featured ? 'var(--shadow-teal)' : 'var(--shadow-sm)',
+                  height: '100%',
+                  transition: 'transform 0.25s, box-shadow 0.25s',
+                }}
+                  onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-4px)' }}
+                  onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)' }}
+                >
+                  <div style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--teal)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '0.85rem' }}>{plan.name}</div>
+                  <div style={{
+                    fontFamily: "'Playfair Display', serif",
+                    fontSize: '2.8rem', fontWeight: 700, lineHeight: 1,
+                    color: plan.featured ? '#fff' : 'var(--navy)', marginBottom: '0.25rem',
+                  }}>{plan.price}</div>
+                  <div style={{ fontSize: '0.82rem', color: plan.featured ? 'rgba(255,255,255,0.38)' : 'var(--slate)', marginBottom: '1.75rem' }}>{plan.period}</div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem', marginBottom: '1.75rem' }}>
+                    {plan.features.map(f => (
+                      <div key={f} style={{ display: 'flex', gap: '0.6rem', alignItems: 'flex-start', fontSize: '0.87rem', color: plan.featured ? 'rgba(255,255,255,0.7)' : 'var(--text-muted)', lineHeight: 1.45 }}>
+                        <span style={{ color: 'var(--teal)', fontWeight: 700, flexShrink: 0, marginTop: 1 }}>✓</span>
+                        {f}
+                      </div>
+                    ))}
+                  </div>
+                  <button
+                    className={`btn ${plan.featured ? 'btn-primary' : 'btn-outline'}`}
+                    style={{ width: '100%', justifyContent: 'center', borderRadius: 100, ...(plan.featured ? {} : { borderColor: 'var(--navy)', color: 'var(--navy)' }) }}
+                    onClick={() => navigate('/signup')}
+                  >Get Started</button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── FAQ ── */}
+      <section style={{ padding: '8rem 2rem', background: '#fff' }}>
+        <div style={{ maxWidth: 760, margin: '0 auto' }}>
+          <SectionHeader
+            eyebrow="FAQ"
+            title="Everything you need to know."
+            sub="Answers to the most common questions before getting started."
+          />
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+            {FAQS.map((faq, i) => (
+              <div key={i} className="reveal" style={{ transitionDelay: `${i * 0.04}s` }}>
+                <FaqItem
+                  q={faq.q} a={faq.a}
+                  open={faqOpen === i}
+                  toggle={() => setFaqOpen(faqOpen === i ? null : i)}
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── FINAL CTA BANNER ── */}
+      <section style={{
+        padding: '7rem 2rem',
+        background: 'linear-gradient(135deg, #06090F 0%, #0C1628 60%, #0A1E35 100%)',
+        position: 'relative', overflow: 'hidden', textAlign: 'center',
+      }}>
+        <div style={{
+          position: 'absolute', width: 500, height: 500, borderRadius: '50%',
+          background: 'radial-gradient(circle, rgba(10,191,191,0.12) 0%, transparent 70%)',
+          top: '-20%', right: '-10%', pointerEvents: 'none',
+        }} />
+        <div style={{ position: 'relative', zIndex: 1 }} className="reveal">
+          <div style={{
+            display: 'inline-block',
+            background: 'rgba(201,169,110,0.12)', border: '1px solid rgba(201,169,110,0.25)',
+            color: '#C9A96E', padding: '0.3rem 1rem', borderRadius: 100,
+            fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.1em',
+            textTransform: 'uppercase', marginBottom: '1.5rem',
+          }}>Ready to Move?</div>
+          <h2 style={{
+            fontFamily: "'Playfair Display', serif",
+            fontSize: 'clamp(2.2rem, 5vw, 3.5rem)',
+            color: '#fff', fontWeight: 700, lineHeight: 1.15,
+            marginBottom: '1.1rem', maxWidth: 680, margin: '0 auto 1.1rem',
+          }}>
+            Skip the broker.<br />Start your search today.
+          </h2>
+          <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: '1.05rem', marginBottom: '2.5rem', maxWidth: 480, margin: '0 auto 2.5rem' }}>
+            Join hundreds of NYC renters who saved thousands with AptPilot.
+          </p>
+          <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+            <button className="btn btn-primary btn-lg" onClick={() => navigate('/signup')}>
+              Start My Search →
+            </button>
+            <button className="btn btn-ghost btn-lg" onClick={() => navigate('/blog')}>
+              Read Our Blog
+            </button>
+          </div>
+        </div>
+      </section>
+
+      {/* ── FOOTER ── */}
+      <footer style={{
+        background: '#06090F', borderTop: '1px solid rgba(255,255,255,0.06)',
+        padding: '4rem 2rem 2.5rem',
+      }}>
+        <div style={{ maxWidth: 1100, margin: '0 auto' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr', gap: '3rem', marginBottom: '3rem' }}>
+            {/* Brand col */}
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.55rem', marginBottom: '1rem' }}>
+                <div style={{
+                  width: 28, height: 28, borderRadius: 7, flexShrink: 0,
+                  background: 'linear-gradient(135deg, #0ABFBF, #00E5CC)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontWeight: 900, fontSize: '0.85rem', color: '#0C1628',
+                }}>A</div>
+                <span style={{ fontFamily: "'Playfair Display', serif", fontSize: '1.25rem', fontWeight: 700, color: '#fff' }}>
+                  Apt<span style={{ color: '#0ABFBF' }}>Pilot</span>
+                </span>
+              </div>
+              <p style={{ fontSize: '0.87rem', color: 'rgba(255,255,255,0.35)', lineHeight: 1.75, maxWidth: 260 }}>
+                NYC apartment search without the broker fee. Automated tours, applications, and move-in — all for a flat fee.
+              </p>
+            </div>
+
+            {/* Product */}
+            <div>
+              <div style={{ fontSize: '0.72rem', fontWeight: 700, color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '1.1rem' }}>Product</div>
+              {['How It Works', 'Pricing', 'Blog', 'FAQ'].map(l => (
+                <div key={l} style={{ marginBottom: '0.65rem' }}>
+                  <span style={{ fontSize: '0.88rem', color: 'rgba(255,255,255,0.45)', cursor: 'pointer', transition: 'color 0.15s' }}
+                    onMouseEnter={e => e.target.style.color = '#fff'}
+                    onMouseLeave={e => e.target.style.color = 'rgba(255,255,255,0.45)'}
+                  >{l}</span>
+                </div>
+              ))}
+            </div>
+
+            {/* Company */}
+            <div>
+              <div style={{ fontSize: '0.72rem', fontWeight: 700, color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '1.1rem' }}>Company</div>
+              {['About', 'Contact', 'Privacy Policy', 'Terms'].map(l => (
+                <div key={l} style={{ marginBottom: '0.65rem' }}>
+                  <span style={{ fontSize: '0.88rem', color: 'rgba(255,255,255,0.45)', cursor: 'pointer', transition: 'color 0.15s' }}
+                    onMouseEnter={e => e.target.style.color = '#fff'}
+                    onMouseLeave={e => e.target.style.color = 'rgba(255,255,255,0.45)'}
+                  >{l}</span>
+                </div>
+              ))}
+            </div>
+
+            {/* CTA col */}
+            <div>
+              <div style={{ fontSize: '0.72rem', fontWeight: 700, color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '1.1rem' }}>Get Started</div>
+              <p style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.38)', marginBottom: '1rem', lineHeight: 1.65 }}>
+                Start your no-broker NYC apartment search today.
+              </p>
+              <button className="btn btn-primary btn-sm" onClick={() => navigate('/signup')}>
+                Create Account →
+              </button>
+            </div>
+          </div>
+
+          {/* Bottom bar */}
+          <div style={{
+            borderTop: '1px solid rgba(255,255,255,0.06)',
+            paddingTop: '1.75rem', display: 'flex',
+            justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem',
+          }}>
+            <p style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.22)' }}>
+              © 2026 AptPilot. All rights reserved.
+            </p>
+            <p style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.22)' }}>
+              Made with care in New York City 🗽
+            </p>
+          </div>
+        </div>
+      </footer>
     </>
   )
 }

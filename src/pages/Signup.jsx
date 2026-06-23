@@ -22,15 +22,29 @@ export default function Signup() {
   }
 
   return (
-    <div style={{ minHeight:'calc(100vh - 64px)', display:'flex', alignItems:'center', justifyContent:'center', padding:'2rem' }}>
-      <div className="card fade-up" style={{ width:'100%', maxWidth:440 }}>
-        <h1 className="serif" style={{ fontSize:'1.9rem', color:'var(--navy)', marginBottom:'0.4rem' }}>Create your account</h1>
-        <p style={{ color:'var(--gray)', fontSize:'0.9rem', marginBottom:'1.75rem' }}>Start your AptPilot search in minutes.</p>
+    <div className="auth-page">
+      <div className="auth-card">
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1.75rem' }}>
+          <div style={{
+            width: 32, height: 32, borderRadius: 9, flexShrink: 0,
+            background: 'linear-gradient(135deg, #0ABFBF, #00E5CC)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontWeight: 900, fontSize: '0.9rem', color: 'var(--navy)',
+          }}>A</div>
+          <span style={{ fontFamily: "'Playfair Display', serif", fontSize: '1.2rem', fontWeight: 700, color: 'var(--navy)' }}>
+            Apt<span style={{ color: 'var(--teal)' }}>Pilot</span>
+          </span>
+        </div>
 
-        <form onSubmit={handleSubmit} style={{ display:'flex', flexDirection:'column', gap:'1rem' }}>
+        <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: '2rem', color: 'var(--navy)', marginBottom: '0.4rem', lineHeight: 1.2 }}>
+          Create your account
+        </h1>
+        <p className="sub">Start your AptPilot search in minutes.</p>
+
+        <form className="auth-form" onSubmit={handleSubmit}>
           <div className="field">
             <label>Full Name</label>
-            <input placeholder="Michael Carracino" value={name} onChange={e => setName(e.target.value)} required />
+            <input placeholder="Your full name" value={name} onChange={e => setName(e.target.value)} required />
           </div>
           <div className="field">
             <label>Email</label>
@@ -40,17 +54,21 @@ export default function Signup() {
             <label>Password</label>
             <input type="password" placeholder="Min. 6 characters" value={password} onChange={e => setPassword(e.target.value)} required />
           </div>
-          {error && <p style={{ color:'#EF4444', fontSize:'0.82rem', background:'#FEF2F2', padding:'0.6rem 0.9rem', borderRadius:'7px' }}>{error}</p>}
-          <button className="btn btn-primary" type="submit" disabled={loading} style={{ marginTop:'0.5rem', justifyContent:'center' }}>
+          {error && (
+            <div style={{ color: '#EF4444', fontSize: '0.83rem', background: '#FEF2F2', padding: '0.65rem 0.9rem', borderRadius: 8, border: '1px solid #FECACA' }}>
+              {error}
+            </div>
+          )}
+          <button className="btn btn-primary" type="submit" disabled={loading} style={{ marginTop: '0.5rem', justifyContent: 'center', borderRadius: 100 }}>
             {loading ? <span className="spinner" /> : 'Create Account →'}
           </button>
         </form>
 
-        <p style={{ marginTop:'1.25rem', textAlign:'center', fontSize:'0.85rem', color:'var(--gray)' }}>
+        <p className="auth-footer" style={{ marginTop: '1.5rem' }}>
           Already have an account?{' '}
-          <Link to="/login" style={{ color:'var(--teal)', fontWeight:600 }}>Sign in</Link>
+          <Link to="/login" style={{ color: 'var(--teal)', fontWeight: 600 }}>Sign in</Link>
         </p>
-        <p style={{ marginTop:'0.75rem', textAlign:'center', fontSize:'0.75rem', color:'#94A3B8', lineHeight:1.5 }}>
+        <p style={{ textAlign: 'center', fontSize: '0.75rem', color: 'var(--slate)', marginTop: '0.75rem', lineHeight: 1.55 }}>
           By signing up you agree to our Terms of Service and Privacy Policy.
         </p>
       </div>
