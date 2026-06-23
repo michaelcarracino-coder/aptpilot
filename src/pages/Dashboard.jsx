@@ -54,6 +54,10 @@ const css = `
 .onboard-label { font-weight:600;font-size:0.88rem;color:var(--navy);line-height:1.3; }
 .onboard-sublabel { font-size:0.78rem;color:var(--slate);margin-top:0.15rem; }
 .rt-toast { position:fixed;bottom:1.5rem;right:1.5rem;background:var(--navy);color:#fff;padding:0.75rem 1.25rem;border-radius:12px;font-size:0.85rem;font-weight:500;box-shadow:var(--shadow-lg);z-index:999;animation:fadeUp 0.3s ease;display:flex;align-items:center;gap:0.6rem; }
+.referral-card { background:linear-gradient(135deg,var(--navy),var(--navy-soft));border-radius:var(--radius);padding:1.25rem;color:#fff; }
+.referral-card h3 { font-family:'Playfair Display',serif;font-size:1rem;margin-bottom:0.35rem; }
+.referral-code-box { background:rgba(10,191,191,0.12);border:1.5px solid rgba(10,191,191,0.3);border-radius:8px;padding:0.6rem 0.85rem;font-family:'Inter',monospace;font-size:0.88rem;font-weight:700;color:var(--teal);letter-spacing:0.08em;margin:0.75rem 0;display:flex;justify-content:space-between;align-items:center;cursor:pointer;transition:background 0.15s; }
+.referral-code-box:hover { background:rgba(10,191,191,0.2); }
 `
 
 const STATUS_COLORS = {
@@ -78,13 +82,20 @@ export default function Dashboard() {
   const [loading, setLoading]  = useState(true)
   const [toast, setToast]      = useState(null)
   const [portalLoading, setPortalLoading] = useState(false)
+  const [referrals, setReferrals] = useState(0)
+  const [copied, setCopied] = useState(false)
   const [newIds, setNewIds]    = useState(new Set())
   const [searchParams] = useSearchParams()
   const justPaid = searchParams.get('payment') === 'success'
   const channelRef = useRef(null)
   const toastTimer = useRef(null)
 
-  useEffect(() => { if (user) loadData() }, [user])
+  useEffect(() => { if (user) { loadData(); loadReferrals() } }, [user])
+
+  async function loadReferrals() {
+    const { count } = await supabase.from('referrals').select('*', { count: 'exact', head: true }).eq('referrer_id', user.id)
+    setReferrals(count || 0)
+  }
 
   async function loadData() {
     setLoading(true)
@@ -322,6 +333,25 @@ export default function Dashboard() {
                 ))}
               </div>
             </div>
+
+            {profile?.referral_code && (
+              <div>
+                <div className="sect-title">Refer a Friend</div>
+                <div className="referral-card">
+                  <h3>Share AptPilot</h3>
+                  <p style={{ color:'rgba(255,255,255,0.6)', fontSize:'0.8rem', lineHeight:1.55 }}>Share your link. Every friend you refer helps us grow — and we appreciate it.</p>
+                  <div className="referral-code-box" onClick={() => {
+                    navigator.clipboard.writeText(`https://aptpilot.vercel.app/signup?ref=${profile.referral_code}`)
+                    setCopied(true); setTimeout(() => setCopied(false), 2000)
+                  }}>
+                    <span>aptpilot.vercel.app/signup?ref={profile.referral_code}</span>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                  </div>
+                  {copied && <p style={{ color:'var(--teal)', fontSize:'0.78rem', marginBottom:'0.5rem' }}>Copied to clipboard!</p>}
+                  <p style={{ color:'rgba(255,255,255,0.5)', fontSize:'0.76rem' }}>{referrals} {referrals === 1 ? 'person' : 'people'} referred</p>
+                </div>
+              </div>
+            )}
 
             <div>
               <div className="sect-title">Your Criteria</div>

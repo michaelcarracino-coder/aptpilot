@@ -1,6 +1,7 @@
-import { useState } from 'react'
-import { useNavigate, Link } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { useNavigate, Link, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import { supabase } from '../lib/supabase'
 
 export default function Signup() {
   const [name, setName]         = useState('')
@@ -10,15 +11,26 @@ export default function Signup() {
   const [loading, setLoading]   = useState(false)
   const { signUp } = useAuth()
   const navigate   = useNavigate()
+  const [searchParams] = useSearchParams()
+  const refCode = searchParams.get('ref') || ''
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     if (password.length < 6) { setError('Password must be at least 6 characters'); return }
     setError(''); setLoading(true)
-    const { error } = await signUp(email, password, name)
+    const { error, data } = await signUp(email, password, name)
     setLoading(false)
-    if (error) setError(error.message)
-    else navigate('/intake')
+    if (error) { setError(error.message); return }
+    // Track referral if ref code present
+    if (refCode && data?.user?.id) {
+      const { data: referrer } = await supabase
+        .from('profiles').select('id').eq('referral_code', refCode.toUpperCase()).single()
+      if (referrer) {
+        await supabase.from('referrals').insert({ referrer_id: referrer.id, referee_id: data.user.id }).catch(() => {})
+        await supabase.from('profiles').update({ referred_by: refCode.toUpperCase() }).eq('id', data.user.id).catch(() => {})
+      }
+    }
+    navigate('/intake')
   }
 
   return (

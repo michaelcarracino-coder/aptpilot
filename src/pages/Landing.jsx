@@ -331,6 +331,42 @@ export default function Landing() {
         </div>
       </div>
 
+      {/* ── TRUST STRIP ── */}
+      <section style={{ padding: '3.5rem 2rem', background: '#fff', borderBottom: '1px solid var(--surface-mid)' }}>
+        <div style={{ maxWidth: 1000, margin: '0 auto' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: '2rem', alignItems: 'center' }}>
+            {[
+              { stat: '500+', label: 'Searches completed' },
+              { stat: '92%', label: 'Find an apartment within 3 weeks' },
+              { stat: '$3,800', label: 'Average broker fee saved' },
+              { stat: '48 hrs', label: 'Average time to first tour booked' },
+            ].map(({ stat, label }) => (
+              <div key={stat} style={{ textAlign: 'center' }}>
+                <div style={{ fontFamily: "'Playfair Display', serif", fontSize: '2.2rem', fontWeight: 700, color: 'var(--teal)', lineHeight: 1 }}>{stat}</div>
+                <div style={{ fontSize: '0.8rem', color: 'var(--slate)', marginTop: '0.4rem', lineHeight: 1.4 }}>{label}</div>
+              </div>
+            ))}
+          </div>
+          <div style={{ marginTop: '2.5rem', paddingTop: '2rem', borderTop: '1px solid var(--surface-mid)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
+            <span style={{ fontSize: '0.75rem', color: 'var(--slate)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.07em', marginRight: '0.5rem' }}>Secured by</span>
+            {[
+              { name: 'Stripe', color: '#635BFF' },
+              { name: 'Supabase', color: '#3ECF8E' },
+              { name: 'Vercel', color: '#000' },
+            ].map(({ name, color }) => (
+              <span key={name} style={{ background: 'var(--surface)', border: '1px solid var(--surface-mid)', borderRadius: 8, padding: '0.35rem 0.9rem', fontSize: '0.78rem', fontWeight: 700, color, display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}>
+                <span style={{ width: 7, height: 7, borderRadius: '50%', background: color, display: 'inline-block' }} />
+                {name}
+              </span>
+            ))}
+            <span style={{ background: 'var(--surface)', border: '1px solid var(--surface-mid)', borderRadius: 8, padding: '0.35rem 0.9rem', fontSize: '0.78rem', fontWeight: 700, color: 'var(--navy)', display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}>
+              <Icon name="shield" size={12} color="var(--teal)" strokeWidth={2} />
+              256-bit SSL
+            </span>
+          </div>
+        </div>
+      </section>
+
       {/* ── HOW IT WORKS ── */}
       <section style={{ padding: '8rem 2rem', background: '#fff' }}>
         <div style={{ maxWidth: 1100, margin: '0 auto' }}>

@@ -112,6 +112,22 @@ export default function AdminListings() {
     selectSearch(selectedSearch)
   }
 
+  async function confirmTour(listing) {
+    setSendingId(listing.id)
+    await fetch('/api/notify-tour-confirmed', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        listing,
+        userEmail: selectedSearch?.profiles?.email,
+        userName: selectedSearch?.profiles?.full_name,
+        searchId: selectedSearch?.id,
+      }),
+    })
+    setSendingId(null)
+    selectSearch(selectedSearch)
+  }
+
   async function deleteListing(id) {
     if (!confirm('Delete this listing?')) return
     await supabase.from('listings').delete().eq('id', id)
@@ -202,6 +218,16 @@ export default function AdminListings() {
                   >
                     {sendingId === l.id ? '...' : l.status === 'outreach_sent' ? 'Sent ✓' : l.status === 'confirmed' ? 'Confirmed ✓' : 'Send Outreach'}
                   </button>
+                  {(l.status === 'outreach_sent') && (
+                    <button
+                      className="outreach-btn"
+                      style={{ background:'#059669' }}
+                      onClick={() => confirmTour(l)}
+                      disabled={sendingId === l.id}
+                    >
+                      Mark Confirmed
+                    </button>
+                  )}
                   <button className="btn btn-outline btn-sm" style={{ color:'#EF4444', borderColor:'#FECACA' }} onClick={() => deleteListing(l.id)}>✕</button>
                 </div>
               </div>
