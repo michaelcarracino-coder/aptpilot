@@ -2,13 +2,14 @@ import { useNavigate } from 'react-router-dom'
 import { useState, useEffect, useRef } from 'react'
 import SEO from '../components/SEO'
 
-/* ─── Unsplash photo URLs ─── */
+/* ─── Pexels photo URLs (verified) ─── */
+const px = (id) => `https://images.pexels.com/photos/${id}/pexels-photo-${id}.jpeg?auto=compress&cs=tinysrgb&w=1920`
 const PHOTOS = {
-  heroSkyline:    'https://images.unsplash.com/photo-1534430480872-278f2b9a2e18?auto=format&fit=crop&w=1920&q=85',
-  brownstones:    'https://images.unsplash.com/photo-1568605114967-8130f3a36994?auto=format&fit=crop&w=1920&q=85',
-  nycStreet:      'https://images.unsplash.com/photo-1499092346682-b537d8a29968?auto=format&fit=crop&w=1920&q=85',
-  brooklyn:       'https://images.unsplash.com/photo-1532960401447-7dd05bef20b0?auto=format&fit=crop&w=900&q=85',
-  manhattan:      'https://images.unsplash.com/photo-1522083165195-3424ed129620?auto=format&fit=crop&w=900&q=85',
+  heroSkyline: px(28518041),   // NYC skyline at night
+  brownstones: px(30726437),   // Brooklyn brownstones in fall
+  aerial:      px(18511465),   // Aerial view of Midtown Manhattan
+  manhattan:   px(10633466),   // Aerial view of Manhattan
+  street:      px(16920867),   // Street in Manhattan
 }
 
 /* ─── SVG Icon library ─── */
@@ -387,7 +388,7 @@ export default function Landing() {
       {/* ── NYC STREET PHOTO — aerial/park ── */}
       <section style={{ position: 'relative', height: 420, overflow: 'hidden' }}>
         <img
-          src={PHOTOS.nycStreet}
+          src={PHOTOS.aerial}
           alt="New York City aerial view"
           style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center', display: 'block' }}
         />
