@@ -11,12 +11,12 @@ const css = `
 .admin-listings h1 { font-family:'Cormorant Garamond',serif; font-size:2rem; color:var(--navy); margin-bottom:0.25rem; }
 .search-selector { background:white; border-radius:12px; padding:1.25rem; box-shadow:var(--shadow); margin-bottom:1.5rem; }
 .search-card {
-  border:1.5px solid var(--gray-light); border-radius:10px; padding:1rem 1.25rem;
+  border:1.5px solid var(--surface-mid); border-radius:10px; padding:1rem 1.25rem;
   cursor:pointer; transition:all 0.15s; margin-bottom:0.5rem; display:flex; justify-content:space-between; align-items:center;
 }
 .search-card:hover,.search-card.active { border-color:var(--teal); background:var(--teal-pale); }
 .search-card-info { font-size:0.88rem; color:var(--navy); font-weight:600; }
-.search-card-meta { font-size:0.78rem; color:var(--gray); margin-top:0.2rem; }
+.search-card-meta { font-size:0.78rem; color:var(--slate); margin-top:0.2rem; }
 .search-card-badge { font-size:0.72rem; background:var(--teal-pale); color:var(--teal); border-radius:100px; padding:0.2rem 0.6rem; font-weight:600; }
 .add-listing-form { background:white; border-radius:12px; padding:1.75rem; box-shadow:var(--shadow); margin-bottom:1.5rem; }
 .add-listing-form h2 { font-size:1rem; font-weight:700; color:var(--navy); margin-bottom:1.25rem; }
@@ -28,7 +28,7 @@ const css = `
   margin-bottom:0.75rem; display:flex; justify-content:space-between; align-items:flex-start; gap:1rem; flex-wrap:wrap;
 }
 .listing-address { font-weight:700; font-size:0.92rem; color:var(--navy); }
-.listing-meta { font-size:0.78rem; color:var(--gray); margin-top:0.2rem; }
+.listing-meta { font-size:0.78rem; color:var(--slate); margin-top:0.2rem; }
 .listing-actions { display:flex; gap:0.5rem; flex-shrink:0; }
 .status-pill { font-size:0.7rem; font-weight:700; padding:0.2rem 0.65rem; border-radius:100px; text-transform:uppercase; letter-spacing:0.04em; }
 .s-pending { background:#FEF3C7; color:#D97706; }
@@ -127,12 +127,12 @@ export default function AdminListings() {
       <style>{css}</style>
       <div className="admin-listings">
         <h1>Listings Admin</h1>
-        <p style={{ color:'var(--gray)', fontSize:'0.88rem', marginBottom:'1.5rem' }}>Select a search, pull matching listings from StreetEasy, and send outreach to agents.</p>
+        <p style={{ color:'var(--slate)', fontSize:'0.88rem', marginBottom:'1.5rem' }}>Select a search, pull matching listings from StreetEasy, and send outreach to agents.</p>
 
         {/* Search selector */}
         <div className="search-selector">
           <div style={{ fontWeight:700, fontSize:'0.9rem', color:'var(--navy)', marginBottom:'0.75rem' }}>Active Searches ({searches.length})</div>
-          {searches.length === 0 && <p style={{ color:'var(--gray)', fontSize:'0.88rem' }}>No searches yet.</p>}
+          {searches.length === 0 && <p style={{ color:'var(--slate)', fontSize:'0.88rem' }}>No searches yet.</p>}
           {searches.map(s => (
             <div key={s.id} className={`search-card ${selectedSearch?.id === s.id ? 'active' : ''}`} onClick={() => selectSearch(s)}>
               <div>
@@ -180,7 +180,7 @@ export default function AdminListings() {
             <div style={{ fontWeight:700, fontSize:'0.9rem', color:'var(--navy)', marginBottom:'0.75rem' }}>
               Listings ({listings.length})
             </div>
-            {listings.length === 0 && <p style={{ color:'var(--gray)', fontSize:'0.88rem' }}>No listings added yet — add some above.</p>}
+            {listings.length === 0 && <p style={{ color:'var(--slate)', fontSize:'0.88rem' }}>No listings added yet — add some above.</p>}
             {listings.map(l => (
               <div className="listing-row" key={l.id}>
                 <div>

@@ -7,38 +7,38 @@ const css = `
 .dash { max-width:1100px; margin:0 auto; padding:2.5rem 2rem; animation:fadeUp 0.4s ease both; }
 .dash-header { display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:2rem;flex-wrap:wrap;gap:1rem; }
 .dash-header h1 { font-family:'Cormorant Garamond',serif; font-size:2rem; color:var(--navy); }
-.dash-header p { color:var(--gray); font-size:0.88rem; margin-top:0.25rem; }
+.dash-header p { color:var(--slate); font-size:0.88rem; margin-top:0.25rem; }
 .live-badge { background:#ECFDF5;color:#059669;border:1px solid #A7F3D0;padding:0.4rem 1rem;border-radius:100px;font-size:0.8rem;font-weight:600;display:flex;align-items:center;gap:0.45rem; }
 .pulse { width:7px;height:7px;border-radius:50%;background:#059669;animation:pulse 2s infinite; }
 .kpi-row { display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:1.75rem; }
 @media(max-width:700px){ .kpi-row{grid-template-columns:repeat(2,1fr);} }
 .kpi { background:#fff;border-radius:var(--radius);padding:1.25rem;box-shadow:var(--shadow); }
-.kpi-label { font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:var(--gray);margin-bottom:0.3rem; }
+.kpi-label { font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:var(--slate);margin-bottom:0.3rem; }
 .kpi-val { font-family:'Cormorant Garamond',serif;font-size:2.1rem;color:var(--navy);line-height:1; }
 .kpi-sub { font-size:0.77rem;color:var(--teal);font-weight:600;margin-top:0.3rem; }
-.sect-title { font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--gray);margin-bottom:0.75rem; }
+.sect-title { font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--slate);margin-bottom:0.75rem; }
 .two-col { display:grid;grid-template-columns:1fr 320px;gap:1.5rem; }
 @media(max-width:800px){ .two-col{grid-template-columns:1fr;} }
 .tour-card { background:#fff;border-radius:var(--radius);padding:1.1rem 1.25rem;box-shadow:var(--shadow);display:flex;align-items:center;gap:1.25rem;margin-bottom:0.75rem;border:1.5px solid transparent;transition:all 0.18s; }
 .tour-card:hover { border-color:var(--teal); }
 .tour-icon { background:var(--navy);color:#fff;border-radius:10px;padding:0.6rem 0.75rem;text-align:center;min-width:52px;flex-shrink:0;font-size:1.1rem; }
 .tour-addr { font-weight:600;font-size:0.92rem;color:var(--navy); }
-.tour-meta { font-size:0.8rem;color:var(--gray);margin-top:0.2rem;display:flex;gap:0.75rem;flex-wrap:wrap; }
+.tour-meta { font-size:0.8rem;color:var(--slate);margin-top:0.2rem;display:flex;gap:0.75rem;flex-wrap:wrap; }
 .tour-price { font-family:'Cormorant Garamond',serif;font-size:1.15rem;color:var(--teal);text-align:right;flex-shrink:0; }
-.tour-price small { font-family:'Plus Jakarta Sans',sans-serif;font-size:0.72rem;color:var(--gray);display:block; }
+.tour-price small { font-family:'Plus Jakarta Sans',sans-serif;font-size:0.72rem;color:var(--slate);display:block; }
 .status-pill { padding:0.28rem 0.65rem;border-radius:100px;font-size:0.72rem;font-weight:700;margin-top:0.3rem; }
 .s-pending { background:#FEF3C7;color:#D97706; }
 .s-outreach_sent { background:#EFF6FF;color:#2563EB; }
 .s-confirmed { background:#ECFDF5;color:#059669; }
 .s-declined { background:#FEF2F2;color:#EF4444; }
 .tracker-card { background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);padding:1.25rem; }
-.tracker-row { display:flex;gap:0.85rem;padding:0.65rem 0;border-bottom:1px solid var(--gray-light); }
+.tracker-row { display:flex;gap:0.85rem;padding:0.65rem 0;border-bottom:1px solid var(--surface-mid); }
 .tracker-row:last-child { border:none; }
 .t-dot { width:9px;height:9px;border-radius:50%;margin-top:4px;flex-shrink:0; }
 .criteria-card { background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);padding:1.25rem; }
-.crit-row { display:flex;justify-content:space-between;padding:0.45rem 0;border-bottom:1px solid var(--gray-light);font-size:0.85rem; }
+.crit-row { display:flex;justify-content:space-between;padding:0.45rem 0;border-bottom:1px solid var(--surface-mid);font-size:0.85rem; }
 .crit-row:last-child { border:none; }
-.empty-state { text-align:center;padding:2.5rem;color:var(--gray);font-size:0.9rem;background:#fff;border-radius:var(--radius);box-shadow:var(--shadow); }
+.empty-state { text-align:center;padding:2.5rem;color:var(--slate);font-size:0.9rem;background:#fff;border-radius:var(--radius);box-shadow:var(--shadow); }
 .success-banner { background:#ECFDF5;border:1px solid #A7F3D0;border-radius:12px;padding:1rem 1.5rem;margin-bottom:1.5rem;display:flex;align-items:center;gap:0.75rem;color:#065F46;font-size:0.88rem;font-weight:500; }
 `
 
@@ -89,14 +89,14 @@ export default function Dashboard() {
 
         {justPaid && (
           <div className="success-banner">
-            <span style={{ fontSize:'1.25rem' }}>🎉</span>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#059669" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink:0 }}><polyline points="20 6 9 17 4 12"/></svg>
             <span>Payment successful! Your search is now active. We're pulling listings that match your criteria — check back soon for your tour agenda.</span>
           </div>
         )}
 
         <div className="dash-header">
           <div>
-            <h1>Good morning, {firstName}. 👋</h1>
+            <h1>Good morning, {firstName}.</h1>
             <p>
               {listings.length === 0
                 ? "We're finding apartments that match your criteria — your tour agenda will appear here shortly."
@@ -124,12 +124,12 @@ export default function Dashboard() {
 
         <div className="two-col">
           <div>
-            <div className="sect-title">🏠 Your Apartments</div>
+            <div className="sect-title">Your Apartments</div>
             {loading ? (
               <div className="empty-state">Loading your listings...</div>
             ) : listings.length === 0 ? (
               <div className="empty-state">
-                <div style={{ fontSize:'2rem', marginBottom:'0.75rem' }}>🔍</div>
+                <div style={{ marginBottom:'0.75rem' }}><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--slate)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>
                 <strong>We're on it.</strong>
                 <p style={{ marginTop:'0.4rem', color:'var(--gray)' }}>
                   Our team is searching listings that match your criteria right now. Your apartments will appear here within a few hours.
@@ -138,20 +138,20 @@ export default function Dashboard() {
             ) : (
               listings.map(l => (
                 <div className="tour-card" key={l.id}>
-                  <div className="tour-icon">🏠</div>
+                  <div className="tour-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div>
                   <div style={{ flex:1 }}>
                     <div className="tour-addr">{l.address}{l.unit ? `, ${l.unit}` : ''}</div>
                     <div className="tour-meta">
-                      {l.bedrooms && <span>🛏 {l.bedrooms}</span>}
-                      {l.bathrooms && <span>🚿 {l.bathrooms}</span>}
-                      {l.sqft && <span>📐 {l.sqft}</span>}
-                      {l.agent_name && <span>👤 {l.agent_name}</span>}
+                      {l.bedrooms && <span>{l.bedrooms} bd</span>}
+                      {l.bathrooms && <span>{l.bathrooms} ba</span>}
+                      {l.sqft && <span>{l.sqft} sf</span>}
+                      {l.agent_name && <span>{l.agent_name}</span>}
                     </div>
                     <div style={{ marginTop:'0.35rem' }}>
                       <span className={`status-pill s-${l.status}`}>
                         {l.status === 'pending' ? 'Finding tour time' :
                          l.status === 'outreach_sent' ? 'Agent contacted' :
-                         l.status === 'confirmed' ? 'Tour confirmed ✓' :
+                         l.status === 'confirmed' ? 'Tour confirmed' :
                          l.status === 'declined' ? 'Not available' : l.status}
                       </span>
                       {l.listing_url && (
@@ -172,7 +172,7 @@ export default function Dashboard() {
 
           <div style={{ display:'flex', flexDirection:'column', gap:'1.25rem' }}>
             <div>
-              <div className="sect-title">📋 Status Tracker</div>
+              <div className="sect-title">Status Tracker</div>
               <div className="tracker-card">
                 {listings.length === 0 ? (
                   <p style={{ color:'var(--gray)', fontSize:'0.85rem', padding:'0.5rem 0' }}>Listings will appear here once found.</p>
@@ -184,7 +184,7 @@ export default function Dashboard() {
                       <div style={{ fontSize:'0.77rem', color:'var(--gray)', marginTop:'0.15rem' }}>
                         {l.status === 'pending' ? 'Searching for tour availability' :
                          l.status === 'outreach_sent' ? 'Tour request sent to agent' :
-                         l.status === 'confirmed' ? 'Tour confirmed ✓' :
+                         l.status === 'confirmed' ? 'Tour confirmed' :
                          l.status === 'declined' ? 'Listing not available' : l.status}
                       </div>
                     </div>
@@ -194,7 +194,7 @@ export default function Dashboard() {
             </div>
 
             <div>
-              <div className="sect-title">🔍 Your Criteria</div>
+              <div className="sect-title">Your Criteria</div>
               <div className="criteria-card">
                 {[
                   ['Budget', search ? `$${search.min_budget || '?'} – $${search.max_budget || '?'}/mo` : '—'],

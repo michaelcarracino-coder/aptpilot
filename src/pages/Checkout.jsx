@@ -41,30 +41,33 @@ export default function Checkout() {
     <div style={{ minHeight:'calc(100vh - 64px)', display:'flex', alignItems:'center', justifyContent:'center', padding:'2rem' }}>
       <div className="card fade-up" style={{ width:'100%', maxWidth:480 }}>
         <div style={{ textAlign:'center', marginBottom:'1.75rem' }}>
-          <div style={{ fontSize:'2.5rem', marginBottom:'0.75rem' }}>🚀</div>
+          <div style={{ width:56, height:56, borderRadius:16, background:'var(--teal-pale)', display:'flex', alignItems:'center', justifyContent:'center', margin:'0 auto 0.75rem' }}>
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          </div>
           <h1 className="serif" style={{ fontSize:'1.9rem', color:'var(--navy)', marginBottom:'0.4rem' }}>Almost there!</h1>
           <p style={{ color:'var(--gray)', fontSize:'0.9rem' }}>Complete payment to activate your AptPilot search.</p>
         </div>
 
-        <div style={{ background:'var(--off-white)', borderRadius:'10px', padding:'1.25rem', marginBottom:'1.5rem' }}>
+        <div style={{ background:'var(--surface)', borderRadius:'10px', padding:'1.25rem', marginBottom:'1.5rem' }}>
           <div style={{ display:'flex', justifyContent:'space-between', marginBottom:'0.6rem', fontSize:'0.9rem' }}>
-            <span style={{ color:'var(--gray)' }}>{planName}</span>
+            <span style={{ color:'var(--slate)' }}>{planName}</span>
             <span style={{ fontWeight:600 }}>${price}.00</span>
           </div>
           {search?.chauffeur && (
             <div style={{ display:'flex', justifyContent:'space-between', marginBottom:'0.6rem', fontSize:'0.9rem' }}>
-              <span style={{ color:'var(--gray)' }}>🚘 Chauffeur Add-On</span>
+              <span style={{ color:'var(--slate)' }}>Chauffeur Add-On</span>
               <span style={{ fontWeight:600 }}>Per booking</span>
             </div>
           )}
-          <div style={{ borderTop:'1px solid var(--gray-light)', paddingTop:'0.6rem', display:'flex', justifyContent:'space-between', fontWeight:700 }}>
+          <div style={{ borderTop:'1px solid var(--surface-mid)', paddingTop:'0.6rem', display:'flex', justifyContent:'space-between', fontWeight:700 }}>
             <span>Total Due Today</span>
-            <span style={{ color:'var(--teal)', fontFamily:"'DM Serif Display',serif", fontSize:'1.2rem' }}>${price}.00</span>
+            <span style={{ color:'var(--teal)', fontFamily:"'Playfair Display',serif", fontSize:'1.2rem' }}>${price}.00</span>
           </div>
         </div>
 
-        <div style={{ background:'#F0FDF4', border:'1px solid #A7F3D0', borderRadius:'8px', padding:'0.75rem 1rem', marginBottom:'1.5rem', fontSize:'0.82rem', color:'#065F46', display:'flex', gap:'0.5rem' }}>
-          🔒 Payments are processed securely by Stripe. AptPilot never stores your card details.
+        <div style={{ background:'#F0FDF4', border:'1px solid #A7F3D0', borderRadius:'8px', padding:'0.75rem 1rem', marginBottom:'1.5rem', fontSize:'0.82rem', color:'#065F46', display:'flex', alignItems:'center', gap:'0.5rem' }}>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#065F46" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink:0 }}><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          Payments are processed securely by Stripe. AptPilot never stores your card details.
         </div>
 
         <button className="btn btn-primary" onClick={handlePay} disabled={paying} style={{ width:'100%', justifyContent:'center', padding:'0.9rem' }}>
