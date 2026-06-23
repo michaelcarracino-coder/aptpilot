@@ -15,6 +15,8 @@ import AdminTestimonials from './pages/AdminTestimonials'
 import ForgotPassword from './pages/ForgotPassword'
 import ResetPassword  from './pages/ResetPassword'
 import Pricing        from './pages/Pricing'
+import Privacy        from './pages/Privacy'
+import Terms          from './pages/Terms'
 
 function PrivateRoute({ children }) {
   const { user, loading } = useAuth()
@@ -43,6 +45,8 @@ function AppRoutes() {
         <Route path="/admin/listings" element={<AdminListings />} />
         <Route path="/admin/testimonials" element={<AdminTestimonials />} />
         <Route path="/pricing"         element={<Pricing />} />
+        <Route path="/privacy"         element={<Privacy />} />
+        <Route path="/terms"           element={<Terms />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/login"     element={user ? <Navigate to="/dashboard" /> : <Login />} />
