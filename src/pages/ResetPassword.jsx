@@ -47,19 +47,21 @@ export default function ResetPassword() {
       <div className="card fade-up" style={{ width:'100%', maxWidth:420 }}>
         {success ? (
           <div style={{ textAlign:'center' }}>
-            <div style={{ fontSize:'2.5rem', marginBottom:'0.75rem' }}>✅</div>
+            <div style={{ width:56, height:56, borderRadius:16, background:'#ECFDF5', display:'flex', alignItems:'center', justifyContent:'center', margin:'0 auto 0.75rem' }}>
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#059669" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
             <h1 className="serif" style={{ fontSize:'1.7rem', color:'var(--navy)', marginBottom:'0.6rem' }}>Password updated</h1>
-            <p style={{ color:'var(--gray)', fontSize:'0.9rem' }}>Redirecting you to sign in...</p>
+            <p style={{ color:'var(--slate)', fontSize:'0.9rem' }}>Redirecting you to sign in...</p>
           </div>
         ) : !ready ? (
           <div style={{ textAlign:'center' }}>
             <div className="spinner" style={{ borderColor:'rgba(10,147,150,0.3)', borderTopColor:'var(--teal)', width:28, height:28, margin:'0 auto 1rem' }} />
-            <p style={{ color:'var(--gray)', fontSize:'0.9rem' }}>Verifying your reset link...</p>
+            <p style={{ color:'var(--slate)', fontSize:'0.9rem' }}>Verifying your reset link...</p>
           </div>
         ) : (
           <>
             <h1 className="serif" style={{ fontSize:'1.9rem', color:'var(--navy)', marginBottom:'0.4rem' }}>Set a new password</h1>
-            <p style={{ color:'var(--gray)', fontSize:'0.9rem', marginBottom:'1.75rem' }}>Choose a new password for your AptPilot account.</p>
+            <p style={{ color:'var(--slate)', fontSize:'0.9rem', marginBottom:'1.75rem' }}>Choose a new password for your AptPilot account.</p>
 
             <form onSubmit={handleSubmit} style={{ display:'flex', flexDirection:'column', gap:'1rem' }}>
               <div className="field">

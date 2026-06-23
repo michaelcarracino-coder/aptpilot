@@ -27,7 +27,7 @@ export default function ForgotPassword() {
         {!sent ? (
           <>
             <h1 className="serif" style={{ fontSize:'1.9rem', color:'var(--navy)', marginBottom:'0.4rem' }}>Reset your password</h1>
-            <p style={{ color:'var(--gray)', fontSize:'0.9rem', marginBottom:'1.75rem' }}>Enter your email and we'll send you a reset link.</p>
+            <p style={{ color:'var(--slate)', fontSize:'0.9rem', marginBottom:'1.75rem' }}>Enter your email and we'll send you a reset link.</p>
 
             <form onSubmit={handleSubmit} style={{ display:'flex', flexDirection:'column', gap:'1rem' }}>
               <div className="field">
@@ -42,15 +42,17 @@ export default function ForgotPassword() {
           </>
         ) : (
           <div style={{ textAlign:'center' }}>
-            <div style={{ fontSize:'2.5rem', marginBottom:'0.75rem' }}>📧</div>
+            <div style={{ width:56, height:56, borderRadius:16, background:'var(--teal-pale)', display:'flex', alignItems:'center', justifyContent:'center', margin:'0 auto 0.75rem' }}>
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+            </div>
             <h1 className="serif" style={{ fontSize:'1.7rem', color:'var(--navy)', marginBottom:'0.6rem' }}>Check your email</h1>
-            <p style={{ color:'var(--gray)', fontSize:'0.9rem', lineHeight:1.6 }}>
+            <p style={{ color:'var(--slate)', fontSize:'0.9rem', lineHeight:1.6 }}>
               We sent a password reset link to <strong>{email}</strong>. Click the link in that email to set a new password.
             </p>
           </div>
         )}
 
-        <p style={{ marginTop:'1.25rem', textAlign:'center', fontSize:'0.85rem', color:'var(--gray)' }}>
+        <p style={{ marginTop:'1.25rem', textAlign:'center', fontSize:'0.85rem', color:'var(--slate)' }}>
           <Link to="/login" style={{ color:'var(--teal)', fontWeight:600 }}>← Back to Sign In</Link>
         </p>
       </div>

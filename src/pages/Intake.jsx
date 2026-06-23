@@ -54,7 +54,8 @@ export default function Intake() {
 
   const [step, setStep]       = useState(1)
   const [saving, setSaving]   = useState(false)
-  const [docs, setDocs]       = useState(['Pay Stub (March 2026).pdf','Tax Return 2025.pdf'])
+  const [docs, setDocs]       = useState([])
+  const [uploading, setUploading] = useState(false)
   const [form, setForm]       = useState({
     moveIn:'', minBed:'1', maxBed:'2', minBudget:'', maxBudget:'',
     neighborhoods:[], tourTimes:[], notes:'',
@@ -119,11 +120,35 @@ export default function Intake() {
             <div className="section-card">
               <div className="section-label"><span className="section-label-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></span>Upload Documents</div>
               <p style={{ fontSize:'0.83rem', color:'var(--slate)', marginBottom:'1rem' }}>Uploaded once — used to auto-fill every application.</p>
-              <div className="upload-area" onClick={() => setDocs(d => [...d, `Document_${d.length+1}.pdf`])}>
-                <div style={{ marginBottom:'0.5rem' }}><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg></div>
-                <p style={{ fontSize:'0.85rem', color:'var(--gray)' }}><strong style={{ color:'var(--teal)' }}>Click to upload</strong> or drag & drop<br />Pay stubs, tax returns, bank statements, ID</p>
-              </div>
-              {docs.map((d, i) => <div className="doc-item" key={i}><span style={{ color:'var(--teal)' }}>✓</span>{d}</div>)}
+              <label className="upload-area" style={{ cursor: uploading ? 'wait' : 'pointer', display:'block' }}>
+                <input type="file" accept=".pdf,image/*" multiple style={{ display:'none' }} disabled={uploading} onChange={async (e) => {
+                  const files = Array.from(e.target.files)
+                  if (!files.length) return
+                  setUploading(true)
+                  const uploaded = []
+                  for (const file of files) {
+                    const path = `${user.id}/${Date.now()}-${file.name}`
+                    const { error } = await supabase.storage.from('documents').upload(path, file)
+                    if (!error) uploaded.push(file.name)
+                  }
+                  setDocs(d => [...d, ...uploaded])
+                  setUploading(false)
+                  e.target.value = ''
+                }} />
+                <div style={{ marginBottom:'0.5rem' }}>
+                  {uploading
+                    ? <span className="spinner" style={{ borderColor:'rgba(10,191,191,0.3)', borderTopColor:'var(--teal)', width:24, height:24, display:'inline-block' }} />
+                    : <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+                  }
+                </div>
+                <p style={{ fontSize:'0.85rem', color:'var(--slate)' }}><strong style={{ color:'var(--teal)' }}>Click to upload</strong> or drag & drop<br />PDF, JPG, PNG · Pay stubs, tax returns, bank statements, ID</p>
+              </label>
+              {docs.map((d, i) => (
+                <div className="doc-item" key={i}>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                  {d}
+                </div>
+              ))}
             </div>
           </div>
         )}
