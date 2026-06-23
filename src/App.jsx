@@ -11,6 +11,7 @@ import Blog       from './pages/Blog'
 import BlogPost   from './pages/BlogPost'
 import AdminBlog  from './pages/AdminBlog'
 import AdminListings from './pages/AdminListings'
+import AdminTestimonials from './pages/AdminTestimonials'
 import ForgotPassword from './pages/ForgotPassword'
 import ResetPassword  from './pages/ResetPassword'
 import Pricing        from './pages/Pricing'
@@ -40,6 +41,7 @@ function AppRoutes() {
         <Route path="/blog/:slug" element={<BlogPost />} />
         <Route path="/admin/blog" element={<AdminBlog />} />
         <Route path="/admin/listings" element={<AdminListings />} />
+        <Route path="/admin/testimonials" element={<AdminTestimonials />} />
         <Route path="/pricing"         element={<Pricing />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />

@@ -45,6 +45,7 @@ export default function Nav() {
     { label: 'My Search', path: '/intake', show: !!user && !profile?.paid },
     { label: 'Listings', path: '/admin/listings', show: user?.email === 'aptpilot1@gmail.com' },
     { label: 'Blog Admin', path: '/admin/blog', show: user?.email === 'aptpilot1@gmail.com' },
+    { label: 'Testimonials', path: '/admin/testimonials', show: user?.email === 'aptpilot1@gmail.com' },
   ].filter(l => l.show)
 
   return (
