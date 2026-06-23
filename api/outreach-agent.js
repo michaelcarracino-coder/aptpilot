@@ -44,7 +44,7 @@ export default async function handler(req, res) {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          from: 'AptPilot <tours@aptpilot.vercel.app>',
+          from: 'AptPilot <onboarding@resend.dev>',
           to: [listing.agent_email],
           reply_to: userEmail,
           subject: `Tour Request — ${address}`,
