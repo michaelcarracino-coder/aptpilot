@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom'
 import { useState, useEffect, useRef } from 'react'
 import SEO from '../components/SEO'
+import { supabase } from '../lib/supabase'
 
 /* ─── Pexels photo URLs (verified) ─── */
 const px = (id) => `https://images.pexels.com/photos/${id}/pexels-photo-${id}.jpeg?auto=compress&cs=tinysrgb&w=1920`
@@ -102,12 +103,7 @@ const STEPS = [
   { num: '06', icon: 'key',       title: 'Get your keys', desc: 'Real-time updates on every application until you sign your lease.' },
 ]
 
-/* ─── Testimonials ─── */
-const TESTIMONIALS = [
-  { quote: "I saved $4,200 in broker fees and had 6 tours scheduled in 48 hours. AptPilot is genuinely magic.", name: "Sophie R.", role: "Moved to Williamsburg, Brooklyn", initials: "SR" },
-  { quote: "As someone with zero time to apartment hunt, this was a lifesaver. They booked everything and I just showed up.", name: "Marcus T.", role: "Moved to the Upper West Side", initials: "MT" },
-  { quote: "The broker fee savings alone paid for the service 8x over. The dashboard made it feel effortless.", name: "Priya K.", role: "Moved to Long Island City", initials: "PK" },
-]
+/* ─── Testimonials loaded from Supabase ─── */
 
 /* ─── FAQs ─── */
 const FAQS = [
@@ -237,11 +233,18 @@ function ExitModal({ show, onClose }) {
 /* ─── Main Landing ─── */
 export default function Landing() {
   const navigate = useNavigate()
-  const [faqOpen, setFaqOpen] = useState(null)
-  const [showExit, setShowExit] = useState(false)
-  const [hasShown, setHasShown] = useState(false)
+  const [faqOpen, setFaqOpen]           = useState(null)
+  const [showExit, setShowExit]         = useState(false)
+  const [hasShown, setHasShown]         = useState(false)
+  const [testimonials, setTestimonials] = useState([])
 
   useReveal()
+
+  useEffect(() => {
+    supabase.from('testimonials').select('*').eq('active', true).order('sort_order').then(({ data }) => {
+      if (data?.length) setTestimonials(data)
+    })
+  }, [])
 
   useEffect(() => {
     if (sessionStorage.getItem('aptpilot_exit')) { setHasShown(true); return }
@@ -444,7 +447,7 @@ export default function Landing() {
         <div style={{ maxWidth: 1080, margin: '0 auto' }}>
           <SectionHeader eyebrow="Client Stories" title="Real renters. Real savings." sub="Join hundreds of New Yorkers who skipped the broker and found their apartment faster." light />
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1.5rem' }}>
-            {TESTIMONIALS.map((t, i) => (
+            {testimonials.map((t, i) => (
               <div key={i} className="reveal" style={{ transitionDelay: `${i * 0.09}s` }}>
                 <div
                   style={{ background: 'rgba(255,255,255,0.04)', border: '1.5px solid rgba(255,255,255,0.08)', borderRadius: 20, padding: '2rem', transition: 'background 0.22s, border-color 0.22s' }}
@@ -452,7 +455,7 @@ export default function Landing() {
                   onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.04)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)' }}
                 >
                   <div style={{ display: 'flex', gap: '2px', marginBottom: '1.1rem' }}>
-                    {[...Array(5)].map((_, j) => <Icon key={j} name="star" size={14} color="#C9A96E" />)}
+                    {[...Array(t.rating || 5)].map((_, j) => <Icon key={j} name="star" size={14} color="#C9A96E" />)}
                   </div>
                   <p style={{ color: 'rgba(255,255,255,0.8)', fontSize: '0.97rem', lineHeight: 1.75, marginBottom: '1.5rem', fontStyle: 'italic' }}>"{t.quote}"</p>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
@@ -560,18 +563,33 @@ export default function Landing() {
               </p>
             </div>
             {[
-              { label: 'Product', links: ['How It Works', 'Pricing', 'Blog', 'FAQ'] },
-              { label: 'Company', links: ['About', 'Contact', 'Privacy Policy', 'Terms'] },
-              { label: 'Get Started', links: ['Create Account', 'Sign In', 'My Search', 'Dashboard'] },
+              { label: 'Product', links: [
+                { label: 'How It Works', href: '#how-it-works' },
+                { label: 'Pricing', href: '/pricing' },
+                { label: 'Blog', href: '/blog' },
+                { label: 'FAQ', href: '#faq' },
+              ]},
+              { label: 'Company', links: [
+                { label: 'About', href: 'mailto:support@aptpilot.com' },
+                { label: 'Contact', href: 'mailto:support@aptpilot.com' },
+                { label: 'Privacy Policy', href: '/privacy' },
+                { label: 'Terms of Service', href: '/terms' },
+              ]},
+              { label: 'Get Started', links: [
+                { label: 'Create Account', href: '/signup' },
+                { label: 'Sign In', href: '/login' },
+                { label: 'My Search', href: '/intake' },
+                { label: 'Dashboard', href: '/dashboard' },
+              ]},
             ].map(col => (
               <div key={col.label}>
                 <div style={{ fontSize: '0.72rem', fontWeight: 700, color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '1.1rem' }}>{col.label}</div>
                 {col.links.map(l => (
-                  <div key={l} style={{ marginBottom: '0.65rem' }}>
-                    <span style={{ fontSize: '0.88rem', color: 'rgba(255,255,255,0.42)', cursor: 'pointer', transition: 'color 0.15s' }}
+                  <div key={l.label} style={{ marginBottom: '0.65rem' }}>
+                    <a href={l.href} style={{ fontSize: '0.88rem', color: 'rgba(255,255,255,0.42)', cursor: 'pointer', transition: 'color 0.15s', textDecoration: 'none', display: 'inline-block' }}
                       onMouseEnter={e => e.target.style.color = '#fff'}
                       onMouseLeave={e => e.target.style.color = 'rgba(255,255,255,0.42)'}
-                    >{l}</span>
+                    >{l.label}</a>
                   </div>
                 ))}
               </div>
