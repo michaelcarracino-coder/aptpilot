@@ -13,6 +13,7 @@ import AdminBlog  from './pages/AdminBlog'
 import AdminListings from './pages/AdminListings'
 import ForgotPassword from './pages/ForgotPassword'
 import ResetPassword  from './pages/ResetPassword'
+import Pricing        from './pages/Pricing'
 
 function PrivateRoute({ children }) {
   const { user, loading } = useAuth()
@@ -39,6 +40,7 @@ function AppRoutes() {
         <Route path="/blog/:slug" element={<BlogPost />} />
         <Route path="/admin/blog" element={<AdminBlog />} />
         <Route path="/admin/listings" element={<AdminListings />} />
+        <Route path="/pricing"         element={<Pricing />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/login"     element={user ? <Navigate to="/dashboard" /> : <Login />} />

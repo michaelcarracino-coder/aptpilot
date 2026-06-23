@@ -75,6 +75,36 @@ export default async function handler(req, res) {
       })
     }
 
+    // ── NOTIFY USER OF OUTREACH ─────────────────────────────────────────────
+    if (userEmail) {
+      await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${process.env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          from: 'AptPilot <onboarding@resend.dev>',
+          to: [userEmail],
+          subject: `Update: We contacted the agent for ${address}`,
+          html: `
+            <div style="font-family:sans-serif;max-width:560px;margin:0 auto;padding:2rem;">
+              <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:1.5rem;">
+                <div style="width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,#0ABFBF,#00E5CC);display:flex;align-items:center;justify-content:center;font-weight:900;color:#0C1628;font-size:0.9rem;">A</div>
+                <span style="font-family:Georgia,serif;font-size:1.1rem;font-weight:700;color:#0C1628;">AptPilot</span>
+              </div>
+              <h2 style="color:#0C1628;font-family:Georgia,serif;font-size:1.5rem;margin-bottom:0.5rem;">We reached out to the agent.</h2>
+              <p style="color:#6B7FA0;font-size:0.9rem;line-height:1.65;margin-bottom:1.5rem;">
+                We've contacted the listing agent for <strong style="color:#0C1628;">${address}</strong> on your behalf and requested a tour at your available times.
+              </p>
+              <div style="background:#F2F5FA;border-radius:10px;padding:1rem 1.25rem;margin-bottom:1.5rem;font-size:0.85rem;">
+                <p style="margin:0 0 0.5rem;font-weight:700;color:#0C1628;">What happens next</p>
+                <p style="margin:0;color:#6B7FA0;line-height:1.6;">Agents typically respond within 24–48 hours. As soon as they confirm, your dashboard will update and you'll get another email with the tour details.</p>
+              </div>
+              <a href="https://aptpilot.vercel.app/dashboard" style="display:inline-block;background:#0ABFBF;color:#0C1628;font-weight:700;padding:0.75rem 1.75rem;border-radius:100px;text-decoration:none;font-size:0.88rem;">View Dashboard →</a>
+            </div>
+          `,
+        }),
+      }).catch(e => console.error('User outreach notification failed:', e))
+    }
+
     // ── UPDATE LISTING STATUS IN SUPABASE ──────────────────────────────────
     const { createClient } = await import('@supabase/supabase-js')
     const supabase = createClient(

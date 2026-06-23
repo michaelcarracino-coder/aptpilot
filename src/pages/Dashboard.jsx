@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { supabase } from '../lib/supabase'
 import { useSearchParams } from 'react-router-dom'
@@ -6,7 +6,7 @@ import { useSearchParams } from 'react-router-dom'
 const css = `
 .dash { max-width:1100px; margin:0 auto; padding:2.5rem 2rem; animation:fadeUp 0.4s ease both; }
 .dash-header { display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:2rem;flex-wrap:wrap;gap:1rem; }
-.dash-header h1 { font-family:'Cormorant Garamond',serif; font-size:2rem; color:var(--navy); }
+.dash-header h1 { font-family:'Playfair Display',serif; font-size:2rem; color:var(--navy); }
 .dash-header p { color:var(--slate); font-size:0.88rem; margin-top:0.25rem; }
 .live-badge { background:#ECFDF5;color:#059669;border:1px solid #A7F3D0;padding:0.4rem 1rem;border-radius:100px;font-size:0.8rem;font-weight:600;display:flex;align-items:center;gap:0.45rem; }
 .pulse { width:7px;height:7px;border-radius:50%;background:#059669;animation:pulse 2s infinite; }
@@ -14,19 +14,21 @@ const css = `
 @media(max-width:700px){ .kpi-row{grid-template-columns:repeat(2,1fr);} }
 .kpi { background:#fff;border-radius:var(--radius);padding:1.25rem;box-shadow:var(--shadow); }
 .kpi-label { font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:var(--slate);margin-bottom:0.3rem; }
-.kpi-val { font-family:'Cormorant Garamond',serif;font-size:2.1rem;color:var(--navy);line-height:1; }
+.kpi-val { font-family:'Playfair Display',serif;font-size:2.1rem;color:var(--navy);line-height:1; }
 .kpi-sub { font-size:0.77rem;color:var(--teal);font-weight:600;margin-top:0.3rem; }
 .sect-title { font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--slate);margin-bottom:0.75rem; }
 .two-col { display:grid;grid-template-columns:1fr 320px;gap:1.5rem; }
 @media(max-width:800px){ .two-col{grid-template-columns:1fr;} }
 .tour-card { background:#fff;border-radius:var(--radius);padding:1.1rem 1.25rem;box-shadow:var(--shadow);display:flex;align-items:center;gap:1.25rem;margin-bottom:0.75rem;border:1.5px solid transparent;transition:all 0.18s; }
 .tour-card:hover { border-color:var(--teal); }
-.tour-icon { background:var(--navy);color:#fff;border-radius:10px;padding:0.6rem 0.75rem;text-align:center;min-width:52px;flex-shrink:0;font-size:1.1rem; }
+.tour-card.new-listing { animation:highlightIn 1.2s ease; }
+@keyframes highlightIn { 0%{background:#E0FFF9;border-color:var(--teal);} 100%{background:#fff;border-color:transparent;} }
+.tour-icon { background:var(--navy);color:#fff;border-radius:10px;padding:0.6rem 0.75rem;text-align:center;min-width:52px;flex-shrink:0; }
 .tour-addr { font-weight:600;font-size:0.92rem;color:var(--navy); }
 .tour-meta { font-size:0.8rem;color:var(--slate);margin-top:0.2rem;display:flex;gap:0.75rem;flex-wrap:wrap; }
-.tour-price { font-family:'Cormorant Garamond',serif;font-size:1.15rem;color:var(--teal);text-align:right;flex-shrink:0; }
-.tour-price small { font-family:'Plus Jakarta Sans',sans-serif;font-size:0.72rem;color:var(--slate);display:block; }
-.status-pill { padding:0.28rem 0.65rem;border-radius:100px;font-size:0.72rem;font-weight:700;margin-top:0.3rem; }
+.tour-price { font-family:'Playfair Display',serif;font-size:1.15rem;color:var(--teal);text-align:right;flex-shrink:0; }
+.tour-price small { font-family:'Inter',sans-serif;font-size:0.72rem;color:var(--slate);display:block; }
+.status-pill { padding:0.28rem 0.65rem;border-radius:100px;font-size:0.72rem;font-weight:700;margin-top:0.3rem;display:inline-block; }
 .s-pending { background:#FEF3C7;color:#D97706; }
 .s-outreach_sent { background:#EFF6FF;color:#2563EB; }
 .s-confirmed { background:#ECFDF5;color:#059669; }
@@ -40,6 +42,18 @@ const css = `
 .crit-row:last-child { border:none; }
 .empty-state { text-align:center;padding:2.5rem;color:var(--slate);font-size:0.9rem;background:#fff;border-radius:var(--radius);box-shadow:var(--shadow); }
 .success-banner { background:#ECFDF5;border:1px solid #A7F3D0;border-radius:12px;padding:1rem 1.5rem;margin-bottom:1.5rem;display:flex;align-items:center;gap:0.75rem;color:#065F46;font-size:0.88rem;font-weight:500; }
+.onboard-card { background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);padding:1.5rem;margin-bottom:1.75rem; }
+.onboard-title { font-family:'Playfair Display',serif;font-size:1.1rem;color:var(--navy);margin-bottom:1.1rem; }
+.onboard-steps { display:flex;flex-direction:column;gap:0; }
+.onboard-step { display:flex;gap:1rem;align-items:flex-start;padding:0.7rem 0;position:relative; }
+.onboard-step:not(:last-child)::after { content:'';position:absolute;left:13px;top:36px;bottom:0;width:2px;background:var(--surface-mid); }
+.onboard-dot { width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:0.75rem;font-weight:700;z-index:1; }
+.onboard-dot.done { background:var(--teal);color:#fff; }
+.onboard-dot.active { background:var(--navy);color:#fff;box-shadow:0 0 0 4px rgba(10,191,191,0.15); }
+.onboard-dot.pending { background:var(--surface-mid);color:var(--slate); }
+.onboard-label { font-weight:600;font-size:0.88rem;color:var(--navy);line-height:1.3; }
+.onboard-sublabel { font-size:0.78rem;color:var(--slate);margin-top:0.15rem; }
+.rt-toast { position:fixed;bottom:1.5rem;right:1.5rem;background:var(--navy);color:#fff;padding:0.75rem 1.25rem;border-radius:12px;font-size:0.85rem;font-weight:500;box-shadow:var(--shadow-lg);z-index:999;animation:fadeUp 0.3s ease;display:flex;align-items:center;gap:0.6rem; }
 `
 
 const STATUS_COLORS = {
@@ -49,24 +63,34 @@ const STATUS_COLORS = {
   declined: '#EF4444',
 }
 
+const ONBOARD_STEPS = [
+  { key: 'paid',      label: 'Payment confirmed',       sub: 'Your search is active'              },
+  { key: 'criteria',  label: 'Criteria reviewed',       sub: 'We review your requirements'        },
+  { key: 'listings',  label: 'Listings sourced',        sub: 'Matching apartments identified'     },
+  { key: 'outreach',  label: 'Agents contacted',        sub: 'Tour requests sent on your behalf'  },
+  { key: 'tours',     label: 'Tours confirmed',         sub: 'Sit back — we handle scheduling'    },
+]
+
 export default function Dashboard() {
   const { user, profile } = useAuth()
-  const [search, setSearch] = useState(null)
+  const [search, setSearch]   = useState(null)
   const [listings, setListings] = useState([])
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading]  = useState(true)
+  const [toast, setToast]      = useState(null)
+  const [portalLoading, setPortalLoading] = useState(false)
+  const [newIds, setNewIds]    = useState(new Set())
   const [searchParams] = useSearchParams()
   const justPaid = searchParams.get('payment') === 'success'
+  const channelRef = useRef(null)
+  const toastTimer = useRef(null)
 
-  useEffect(() => {
-    if (user) loadData()
-  }, [user])
+  useEffect(() => { if (user) loadData() }, [user])
 
   async function loadData() {
     setLoading(true)
     const { data: searchData } = await supabase
       .from('searches').select('*').eq('user_id', user.id)
       .order('created_at', { ascending: false }).limit(1).single()
-
     setSearch(searchData)
 
     if (searchData) {
@@ -74,29 +98,93 @@ export default function Dashboard() {
         .from('listings').select('*').eq('search_id', searchData.id)
         .order('created_at', { ascending: false })
       setListings(listingData || [])
+      subscribeToListings(searchData.id)
     }
     setLoading(false)
   }
 
+  function subscribeToListings(searchId) {
+    if (channelRef.current) supabase.removeChannel(channelRef.current)
+    channelRef.current = supabase
+      .channel(`listings:${searchId}`)
+      .on('postgres_changes', {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'listings',
+        filter: `search_id=eq.${searchId}`,
+      }, (payload) => {
+        setListings(prev => [payload.new, ...prev])
+        setNewIds(prev => new Set([...prev, payload.new.id]))
+        showToast(`New listing added: ${payload.new.address}`)
+        setTimeout(() => setNewIds(prev => { const s = new Set(prev); s.delete(payload.new.id); return s }), 2000)
+      })
+      .on('postgres_changes', {
+        event: 'UPDATE',
+        schema: 'public',
+        table: 'listings',
+        filter: `search_id=eq.${searchId}`,
+      }, (payload) => {
+        setListings(prev => prev.map(l => l.id === payload.new.id ? payload.new : l))
+        if (payload.new.status === 'confirmed') showToast(`Tour confirmed: ${payload.new.address}`)
+        if (payload.new.status === 'outreach_sent') showToast(`Agent contacted: ${payload.new.address}`)
+      })
+      .subscribe()
+  }
+
+  function showToast(msg) {
+    setToast(msg)
+    clearTimeout(toastTimer.current)
+    toastTimer.current = setTimeout(() => setToast(null), 4000)
+  }
+
+  useEffect(() => () => {
+    if (channelRef.current) supabase.removeChannel(channelRef.current)
+    clearTimeout(toastTimer.current)
+  }, [])
+
   const firstName = profile?.full_name?.split(' ')[0] || user?.user_metadata?.full_name?.split(' ')[0] || 'there'
   const confirmedTours = listings.filter(l => l.status === 'confirmed')
-  const sentOutreach = listings.filter(l => l.status === 'outreach_sent')
+  const sentOutreach   = listings.filter(l => l.status === 'outreach_sent')
+
+  // Onboarding progress
+  const onboardStatus = {
+    paid:     true,
+    criteria: listings.length > 0 || sentOutreach.length > 0,
+    listings: listings.length > 0,
+    outreach: sentOutreach.length > 0 || confirmedTours.length > 0,
+    tours:    confirmedTours.length > 0,
+  }
+  const showOnboard = listings.length === 0
+
+  const greeting = (() => {
+    const h = new Date().getHours()
+    if (h < 12) return 'Good morning'
+    if (h < 17) return 'Good afternoon'
+    return 'Good evening'
+  })()
 
   return (
     <>
       <style>{css}</style>
       <div className="dash">
 
+        {toast && (
+          <div className="rt-toast">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            {toast}
+          </div>
+        )}
+
         {justPaid && (
           <div className="success-banner">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#059669" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink:0 }}><polyline points="20 6 9 17 4 12"/></svg>
-            <span>Payment successful! Your search is now active. We're pulling listings that match your criteria — check back soon for your tour agenda.</span>
+            <span>Payment confirmed — check your email for a summary of what happens next. We're already on it.</span>
           </div>
         )}
 
         <div className="dash-header">
           <div>
-            <h1>Good morning, {firstName}.</h1>
+            <h1>{greeting}, {firstName}.</h1>
             <p>
               {listings.length === 0
                 ? "We're finding apartments that match your criteria — your tour agenda will appear here shortly."
@@ -104,15 +192,57 @@ export default function Dashboard() {
               }
             </p>
           </div>
-          <div className="live-badge"><div className="pulse" />AptPilot Active</div>
+          <div style={{ display:'flex', gap:'0.75rem', alignItems:'center', flexWrap:'wrap' }}>
+            <div className="live-badge"><div className="pulse" />Live</div>
+            <button
+              onClick={async () => {
+                setPortalLoading(true)
+                const res = await fetch('/api/customer-portal', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ userId: user.id }) })
+                const { url, error } = await res.json()
+                setPortalLoading(false)
+                if (url) window.location.href = url
+                else showToast(error || 'Could not open billing portal')
+              }}
+              disabled={portalLoading}
+              style={{ fontSize:'0.78rem', color:'var(--slate)', background:'transparent', border:'1px solid var(--surface-mid)', borderRadius:100, padding:'0.35rem 0.85rem', cursor:'pointer', fontFamily:'inherit' }}
+            >
+              {portalLoading ? '...' : 'Billing →'}
+            </button>
+          </div>
         </div>
+
+        {showOnboard && (
+          <div className="onboard-card">
+            <div className="onboard-title">What's happening with your search</div>
+            <div className="onboard-steps">
+              {ONBOARD_STEPS.map((s, i) => {
+                const done   = onboardStatus[s.key]
+                const active = !done && (i === 0 || onboardStatus[ONBOARD_STEPS[i-1]?.key])
+                return (
+                  <div className="onboard-step" key={s.key}>
+                    <div className={`onboard-dot ${done ? 'done' : active ? 'active' : 'pending'}`}>
+                      {done
+                        ? <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                        : i + 1
+                      }
+                    </div>
+                    <div style={{ paddingTop:4 }}>
+                      <div className="onboard-label" style={{ color: done ? 'var(--teal)' : active ? 'var(--navy)' : 'var(--slate)' }}>{s.label}</div>
+                      <div className="onboard-sublabel">{s.sub}</div>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        )}
 
         <div className="kpi-row">
           {[
-            { label:'Listings Found', val: listings.length || '—', sub: listings.length > 0 ? 'matching your criteria' : 'search in progress' },
-            { label:'Tours Confirmed', val: confirmedTours.length || '—', sub: confirmedTours.length > 0 ? 'ready to visit' : 'awaiting responses' },
-            { label:'Outreach Sent', val: sentOutreach.length || '—', sub: 'agents contacted' },
-            { label:'You Saved', val: search ? '$' + Math.round((search.max_budget || 4000) * 1.08).toLocaleString() : '—', sub: 'vs. broker fee' },
+            { label:'Listings Found',   val: listings.length || '—',        sub: listings.length > 0 ? 'matching your criteria' : 'search in progress' },
+            { label:'Tours Confirmed',  val: confirmedTours.length || '—',  sub: confirmedTours.length > 0 ? 'ready to visit' : 'awaiting responses' },
+            { label:'Outreach Sent',    val: sentOutreach.length || '—',    sub: 'agents contacted' },
+            { label:'You Saved',        val: search ? '$' + Math.round((search.max_budget || 4000) * 1.08).toLocaleString() : '—', sub: 'vs. broker fee' },
           ].map(k => (
             <div className="kpi" key={k.label}>
               <div className="kpi-label">{k.label}</div>
@@ -131,14 +261,14 @@ export default function Dashboard() {
               <div className="empty-state">
                 <div style={{ marginBottom:'0.75rem' }}><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--slate)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>
                 <strong>We're on it.</strong>
-                <p style={{ marginTop:'0.4rem', color:'var(--gray)' }}>
-                  Our team is searching listings that match your criteria right now. Your apartments will appear here within a few hours.
-                </p>
+                <p style={{ marginTop:'0.4rem', color:'var(--slate)' }}>Our team is searching listings that match your criteria right now. Your apartments will appear here within a few hours.</p>
               </div>
             ) : (
               listings.map(l => (
-                <div className="tour-card" key={l.id}>
-                  <div className="tour-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div>
+                <div className={`tour-card${newIds.has(l.id) ? ' new-listing' : ''}`} key={l.id}>
+                  <div className="tour-icon">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                  </div>
                   <div style={{ flex:1 }}>
                     <div className="tour-addr">{l.address}{l.unit ? `, ${l.unit}` : ''}</div>
                     <div className="tour-meta">
@@ -149,10 +279,10 @@ export default function Dashboard() {
                     </div>
                     <div style={{ marginTop:'0.35rem' }}>
                       <span className={`status-pill s-${l.status}`}>
-                        {l.status === 'pending' ? 'Finding tour time' :
-                         l.status === 'outreach_sent' ? 'Agent contacted' :
-                         l.status === 'confirmed' ? 'Tour confirmed' :
-                         l.status === 'declined' ? 'Not available' : l.status}
+                        {l.status === 'pending'       ? 'Finding tour time'  :
+                         l.status === 'outreach_sent' ? 'Agent contacted'    :
+                         l.status === 'confirmed'     ? 'Tour confirmed'     :
+                         l.status === 'declined'      ? 'Not available'      : l.status}
                       </span>
                       {l.listing_url && (
                         <a href={l.listing_url} target="_blank" rel="noopener noreferrer"
@@ -163,7 +293,7 @@ export default function Dashboard() {
                     </div>
                   </div>
                   <div style={{ textAlign:'right', flexShrink:0 }}>
-                    <div className="tour-price">${l.price?.toLocaleString()}<small>/month</small></div>
+                    <div className="tour-price">{l.price ? `$${l.price.toLocaleString()}` : '—'}<small>/month</small></div>
                   </div>
                 </div>
               ))
@@ -175,17 +305,17 @@ export default function Dashboard() {
               <div className="sect-title">Status Tracker</div>
               <div className="tracker-card">
                 {listings.length === 0 ? (
-                  <p style={{ color:'var(--gray)', fontSize:'0.85rem', padding:'0.5rem 0' }}>Listings will appear here once found.</p>
+                  <p style={{ color:'var(--slate)', fontSize:'0.85rem', padding:'0.5rem 0' }}>Listings will appear here once found.</p>
                 ) : listings.map(l => (
                   <div className="tracker-row" key={l.id}>
                     <div className="t-dot" style={{ background: STATUS_COLORS[l.status] || '#94A3B8' }} />
                     <div>
                       <div style={{ fontWeight:600, fontSize:'0.85rem', color:'var(--navy)' }}>{l.address}{l.unit ? `, ${l.unit}` : ''}</div>
-                      <div style={{ fontSize:'0.77rem', color:'var(--gray)', marginTop:'0.15rem' }}>
-                        {l.status === 'pending' ? 'Searching for tour availability' :
-                         l.status === 'outreach_sent' ? 'Tour request sent to agent' :
-                         l.status === 'confirmed' ? 'Tour confirmed' :
-                         l.status === 'declined' ? 'Listing not available' : l.status}
+                      <div style={{ fontSize:'0.77rem', color:'var(--slate)', marginTop:'0.15rem' }}>
+                        {l.status === 'pending'       ? 'Searching for tour availability' :
+                         l.status === 'outreach_sent' ? 'Tour request sent to agent'      :
+                         l.status === 'confirmed'     ? 'Tour confirmed'                  :
+                         l.status === 'declined'      ? 'Listing not available'           : l.status}
                       </div>
                     </div>
                   </div>
@@ -197,14 +327,17 @@ export default function Dashboard() {
               <div className="sect-title">Your Criteria</div>
               <div className="criteria-card">
                 {[
-                  ['Budget', search ? `$${search.min_budget || '?'} – $${search.max_budget || '?'}/mo` : '—'],
-                  ['Bedrooms', search ? `${search.min_bed} – ${search.max_bed} bed` : '—'],
-                  ['Move-In', search?.move_in || 'ASAP'],
+                  ['Budget',        search ? `$${search.min_budget || '?'} – $${search.max_budget || '?'}/mo` : '—'],
+                  ['Bedrooms',      search ? `${search.min_bed} – ${search.max_bed} bed` : '—'],
+                  ['Move-In',       search?.move_in || 'ASAP'],
                   ['Neighborhoods', (search?.neighborhoods || []).slice(0,2).join(', ') || '—'],
-                  ['Plan', search?.tier === 'pro' ? 'Pro ($499)' : search?.tier === 'standard' ? 'Standard ($299)' : 'Core ($399)'],
-                  ['Chauffeur', search?.chauffeur ? 'Yes ✓' : 'No'],
+                  ['Plan',          search?.tier === 'pro' ? 'Pro ($499)' : search?.tier === 'standard' ? 'Standard ($299)' : 'Core ($399)'],
+                  ['Chauffeur',     search?.chauffeur ? 'Yes' : 'No'],
                 ].map(([k, v]) => (
-                  <div className="crit-row" key={k}><span style={{ color:'var(--gray)' }}>{k}</span><span style={{ fontWeight:600 }}>{v}</span></div>
+                  <div className="crit-row" key={k}>
+                    <span style={{ color:'var(--slate)' }}>{k}</span>
+                    <span style={{ fontWeight:600 }}>{v}</span>
+                  </div>
                 ))}
               </div>
             </div>
