@@ -34,7 +34,7 @@ export default function Login() {
           </span>
         </div>
 
-        <h1 className="auth-card" style={{ fontFamily: "'Playfair Display', serif", fontSize: '2rem', color: 'var(--navy)', marginBottom: '0.4rem', padding: 0, boxShadow: 'none', background: 'none' }}>
+        <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: '2rem', color: 'var(--navy)', marginBottom: '0.4rem' }}>
           Welcome back
         </h1>
         <p className="sub">Sign in to your AptPilot account.</p>

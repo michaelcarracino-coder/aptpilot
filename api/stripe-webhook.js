@@ -39,6 +39,7 @@ export default async function handler(req, res) {
     if (event.type === 'checkout.session.completed') {
       const session = event.data.object;
       const userId = session.client_reference_id;
+      const userEmail = session.customer_details?.email;
 
       if (userId) {
         const { createClient } = await import('@supabase/supabase-js');
@@ -54,6 +55,40 @@ export default async function handler(req, res) {
 
         if (error) {
           return res.status(500).json({ error: error.message });
+        }
+
+        // Fetch the search so we can include criteria in the admin email
+        const { data: searches } = await supabase
+          .from('searches')
+          .select('*')
+          .eq('user_id', userId)
+          .order('created_at', { ascending: false })
+          .limit(1);
+
+        const search = searches?.[0];
+
+        if (search) {
+          await fetch(`${process.env.VITE_SUPABASE_URL?.replace('supabase.co', 'vercel.app') || 'https://aptpilot.vercel.app'}/api/notify-new-search`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              searchId: search.id,
+              userId,
+              userEmail: userEmail || session.customer_email || '',
+              criteria: {
+                min_budget: search.min_budget,
+                max_budget: search.max_budget,
+                min_bed: search.min_bed,
+                max_bed: search.max_bed,
+                move_in: search.move_in,
+                neighborhoods: search.neighborhoods,
+                tour_times: search.tour_times,
+                notes: search.notes,
+                tier: search.tier,
+                chauffeur: search.chauffeur,
+              },
+            }),
+          }).catch(e => console.error('Notify admin failed:', e));
         }
       }
     }
