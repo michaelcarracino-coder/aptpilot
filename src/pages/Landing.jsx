@@ -567,6 +567,7 @@ export default function Landing() {
                 { label: 'How It Works', href: '#how-it-works' },
                 { label: 'Pricing', href: '/pricing' },
                 { label: 'How to Qualify', href: '/qualify' },
+                { label: 'Neighborhoods', href: '/neighborhoods' },
                 { label: 'Blog', href: '/blog' },
                 { label: 'FAQ', href: '#faq' },
               ]},

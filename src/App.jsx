@@ -22,6 +22,7 @@ const Terms            = lazy(() => import('./pages/Terms'))
 const Documents        = lazy(() => import('./pages/Documents'))
 const JoinGroup        = lazy(() => import('./pages/JoinGroup'))
 const Qualify          = lazy(() => import('./pages/Qualify'))
+const Neighborhoods    = lazy(() => import('./pages/Neighborhoods'))
 
 const PageFallback = () => (
   <div style={{ display:'flex', alignItems:'center', justifyContent:'center', height:'100vh' }}>
@@ -60,6 +61,7 @@ function AppRoutes() {
         <Route path="/pricing"         element={<Pricing />} />
         <Route path="/privacy"         element={<Privacy />} />
         <Route path="/qualify"         element={<Qualify />} />
+        <Route path="/neighborhoods"   element={<Neighborhoods />} />
         <Route path="/terms"           element={<Terms />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
