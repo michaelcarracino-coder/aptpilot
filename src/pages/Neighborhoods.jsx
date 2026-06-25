@@ -195,6 +195,7 @@ function NeighborhoodMap() {
 
       const allLatLngs = NBHDS.flatMap(n => n.coords)
       map.fitBounds(L.latLngBounds(allLatLngs), { padding: [24, 24] })
+      setTimeout(() => map.invalidateSize(), 100)
     }
 
     if (window.L) {
@@ -219,7 +220,7 @@ function NeighborhoodMap() {
     <div style={{ margin: '0 0 3rem' }}>
       <p className="nbhd-map-hint">Hover a neighborhood to explore · Click to jump to its section</p>
       <div className="nbhd-map-wrap">
-        <div ref={containerRef} style={{ height: 540 }} />
+        <div ref={containerRef} style={{ height: 540, width: '100%' }} />
         <div ref={infoRef} className="nbhd-map-info">&nbsp;</div>
       </div>
     </div>
