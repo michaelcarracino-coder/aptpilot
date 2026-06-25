@@ -56,6 +56,20 @@ const css = `
 .onboard-label { font-weight:600;font-size:0.88rem;color:var(--navy);line-height:1.3; }
 .onboard-sublabel { font-size:0.78rem;color:var(--slate);margin-top:0.15rem; }
 .rt-toast { position:fixed;bottom:1.5rem;right:1.5rem;background:var(--navy);color:#fff;padding:0.75rem 1.25rem;border-radius:12px;font-size:0.85rem;font-weight:500;box-shadow:var(--shadow-lg);z-index:999;animation:fadeUp 0.3s ease;display:flex;align-items:center;gap:0.6rem; }
+.group-members-card { background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);padding:1.25rem;margin-bottom:1.75rem; }
+.group-member-row { display:flex;align-items:center;gap:1rem;padding:0.75rem 0;border-bottom:1px solid var(--surface-mid); }
+.group-member-row:last-child { border:none; }
+.member-avatar { width:36px;height:36px;border-radius:50%;background:var(--navy);color:#fff;font-weight:700;font-size:0.88rem;display:flex;align-items:center;justify-content:center;flex-shrink:0; }
+.member-name { font-weight:600;font-size:0.88rem;color:var(--navy); }
+.member-email { font-size:0.76rem;color:var(--slate);margin-top:0.1rem; }
+.member-tags { display:flex;gap:0.4rem;flex-wrap:wrap;margin-top:0.35rem; }
+.member-tag { font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;padding:0.18rem 0.55rem;border-radius:100px; }
+.tag-owner { background:var(--teal-pale);color:var(--teal); }
+.tag-tenant { background:#EFF6FF;color:#2563EB; }
+.tag-guarantor { background:#F5F3FF;color:#7C3AED; }
+.tag-complete { background:#ECFDF5;color:#059669; }
+.tag-partial { background:#FEF3C7;color:#D97706; }
+.tag-incomplete { background:#FEF2F2;color:#EF4444; }
 .referral-card { background:linear-gradient(135deg,var(--navy),var(--navy-soft));border-radius:var(--radius);padding:1.25rem;color:#fff; }
 .referral-card h3 { font-family:'Playfair Display',serif;font-size:1rem;margin-bottom:0.35rem; }
 .referral-code-box { background:rgba(10,191,191,0.12);border:1.5px solid rgba(10,191,191,0.3);border-radius:8px;padding:0.6rem 0.85rem;font-family:'Inter',monospace;font-size:0.88rem;font-weight:700;color:var(--teal);letter-spacing:0.08em;margin:0.75rem 0;display:flex;justify-content:space-between;align-items:center;cursor:pointer;transition:background 0.15s; }
@@ -89,7 +103,8 @@ export default function Dashboard() {
   const [copied, setCopied] = useState(false)
   const [newIds, setNewIds]    = useState(new Set())
   const [docCount, setDocCount] = useState(0)
-  const [groupInfo, setGroupInfo] = useState(null)         // { id, role, ownerName }
+  const [groupInfo, setGroupInfo] = useState(null)
+  const [groupMembers, setGroupMembers] = useState([])
   const [showGroupModal, setShowGroupModal] = useState(false)
   const [inviteEmails, setInviteEmails] = useState([''])
   const [inviting, setInviting] = useState(false)
@@ -99,8 +114,15 @@ export default function Dashboard() {
   const channelRef = useRef(null)
   const toastTimer = useRef(null)
 
-  useEffect(() => { if (user) { loadData(); loadReferrals(); loadDocCount(); loadGroup() } }, [user])
+  useEffect(() => { if (user) { loadData(); loadReferrals(); loadDocCount(); loadGroup(); loadGroupMembers() } }, [user])
   useEffect(() => { if (justPaid) setShowGroupModal(true) }, [justPaid])
+
+  async function loadGroupMembers() {
+    const res = await fetch(`/api/group-status?userId=${user.id}`)
+    if (!res.ok) return
+    const json = await res.json()
+    setGroupMembers(json.members || [])
+  }
 
   async function sendInvites() {
     const validEmails = inviteEmails.map(e => e.trim()).filter(e => e.includes('@'))
@@ -400,6 +422,46 @@ export default function Dashboard() {
             </div>
           </div>
         </div>
+
+        {groupMembers.length > 0 && (
+          <div className="group-members-card">
+            <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:'0.5rem' }}>
+              <div className="onboard-title" style={{ margin:0 }}>Group Members</div>
+              <button className="btn btn-outline" style={{ fontSize:'0.78rem', padding:'0.3rem 0.8rem' }} onClick={() => { setInviteSent(false); setInviteEmails(['']); setShowGroupModal(true) }}>
+                + Invite
+              </button>
+            </div>
+            {groupMembers.map(m => {
+              const initials = m.name.split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase()
+              const docRoles = m.docRole === 'both' ? ['tenant','guarantor'] : m.docRole ? [m.docRole] : []
+
+              function statusTag(info) {
+                if (!info) return null
+                if (info.status === 'complete') return <span className="member-tag tag-complete">Docs Complete</span>
+                if (info.status === 'partial') return <span className="member-tag tag-partial">Partial ({info.uploaded}/{info.total})</span>
+                return <span className="member-tag tag-incomplete">Docs Incomplete</span>
+              }
+
+              return (
+                <div className="group-member-row" key={m.userId}>
+                  <div className="member-avatar">{initials || '?'}</div>
+                  <div style={{ flex:1, minWidth:0 }}>
+                    <div className="member-name">{m.name}{m.userId === user.id ? ' (you)' : ''}</div>
+                    <div className="member-email">{m.email}</div>
+                    <div className="member-tags">
+                      {m.groupRole === 'owner' && <span className="member-tag tag-owner">Owner</span>}
+                      {docRoles.includes('tenant') && <span className="member-tag tag-tenant">Tenant</span>}
+                      {docRoles.includes('guarantor') && <span className="member-tag tag-guarantor">Guarantor</span>}
+                      {!m.docRole && <span className="member-tag tag-incomplete">No docs yet</span>}
+                      {statusTag(m.tenant)}
+                      {m.docRole === 'both' && statusTag(m.guarantor)}
+                    </div>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        )}
 
         <div className="kpi-row">
           {[
