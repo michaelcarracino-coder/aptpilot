@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import SEO from '../components/SEO'
 
 const css = `
@@ -25,11 +26,112 @@ const css = `
 .nbhd-card .tidbit { font-size: 0.82rem; color: #2a5a5a; background: #f0fafa; border-left: 3px solid var(--teal); border-radius: 0 6px 6px 0; padding: 0.5rem 0.75rem; line-height: 1.55; }
 .nbhd-card .price-tag { display: inline-block; font-size: 0.75rem; font-weight: 600; background: #f0f4f8; color: #4a6080; border-radius: 100px; padding: 2px 10px; margin-bottom: 0.6rem; }
 
+.nbhd-map-hint { text-align: center; font-size: 0.82rem; color: var(--slate); margin-bottom: 0.75rem; letter-spacing: 0.01em; }
+.nbhd-map-wrap { border: 1px solid #d4eaee; border-radius: 14px; overflow: hidden; margin-bottom: 3rem; }
+.nbhd-map-label { height: 40px; display: flex; align-items: center; justify-content: center; font-size: 0.83rem; font-weight: 600; color: var(--teal); background: #f0fafa; border-top: 1px solid #cce8ee; transition: opacity 0.15s; }
+
 .apt-cta { background: linear-gradient(135deg, #0C1628 0%, #0a2a3a 100%); border-radius: 16px; padding: 2.5rem; text-align: center; margin-top: 4rem; }
 .apt-cta h3 { font-family: 'Playfair Display', serif; font-size: 1.7rem; color: #fff; margin-bottom: 0.6rem; }
 .apt-cta p { font-size: 0.94rem; color: rgba(255,255,255,0.7); margin-bottom: 1.5rem; }
 .apt-cta a { display: inline-block; background: var(--teal); color: #0C1628; font-weight: 700; font-size: 0.95rem; padding: 0.75rem 2rem; border-radius: 100px; text-decoration: none; }
 `
+
+const MAP_REGIONS = [
+  {
+    id: 'hoboken-jc',
+    label: 'Hoboken & Jersey City',
+    d: 'M 10,138 L 130,100 L 144,168 L 142,400 L 130,420 L 10,420 Z',
+    lx: 72, ly: 262, lines: ['Hoboken /', 'Jersey City'],
+  },
+  {
+    id: 'bronx',
+    label: 'The Bronx',
+    d: 'M 160,78 L 185,60 L 204,36 L 360,24 L 382,64 L 336,152 L 264,178 L 200,168 Z',
+    lx: 278, ly: 100,
+  },
+  {
+    id: 'harlem',
+    label: 'Harlem & Upper Manhattan',
+    d: 'M 165,94 L 188,76 L 200,168 L 160,190 Z',
+    lx: null,
+  },
+  {
+    id: 'manhattan',
+    label: 'Manhattan',
+    d: 'M 160,190 L 183,172 L 208,408 L 185,428 L 158,406 Z',
+    lx: 183, ly: 302, rotate: -80,
+  },
+  {
+    id: 'queens',
+    label: 'Queens',
+    d: 'M 200,164 L 264,174 L 336,148 L 462,96 L 482,178 L 440,298 L 368,342 L 280,334 L 218,302 L 206,244 L 202,196 Z',
+    lx: 340, ly: 222,
+  },
+  {
+    id: 'brooklyn',
+    label: 'Brooklyn',
+    d: 'M 158,406 L 185,428 L 208,408 L 218,302 L 280,334 L 368,342 L 400,410 L 338,476 L 228,486 L 182,464 L 158,428 Z',
+    lx: 272, ly: 422,
+  },
+]
+
+function NeighborhoodMap() {
+  const [hovered, setHovered] = useState(null)
+  const hoveredRegion = MAP_REGIONS.find(r => r.id === hovered)
+
+  const scrollTo = (id) => {
+    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }
+
+  return (
+    <div style={{ margin: '0 0 3rem' }}>
+      <p className="nbhd-map-hint">Hover to explore · Click to jump to a section</p>
+      <div className="nbhd-map-wrap">
+        <svg viewBox="0 0 510 510" style={{ width: '100%', display: 'block' }} xmlns="http://www.w3.org/2000/svg">
+          <rect width="510" height="510" fill="#cce8f2" />
+          {MAP_REGIONS.map(r => (
+            <path
+              key={r.id}
+              d={r.d}
+              fill={hovered === r.id ? '#0ABFBF' : '#a8d8c8'}
+              stroke={hovered === r.id ? '#0C1628' : '#6db8a8'}
+              strokeWidth={hovered === r.id ? 2.5 : 1}
+              style={{ cursor: 'pointer', transition: 'fill 0.12s, stroke 0.12s, stroke-width 0.12s' }}
+              onMouseEnter={() => setHovered(r.id)}
+              onMouseLeave={() => setHovered(null)}
+              onClick={() => scrollTo(r.id)}
+            />
+          ))}
+          {MAP_REGIONS.map(r => {
+            if (r.lx === null) return null
+            const active = hovered === r.id
+            return (
+              <text
+                key={`lbl-${r.id}`}
+                textAnchor="middle"
+                dominantBaseline="middle"
+                fontSize="10"
+                fontWeight="700"
+                fill={active ? '#0C1628' : '#1a5a48'}
+                fontFamily="Inter, system-ui, sans-serif"
+                style={{ pointerEvents: 'none', userSelect: 'none' }}
+                transform={r.rotate ? `rotate(${r.rotate} ${r.lx} ${r.ly})` : undefined}
+              >
+                {r.lines
+                  ? r.lines.map((line, i) => <tspan key={i} x={r.lx} y={r.ly + (i - 0.5) * 13}>{line}</tspan>)
+                  : <tspan x={r.lx} y={r.ly}>{r.label}</tspan>
+                }
+              </text>
+            )
+          })}
+        </svg>
+        <div className="nbhd-map-label" style={{ opacity: hovered ? 1 : 0 }}>
+          {hoveredRegion ? `${hoveredRegion.label}  →  click to explore` : ' '}
+        </div>
+      </div>
+    </div>
+  )
+}
 
 function Card({ name, vibe, price, description, tidbit }) {
   return (
@@ -59,6 +161,8 @@ export default function Neighborhoods() {
             New York City is a collection of hundreds of distinct neighborhoods, each with its own personality, price point, and tradeoffs. This guide breaks down the most popular rental markets so you can zero in on the right fit before your search begins.
           </p>
         </div>
+
+        <NeighborhoodMap />
 
         <div className="nbhd-toc">
           <p>Jump to a borough</p>
