@@ -118,10 +118,38 @@ export default function Dashboard() {
   useEffect(() => { if (justPaid) setShowGroupModal(true) }, [justPaid])
 
   async function loadGroupMembers() {
+    const TENANT_REQUIRED  = ['t1','t2','t3','t4']
+    const GUARANTOR_REQUIRED = ['g1','g2','g3','g4','g5']
+
+    function calcStatus(docs, requiredIds, role) {
+      const uploaded = docs.filter(d => d.doc_role === role).map(d => d.doc_id)
+      const done = requiredIds.filter(id => uploaded.includes(id))
+      if (done.length === 0) return { status:'incomplete', uploaded:0, total:requiredIds.length }
+      if (done.length < requiredIds.length) return { status:'partial', uploaded:done.length, total:requiredIds.length }
+      return { status:'complete', uploaded:done.length, total:requiredIds.length }
+    }
+
+    // Try fetching group members first
     const res = await fetch(`/api/group-status?userId=${user.id}`)
-    if (!res.ok) return
-    const json = await res.json()
-    setGroupMembers(json.members || [])
+    if (res.ok) {
+      const json = await res.json()
+      if (json.members?.length > 0) { setGroupMembers(json.members); return }
+    }
+
+    // No group — build a solo self-entry from own docs
+    const { data: docs } = await supabase.from('user_documents').select('doc_id, doc_role').eq('user_id', user.id)
+    const userDocs = docs || []
+    const hasTenant = userDocs.some(d => d.doc_role === 'tenant')
+    const hasGuarantor = userDocs.some(d => d.doc_role === 'guarantor')
+    setGroupMembers([{
+      userId: user.id,
+      groupRole: 'owner',
+      name: profile?.full_name || user.email,
+      email: user.email,
+      docRole: hasTenant && hasGuarantor ? 'both' : hasTenant ? 'tenant' : hasGuarantor ? 'guarantor' : null,
+      tenant: hasTenant ? calcStatus(userDocs, TENANT_REQUIRED, 'tenant') : null,
+      guarantor: hasGuarantor ? calcStatus(userDocs, GUARANTOR_REQUIRED, 'guarantor') : null,
+    }])
   }
 
   async function sendInvites() {
@@ -426,7 +454,7 @@ export default function Dashboard() {
         {groupMembers.length > 0 && (
           <div className="group-members-card">
             <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:'0.5rem' }}>
-              <div className="onboard-title" style={{ margin:0 }}>Group Members</div>
+              <div className="onboard-title" style={{ margin:0 }}>{groupMembers.length > 1 ? 'Group Members' : 'My Profile'}</div>
               <button className="btn btn-outline" style={{ fontSize:'0.78rem', padding:'0.3rem 0.8rem' }} onClick={() => { setInviteSent(false); setInviteEmails(['']); setShowGroupModal(true) }}>
                 + Invite
               </button>
