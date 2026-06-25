@@ -102,7 +102,7 @@ export default function Neighborhoods() {
             />
             <Card
               name="Chelsea"
-              vibe="Arts · Trendy · Gay-friendly"
+              vibe="Arts · Trendy · Vibrant"
               price="$3,200–$7,000/mo"
               description="Home to world-class art galleries, the High Line, and Chelsea Market. The neighborhood is vibrant, walkable, and centrally located on the west side. A mix of newer luxury buildings and older walk-ups."
               tidbit="The far west blocks near the Hudson River Yards can yield better pricing than the gallery district — and the 7 train extension puts Hudson Yards itself minutes from Midtown and Queens."
@@ -151,7 +151,7 @@ export default function Neighborhoods() {
             />
             <Card
               name="Financial District"
-              vibe="Commuter · Sleek · Post-9/11 revamp"
+              vibe="Commuter · Sleek · Revitalized"
               price="$2,800–$5,500/mo"
               description="Once purely a 9-to-5 office district, FiDi has evolved into a genuine residential neighborhood over the past decade. Newer luxury towers, waterfront access at the Seaport, and lower rents than comparable Midtown buildings."
               tidbit="FiDi offers some of Manhattan's best value for large, amenity-rich apartments. The trade-off is a quieter weekend scene — though the Seaport and Fulton Center have improved that significantly."
@@ -168,23 +168,23 @@ export default function Neighborhoods() {
           <div className="nbhd-grid">
             <Card
               name="Central Harlem"
-              vibe="Cultural epicenter · Soul · Evolving"
+              vibe="Historic · Vibrant · Evolving"
               price="$1,800–$3,800/mo"
-              description="The heart of Black American culture in New York. The Apollo Theater, Marcus Garvey Park, and Malcolm X Boulevard anchor a neighborhood with deep history and a rapidly changing rental market. Brownstones, pre-war walkups, and new condo buildings coexist."
+              description="The Apollo Theater, Marcus Garvey Park, and 125th Street anchor a neighborhood with deep history and a rapidly changing rental market. Brownstones, pre-war walkups, and new condo buildings coexist."
               tidbit="Harlem has seen some of Manhattan's fastest rent appreciation. Areas around Frederick Douglass Boulevard and 125th Street are especially competitive. The 2/3 express trains make Midtown a 15-minute commute."
             />
             <Card
               name="East Harlem (El Barrio)"
-              vibe="Latino culture · Authentic · Underrated"
+              vibe="Authentic · Affordable · Underrated"
               price="$1,600–$3,200/mo"
-              description="East Harlem retains strong Puerto Rican and Mexican cultural roots with a food scene to match. More affordable than Central Harlem with easy access to the 4/5/6 trains and the Upper East Side across 96th Street."
+              description="East Harlem has an incredible food scene and a tight-knit community feel. More affordable than Central Harlem with easy access to the 4/5/6 trains and the Upper East Side across 96th Street."
               tidbit="Lexington Avenue above 96th offers some of Manhattan's most undervalued rentals. The area is developing, but more gradually than Central Harlem — better for renters who want space over status."
             />
             <Card
               name="Washington Heights"
-              vibe="Dominican culture · Spacious · Community"
+              vibe="Spacious · Community · Affordable"
               price="$1,500–$2,800/mo"
-              description="One of the most affordable Manhattan neighborhoods, Washington Heights offers large pre-war apartments, Hudson River views, and the Fort Tryon Park/Cloisters. Predominantly Dominican community with a warm neighborhood feel."
+              description="One of the most affordable Manhattan neighborhoods, Washington Heights offers large pre-war apartments, Hudson River views, Fort Tryon Park, and the Cloisters. Warm community feel with an excellent food scene."
               tidbit="You can get a 3-bedroom here for what a studio costs in the West Village. The A express train gets you to Midtown in under 25 minutes — making this one of Manhattan's best commuter value plays."
             />
             <Card
@@ -220,9 +220,9 @@ export default function Neighborhoods() {
             />
             <Card
               name="Greenpoint"
-              vibe="Polish roots · Artsy · Quieter"
+              vibe="Artsy · Residential · Quieter"
               price="$2,500–$5,000/mo"
-              description="Just north of Williamsburg, Greenpoint has a quieter, more residential feel with strong Polish community roots alongside a growing creative class. Manhattan Avenue is the main commercial strip. G and L train access."
+              description="Just north of Williamsburg, Greenpoint has a quieter, more residential feel with a growing creative class and excellent cafes and restaurants. Manhattan Avenue is the main commercial strip. G and L train access."
               tidbit="Greenpoint often prices 10–20% below Williamsburg for equivalent apartments. The G train is the only subway line, which keeps prices lower — but the ferry on the East River waterfront is an underrated commute option."
             />
             <Card
@@ -241,30 +241,30 @@ export default function Neighborhoods() {
             />
             <Card
               name="Cobble Hill / Carroll Gardens"
-              vibe="Family · Italian roots · Brownstone"
+              vibe="Family · Brownstone · Community"
               price="$2,600–$5,500/mo"
-              description="Two adjacent neighborhoods known for their leafy streets, excellent restaurants, and strong community feel. Carroll Gardens retains an Italian-American heritage; Cobble Hill is more mixed. Both are popular with young families."
+              description="Two adjacent neighborhoods known for their leafy streets, excellent restaurants, and strong community feel. Both are popular with young families and offer some of Brooklyn's most charming blocks."
               tidbit="Smith Street is one of Brooklyn's best restaurant rows. The F/G trains provide Manhattan access. These neighborhoods command a premium over nearby Gowanus — where rents are lower but the Superfund site cleanup is ongoing."
             />
             <Card
               name="Park Slope"
-              vibe="Stroller central · Liberal · Green"
+              vibe="Family-friendly · Leafy · Green"
               price="$2,500–$5,500/mo"
               description="Famously family-friendly, Park Slope lines the western edge of Prospect Park with Victorian brownstones and an excellent commercial strip on 5th and 7th Avenues. Among Brooklyn's most consistently in-demand neighborhoods."
               tidbit="The 2/3 express and B/Q trains offer fast Manhattan access. Schools here are among Brooklyn's best, driving family demand. The blocks nearest Prospect Park West carry the highest premiums."
             />
             <Card
               name="Crown Heights"
-              vibe="Caribbean culture · Up-and-coming · Diverse"
+              vibe="Up-and-coming · Diverse · Spacious"
               price="$1,900–$3,500/mo"
-              description="A historically Caribbean neighborhood with strong Jamaican and Trinidadian communities, now attracting a new wave of renters priced out of Park Slope and Prospect Heights. Large pre-war apartments with good bones."
+              description="A neighborhood with deep roots and a rapidly evolving restaurant and retail scene, now attracting a new wave of renters priced out of Park Slope and Prospect Heights. Large pre-war apartments with good bones."
               tidbit="The Kingston Ave and Utica Ave corridors have seen significant commercial development. The 3 and 4 express trains get you to Midtown in under 30 minutes. Eastern Parkway is one of Brooklyn's grandest boulevards."
             />
             <Card
               name="Bed-Stuy (Bedford-Stuyvesant)"
               vibe="Historic · Brownstone revival · Evolving"
               price="$1,800–$3,800/mo"
-              description="Brooklyn's largest neighborhood by population has one of the city's finest stocks of intact brownstone rowhouses. Once neglected, Bed-Stuy has undergone a significant revitalization while retaining its African-American cultural identity."
+              description="Brooklyn's largest neighborhood by population has one of the city's finest stocks of intact brownstone rowhouses. Bed-Stuy has undergone significant revitalization over the past decade with new restaurants, cafes, and retail alongside longtime residents."
               tidbit="Fulton Street and Nostrand Ave are the main commercial corridors. The A/C trains at Nostrand and Utica Ave provide express service to Manhattan. The western blocks near Clinton Hill command higher prices than the eastern reaches."
             />
             <Card
@@ -276,9 +276,9 @@ export default function Neighborhoods() {
             />
             <Card
               name="Bay Ridge"
-              vibe="Suburban feel · Diverse · Quiet"
+              vibe="Suburban feel · Spacious · Quiet"
               price="$1,600–$2,800/mo"
-              description="At Brooklyn's southwestern tip, Bay Ridge has a surprisingly suburban feel with lower density, single-family homes, and a strong Scandinavian and Arab-American heritage. Excellent for families who want space and quiet but need Brooklyn access."
+              description="At Brooklyn's southwestern tip, Bay Ridge has a surprisingly suburban feel with lower density, single-family homes, tree-lined streets, and a lively restaurant scene along Third and Fifth Avenues. Excellent for families who want space and quiet."
               tidbit="The R train to Manhattan is slow (40–50 min), making Bay Ridge better suited for local Brooklyn jobs or remote workers. The Verrazano-Narrows Bridge makes Staten Island and New Jersey accessible. Some of Brooklyn's lowest rents for large apartments."
             />
           </div>
@@ -288,14 +288,14 @@ export default function Neighborhoods() {
         <div className="nbhd-section" id="queens">
           <h2>Queens</h2>
           <p className="section-intro">
-            Queens is the most ethnically diverse urban area in the world — and one of NYC's best-kept secrets for renters. You get more space, more cultural diversity, and lower prices than comparable Manhattan or Brooklyn apartments, often with excellent subway access.
+            Queens is one of NYC's best-kept secrets for renters. You get more space, an incredible variety of food and culture, and lower prices than comparable Manhattan or Brooklyn apartments — often with excellent subway access.
           </p>
           <div className="nbhd-grid">
             <Card
               name="Astoria"
-              vibe="Greek roots · Diverse · Laid-back"
+              vibe="Laid-back · Diverse · Great food"
               price="$2,000–$3,800/mo"
-              description="One of Queens' most popular neighborhoods with renters, Astoria blends Greek heritage with a growing mix of young professionals, artists, and longtime immigrant families. Excellent food scene, Astoria Park on the East River, and strong transit connections."
+              description="One of Queens' most popular neighborhoods with renters. Astoria has a thriving restaurant and bar scene, Astoria Park on the East River, and a mix of young professionals and longtime residents. Strong transit connections and a genuine neighborhood feel."
               tidbit="The N/W trains get you to Midtown in 20–25 minutes — one of the best commute-to-rent ratios in the metro area. Steinway Street and Ditmars Blvd are the main commercial corridors. Larger apartments for less than comparable Brooklyn neighborhoods."
             />
             <Card
@@ -307,28 +307,28 @@ export default function Neighborhoods() {
             />
             <Card
               name="Jackson Heights"
-              vibe="South Asian & Latino culture · Authentic · Affordable"
+              vibe="Authentic · Affordable · Incredible food"
               price="$1,500–$2,600/mo"
-              description="One of the most culturally vibrant neighborhoods in the entire city — Little India on 74th Street, excellent Nepalese, Colombian, and Ecuadorian food, and a warm, tight-knit community. Far from trendy, which keeps prices down."
+              description="One of the most culinarily vibrant neighborhoods in the city — 74th Street alone has some of NYC's best South Asian, South American, and Southeast Asian food. Warm community feel, large apartments, and prices well below comparable areas."
               tidbit="The 7, E, F, M, and R trains converge here — exceptional transit coverage for the price. Expect large apartments with older finishes. Jackson Heights is ideal for renters who prioritize authentic culture and value over amenities."
             />
             <Card
               name="Ridgewood"
               vibe="Emerging · Artsy · Brooklyn adjacent"
               price="$1,700–$3,000/mo"
-              description="Straddling the Brooklyn-Queens border, Ridgewood has absorbed much of the creative community priced out of Bushwick and Bed-Stuy. Germanic architecture, good coffee shops, and a still-developing bar and restaurant scene."
+              description="Straddling the Brooklyn-Queens border, Ridgewood has absorbed much of the creative community priced out of Bushwick and Bed-Stuy. Beautiful early 20th-century brick rowhouses, good coffee shops, and a still-developing bar and restaurant scene."
               tidbit="L and M train access. Ridgewood is one of the last neighborhoods where you can get a true deal on a large, prewar apartment within easy reach of Brooklyn's best neighborhoods. Rents are rising quickly — timing matters."
             />
             <Card
               name="Sunnyside & Woodside"
-              vibe="Irish & Korean roots · Underrated · Commuter-friendly"
+              vibe="Underrated · Commuter-friendly · Community"
               price="$1,600–$2,800/mo"
-              description="Two adjacent Queens neighborhoods with strong Irish-American and Korean communities. Sunnyside has some of the borough's most charming block associations and community gardens. Woodside is quieter and more family-oriented."
+              description="Two adjacent Queens neighborhoods with great value and a genuine community feel. Sunnyside has some of the borough's most charming block associations and community gardens. Woodside is quieter and more family-oriented."
               tidbit="The 7 train provides fast access to Midtown. One of the city's best value propositions for renters who don't need to be in Manhattan or Brooklyn. Queens Blvd is a major commercial artery."
             />
             <Card
               name="Forest Hills & Rego Park"
-              vibe="Suburban · Jewish community · Quiet"
+              vibe="Suburban · Safe · Quiet"
               price="$1,700–$3,200/mo"
               description="Forest Hills feels more like a suburban town than an NYC neighborhood — wide streets, Tudor-style architecture, excellent restaurants on Austin Street, and a genuine sense of community. Rego Park sits just to the north with more high-rise options."
               tidbit="The E/F express trains get you to Midtown in about 30 minutes. One of Queens' safest and most livable neighborhoods. Forest Hills Gardens is a private planned community — coveted but pricey and mostly owner-occupied."
@@ -345,7 +345,7 @@ export default function Neighborhoods() {
           <div className="nbhd-grid">
             <Card
               name="Riverdale"
-              vibe="Suburban enclave · Jewish community · Hilly"
+              vibe="Suburban enclave · Hilly · Spacious"
               price="$1,600–$3,200/mo"
               description="The Bronx's most affluent neighborhood sits on wooded bluffs above the Hudson River. It feels far more like Westchester than the Bronx — quiet residential streets, large apartment buildings, and top private schools. Popular with families and retirees."
               tidbit="The 1 train at 231st Street and Metro-North at Spuyten Duyvil offer two commute options. Riverdale offers some of NYC's best apartment value for families needing space and good schools."
@@ -359,9 +359,9 @@ export default function Neighborhoods() {
             />
             <Card
               name="Fordham / Belmont"
-              vibe="University town · Italian market · Community"
+              vibe="University town · Food market · Community"
               price="$1,200–$2,200/mo"
-              description="Fordham University anchors a neighborhood that feels like an Italian-American village — Arthur Avenue is NYC's most authentic Italian market street, far less touristy than the Mulberry Street version. Strong community feel."
+              description="Fordham University anchors a neighborhood with a strong community feel and one of NYC's best food market streets — Arthur Avenue has been a culinary destination for generations, far less touristy than comparable Manhattan options."
               tidbit="Among the cheapest large apartments you'll find within 30 minutes of Midtown. The D/B trains and Metro-North's Harlem Line run through the area. Belmont's Arthur Avenue is worth the trip alone."
             />
             <Card
