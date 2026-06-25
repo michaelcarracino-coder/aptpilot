@@ -39,6 +39,7 @@ export default function Nav() {
 
   const navLinks = [
     { label: 'Pricing', path: '/pricing', show: true },
+    { label: 'How to Qualify', path: '/qualify', show: true },
     { label: 'Blog', path: '/blog', show: true },
     { label: 'Log In', path: '/login', show: !user },
     { label: 'My Dashboard', path: '/dashboard', show: !!user && !!profile?.paid },
