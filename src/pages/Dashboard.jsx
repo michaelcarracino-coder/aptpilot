@@ -69,8 +69,8 @@ const STATUS_COLORS = {
 
 const ONBOARD_STEPS = [
   { key: 'paid',      label: 'Payment confirmed',       sub: 'Your search is active'              },
-  { key: 'criteria',  label: 'Criteria reviewed',       sub: 'We review your requirements'        },
   { key: 'docs',      label: 'Documents uploaded',      sub: 'Your package is ready to go'        },
+  { key: 'criteria',  label: 'Criteria reviewed',       sub: 'We review your requirements'        },
   { key: 'listings',  label: 'Listings sourced',        sub: 'Matching apartments identified'     },
   { key: 'outreach',  label: 'Agents contacted',        sub: 'Tour requests sent on your behalf'  },
   { key: 'tours',     label: 'Tours confirmed',         sub: 'Sit back — we handle scheduling'    },
