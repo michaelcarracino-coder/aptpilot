@@ -43,6 +43,8 @@ const css = `
 .empty-state { text-align:center;padding:2.5rem;color:var(--slate);font-size:0.9rem;background:#fff;border-radius:var(--radius);box-shadow:var(--shadow); }
 .success-banner { background:#ECFDF5;border:1px solid #A7F3D0;border-radius:12px;padding:1rem 1.5rem;margin-bottom:1.5rem;display:flex;align-items:center;gap:0.75rem;color:#065F46;font-size:0.88rem;font-weight:500; }
 .onboard-card { background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);padding:1.5rem;margin-bottom:1.75rem; }
+.onboard-criteria-row { display:grid;grid-template-columns:1fr 280px;gap:1.25rem;align-items:start;margin-bottom:1.75rem; }
+@media(max-width:800px){ .onboard-criteria-row{grid-template-columns:1fr;} }
 .onboard-title { font-family:'Playfair Display',serif;font-size:1.1rem;color:var(--navy);margin-bottom:1.1rem; }
 .onboard-steps { display:flex;flex-direction:column;gap:0; }
 .onboard-step { display:flex;gap:1rem;align-items:flex-start;padding:0.7rem 0;position:relative; }
@@ -353,31 +355,51 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {showOnboard && (
-          <div className="onboard-card">
-            <div className="onboard-title">What's happening with your search</div>
-            <div className="onboard-steps">
-              {ONBOARD_STEPS.map((s, i) => {
-                const done   = onboardStatus[s.key]
-                const active = !done && (i === 0 || onboardStatus[ONBOARD_STEPS[i-1]?.key])
-                return (
-                  <div className="onboard-step" key={s.key}>
-                    <div className={`onboard-dot ${done ? 'done' : active ? 'active' : 'pending'}`}>
-                      {done
-                        ? <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                        : i + 1
-                      }
+        <div className="onboard-criteria-row">
+          {showOnboard && (
+            <div className="onboard-card" style={{ marginBottom:0 }}>
+              <div className="onboard-title">What's happening with your search</div>
+              <div className="onboard-steps">
+                {ONBOARD_STEPS.map((s, i) => {
+                  const done   = onboardStatus[s.key]
+                  const active = !done && (i === 0 || onboardStatus[ONBOARD_STEPS[i-1]?.key])
+                  return (
+                    <div className="onboard-step" key={s.key}>
+                      <div className={`onboard-dot ${done ? 'done' : active ? 'active' : 'pending'}`}>
+                        {done
+                          ? <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                          : i + 1
+                        }
+                      </div>
+                      <div style={{ paddingTop:4 }}>
+                        <div className="onboard-label" style={{ color: done ? 'var(--teal)' : active ? 'var(--navy)' : 'var(--slate)' }}>{s.label}</div>
+                        <div className="onboard-sublabel">{s.sub}</div>
+                      </div>
                     </div>
-                    <div style={{ paddingTop:4 }}>
-                      <div className="onboard-label" style={{ color: done ? 'var(--teal)' : active ? 'var(--navy)' : 'var(--slate)' }}>{s.label}</div>
-                      <div className="onboard-sublabel">{s.sub}</div>
-                    </div>
-                  </div>
-                )
-              })}
+                  )
+                })}
+              </div>
+            </div>
+          )}
+          <div>
+            <div className="sect-title">Your Criteria</div>
+            <div className="criteria-card">
+              {[
+                ['Budget',        search ? `$${search.min_budget || '?'} – $${search.max_budget || '?'}/mo` : '—'],
+                ['Bedrooms',      search ? `${search.min_bed} – ${search.max_bed} bed` : '—'],
+                ['Move-In',       search?.move_in || 'ASAP'],
+                ['Neighborhoods', (search?.neighborhoods || []).slice(0,2).join(', ') || '—'],
+                ['Plan',          search?.tier === 'pro' ? 'Pro ($499)' : search?.tier === 'standard' ? 'Standard ($299)' : 'Core ($399)'],
+                ['Chauffeur',     search?.chauffeur ? 'Yes' : 'No'],
+              ].map(([k, v]) => (
+                <div className="crit-row" key={k}>
+                  <span style={{ color:'var(--slate)' }}>{k}</span>
+                  <span style={{ fontWeight:600 }}>{v}</span>
+                </div>
+              ))}
             </div>
           </div>
-        )}
+        </div>
 
         <div className="kpi-row">
           {[
@@ -503,24 +525,6 @@ export default function Dashboard() {
               </Link>
             </div>
 
-            <div>
-              <div className="sect-title">Your Criteria</div>
-              <div className="criteria-card">
-                {[
-                  ['Budget',        search ? `$${search.min_budget || '?'} – $${search.max_budget || '?'}/mo` : '—'],
-                  ['Bedrooms',      search ? `${search.min_bed} – ${search.max_bed} bed` : '—'],
-                  ['Move-In',       search?.move_in || 'ASAP'],
-                  ['Neighborhoods', (search?.neighborhoods || []).slice(0,2).join(', ') || '—'],
-                  ['Plan',          search?.tier === 'pro' ? 'Pro ($499)' : search?.tier === 'standard' ? 'Standard ($299)' : 'Core ($399)'],
-                  ['Chauffeur',     search?.chauffeur ? 'Yes' : 'No'],
-                ].map(([k, v]) => (
-                  <div className="crit-row" key={k}>
-                    <span style={{ color:'var(--slate)' }}>{k}</span>
-                    <span style={{ fontWeight:600 }}>{v}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
           </div>
         </div>
       </div>

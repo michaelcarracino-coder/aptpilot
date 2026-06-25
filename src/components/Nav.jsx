@@ -41,7 +41,7 @@ export default function Nav() {
     { label: 'Pricing', path: '/pricing', show: true },
     { label: 'Blog', path: '/blog', show: true },
     { label: 'Log In', path: '/login', show: !user },
-    { label: 'Dashboard', path: '/dashboard', show: !!user && !!profile?.paid },
+    { label: 'My Dashboard', path: '/dashboard', show: !!user && !!profile?.paid },
     { label: 'My Search', path: '/intake', show: !!user && !profile?.paid },
     { label: 'Listings', path: '/admin/listings', show: user?.email === 'aptpilot1@gmail.com' },
     { label: 'Blog Admin', path: '/admin/blog', show: user?.email === 'aptpilot1@gmail.com' },
