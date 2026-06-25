@@ -59,7 +59,7 @@ function useReveal() {
     )
     els.forEach(el => io.observe(el))
     return () => io.disconnect()
-  })
+  }, [])
 }
 
 /* ─── Section header ─── */
@@ -371,7 +371,7 @@ export default function Landing() {
       </section>
 
       {/* ── HOW IT WORKS ── */}
-      <section style={{ padding: '8rem 2rem', background: '#fff' }}>
+      <section id="how-it-works" style={{ padding: '8rem 2rem', background: '#fff' }}>
         <div style={{ maxWidth: 1100, margin: '0 auto' }}>
           <SectionHeader eyebrow="How It Works" title="From criteria to keys — we handle everything." sub="Tell us what you need. We do the searching, scheduling, and applying." />
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1.5rem' }}>
@@ -414,7 +414,7 @@ export default function Landing() {
             <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '1rem', lineHeight: 1.75, marginBottom: '1.75rem' }}>
               AptPilot covers all five boroughs plus Jersey City, Hoboken, and Astoria — pulling listings from every major platform in real time.
             </p>
-            <button className="btn btn-primary" onClick={() => {}}>
+            <button className="btn btn-primary" onClick={() => document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' })}>
               See how it works
             </button>
           </div>
@@ -517,7 +517,7 @@ export default function Landing() {
       </section>
 
       {/* ── FAQ ── */}
-      <section style={{ padding: '8rem 2rem', background: '#fff' }}>
+      <section id="faq" style={{ padding: '8rem 2rem', background: '#fff' }}>
         <div style={{ maxWidth: 760, margin: '0 auto' }}>
           <SectionHeader eyebrow="FAQ" title="Everything you need to know." sub="Answers to the most common questions before getting started." />
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>

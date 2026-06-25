@@ -23,6 +23,8 @@
   --slate-dark:  #4A5A78;
   --text:        #0C1628;
   --text-muted:  #6B7FA0;
+  --gray:        #7A8FAF;
+  --gray-light:  #E8EDF5;
 
   /* Shadows */
   --shadow-xs:  0 1px 4px rgba(12,22,40,0.06);

@@ -1,22 +1,30 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { lazy, Suspense } from 'react'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import Nav from './components/Nav'
-import Landing    from './pages/Landing'
-import Login      from './pages/Login'
-import Signup     from './pages/Signup'
-import Intake     from './pages/Intake'
-import Checkout   from './pages/Checkout'
-import Dashboard  from './pages/Dashboard'
-import Blog       from './pages/Blog'
-import BlogPost   from './pages/BlogPost'
-import AdminBlog  from './pages/AdminBlog'
-import AdminListings from './pages/AdminListings'
-import AdminTestimonials from './pages/AdminTestimonials'
-import ForgotPassword from './pages/ForgotPassword'
-import ResetPassword  from './pages/ResetPassword'
-import Pricing        from './pages/Pricing'
-import Privacy        from './pages/Privacy'
-import Terms          from './pages/Terms'
+
+const Landing          = lazy(() => import('./pages/Landing'))
+const Login            = lazy(() => import('./pages/Login'))
+const Signup           = lazy(() => import('./pages/Signup'))
+const Intake           = lazy(() => import('./pages/Intake'))
+const Checkout         = lazy(() => import('./pages/Checkout'))
+const Dashboard        = lazy(() => import('./pages/Dashboard'))
+const Blog             = lazy(() => import('./pages/Blog'))
+const BlogPost         = lazy(() => import('./pages/BlogPost'))
+const AdminBlog        = lazy(() => import('./pages/AdminBlog'))
+const AdminListings    = lazy(() => import('./pages/AdminListings'))
+const AdminTestimonials = lazy(() => import('./pages/AdminTestimonials'))
+const ForgotPassword   = lazy(() => import('./pages/ForgotPassword'))
+const ResetPassword    = lazy(() => import('./pages/ResetPassword'))
+const Pricing          = lazy(() => import('./pages/Pricing'))
+const Privacy          = lazy(() => import('./pages/Privacy'))
+const Terms            = lazy(() => import('./pages/Terms'))
+
+const PageFallback = () => (
+  <div style={{ display:'flex', alignItems:'center', justifyContent:'center', height:'100vh' }}>
+    <div className="spinner" style={{ borderColor:'rgba(10,147,150,0.3)', borderTopColor:'var(--teal)', width:32, height:32 }} />
+  </div>
+)
 
 function PrivateRoute({ children }) {
   const { user, loading } = useAuth()
@@ -26,7 +34,7 @@ function PrivateRoute({ children }) {
 
 function PaidRoute({ children }) {
   const { user, profile, loading } = useAuth()
-  if (loading) return null
+  if (loading) return <div style={{ display:'flex', alignItems:'center', justifyContent:'center', height:'100vh' }}><div className="spinner" style={{ borderColor:'rgba(10,147,150,0.3)', borderTopColor:'var(--teal)', width:32, height:32 }} /></div>
   if (!user) return <Navigate to="/login" replace />
   if (!profile?.paid) return <Navigate to="/checkout" replace />
   return children
@@ -37,6 +45,7 @@ function AppRoutes() {
   return (
     <>
       <Nav />
+      <Suspense fallback={<PageFallback />}>
       <Routes>
         <Route path="/"          element={<Landing />} />
         <Route path="/blog"      element={<Blog />} />
@@ -56,6 +65,7 @@ function AppRoutes() {
         <Route path="/dashboard" element={<PaidRoute><Dashboard /></PaidRoute>} />
         <Route path="*"          element={<Navigate to="/" />} />
       </Routes>
+      </Suspense>
     </>
   )
 }

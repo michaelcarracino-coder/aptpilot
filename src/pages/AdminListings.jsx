@@ -8,7 +8,7 @@ const ADMIN_EMAIL = 'aptpilot1@gmail.com'
 
 const css = `
 .admin-listings { max-width: 1000px; margin: 0 auto; padding: 2rem 1.5rem 5rem; }
-.admin-listings h1 { font-family:'Cormorant Garamond',serif; font-size:2rem; color:var(--navy); margin-bottom:0.25rem; }
+.admin-listings h1 { font-family:'Playfair Display',serif; font-size:2rem; color:var(--navy); margin-bottom:0.25rem; }
 .search-selector { background:white; border-radius:12px; padding:1.25rem; box-shadow:var(--shadow); margin-bottom:1.5rem; }
 .search-card {
   border:1.5px solid var(--surface-mid); border-radius:10px; padding:1rem 1.25rem;
@@ -50,6 +50,7 @@ export default function AdminListings() {
   const [listings, setListings] = useState([])
   const [saving, setSaving] = useState(false)
   const [sendingId, setSendingId] = useState(null)
+  const [tourTimes, setTourTimes] = useState({})
   const [form, setForm] = useState({
     address:'', unit:'', bedrooms:'', bathrooms:'', sqft:'', price:'',
     agent_name:'', agent_email:'', agent_phone:'', listing_url:'', notes:''
@@ -113,6 +114,11 @@ export default function AdminListings() {
   }
 
   async function confirmTour(listing) {
+    const scheduledAt = tourTimes[listing.id]
+    if (!scheduledAt) {
+      alert('Please enter the confirmed tour date and time first.')
+      return
+    }
     setSendingId(listing.id)
     await fetch('/api/notify-tour-confirmed', {
       method: 'POST',
@@ -122,9 +128,11 @@ export default function AdminListings() {
         userEmail: selectedSearch?.profiles?.email,
         userName: selectedSearch?.profiles?.full_name,
         searchId: selectedSearch?.id,
+        scheduledAt,
       }),
     })
     setSendingId(null)
+    setTourTimes(t => { const n = { ...t }; delete n[listing.id]; return n })
     selectSearch(selectedSearch)
   }
 
@@ -218,15 +226,23 @@ export default function AdminListings() {
                   >
                     {sendingId === l.id ? '...' : l.status === 'outreach_sent' ? 'Sent ✓' : l.status === 'confirmed' ? 'Confirmed ✓' : 'Send Outreach'}
                   </button>
-                  {(l.status === 'outreach_sent') && (
-                    <button
-                      className="outreach-btn"
-                      style={{ background:'#059669' }}
-                      onClick={() => confirmTour(l)}
-                      disabled={sendingId === l.id}
-                    >
-                      Mark Confirmed
-                    </button>
+                  {l.status === 'outreach_sent' && (
+                    <>
+                      <input
+                        type="datetime-local"
+                        value={tourTimes[l.id] || ''}
+                        onChange={e => setTourTimes(t => ({ ...t, [l.id]: e.target.value }))}
+                        style={{ fontSize:'0.78rem', border:'1.5px solid var(--surface-mid)', borderRadius:7, padding:'0.35rem 0.5rem', fontFamily:'inherit', color:'var(--navy)' }}
+                      />
+                      <button
+                        className="outreach-btn"
+                        style={{ background:'#059669' }}
+                        onClick={() => confirmTour(l)}
+                        disabled={sendingId === l.id || !tourTimes[l.id]}
+                      >
+                        {sendingId === l.id ? '...' : 'Mark Confirmed'}
+                      </button>
+                    </>
                   )}
                   <button className="btn btn-outline btn-sm" style={{ color:'#EF4444', borderColor:'#FECACA' }} onClick={() => deleteListing(l.id)}>✕</button>
                 </div>
