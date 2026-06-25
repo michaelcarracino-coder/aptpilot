@@ -6,8 +6,25 @@ import { supabase } from '../lib/supabase'
 const NEIGHBORHOODS = ['Upper East Side','Upper West Side','Midtown','Chelsea','West Village','SoHo','Tribeca','Lower East Side','Williamsburg','Astoria','Park Slope','Hoboken','Jersey City','Long Island City','Bushwick']
 const TIMES = ['8:00 AM','9:00 AM','10:00 AM','11:00 AM','12:00 PM','1:00 PM','2:00 PM','3:00 PM','4:00 PM','5:00 PM','6:00 PM','7:00 PM']
 
+const TENANT_DOCS = [
+  { id:'t1', label:'ID or Passport', sub:'Photo or scan — government issued' },
+  { id:'t2', label:'Offer Letter or Letter of Employment', sub:'Ideally dated within 30 days of lease start. Upload what you have if outside that range and try to add a newer one when available.' },
+  { id:'t3', label:'2 Most Recent Bank Statements', sub:'Checking, savings, and any investment accounts' },
+  { id:'t4', label:'Top 2 Pages of 2 Most Recent Tax Returns', sub:'First 2 pages only of each return' },
+  { id:'t5', label:'6 Months Proof of Rent Payments or Landlord Letter', sub:'Not required — but strongly recommended if you have it', optional: true },
+]
+
+const GUARANTOR_DOCS = [
+  { id:'g1', label:'ID or Passport', sub:'Photo or scan — government issued' },
+  { id:'g2', label:'Letter of Employment', sub:'Must state start date, length of employment, position, salary/bonuses, and be signed. If self-employed or retired, a CPA letter with the same criteria works.' },
+  { id:'g3', label:'2 Most Recent Paystubs', sub:'' },
+  { id:'g4', label:'2 Most Recent Bank Statements', sub:'Checking, savings, and any investment accounts' },
+  { id:'g5', label:'Top 2 Pages of 2 Most Recent Tax Returns', sub:'First 2 pages only of each return' },
+  { id:'g6', label:'2 Most Recent W-2s', sub:'Can substitute for tax returns', optional: true },
+]
+
 const css = `
-.intake { max-width: 720px; margin: 0 auto; padding: 2.5rem 1.5rem; animation: fadeUp 0.4s ease both; }
+.intake { max-width: 960px; margin: 0 auto; padding: 2.5rem 2rem; animation: fadeUp 0.4s ease both; }
 .intake h1 { font-family:'Playfair Display',serif; font-size:2rem; color:var(--navy); margin-bottom:0.3rem; }
 .intake .sub { color:var(--slate); font-size:0.9rem; margin-bottom:2rem; }
 .progress-wrap { margin-bottom:2rem; }
@@ -28,11 +45,25 @@ const css = `
 .upload-area { border:2px dashed var(--surface-mid); border-radius:10px; padding:1.5rem; text-align:center; cursor:pointer; transition:all 0.2s; }
 .upload-area:hover { border-color:var(--teal); background:var(--teal-pale); }
 .doc-item { display:flex;align-items:center;gap:0.7rem;background:var(--teal-pale);border-radius:8px;padding:0.5rem 0.75rem;font-size:0.85rem;color:var(--navy);margin-top:0.5rem; }
-.doc-upload-layout { display:grid; grid-template-columns:1fr 260px; gap:1.25rem; align-items:start; }
-@media(max-width:680px){ .doc-upload-layout{grid-template-columns:1fr;} }
+.doc-outer-layout { display:grid; grid-template-columns:1fr 240px; gap:1.5rem; align-items:start; }
+@media(max-width:760px){ .doc-outer-layout{grid-template-columns:1fr;} }
 .doc-sidenote { background:linear-gradient(135deg,#EFF8F8,#E0F5F5); border:1.5px solid rgba(10,191,191,0.25); border-radius:12px; padding:1.25rem 1.1rem; }
 .doc-sidenote-title { font-weight:700; font-size:0.85rem; color:var(--navy); margin-bottom:0.6rem; display:flex; align-items:center; gap:0.5rem; }
 .doc-sidenote-body { font-size:0.8rem; color:#4A6080; line-height:1.65; }
+.role-tabs { display:flex; gap:0; margin-bottom:1.25rem; background:var(--surface); border-radius:9px; padding:3px; }
+.role-tab { flex:1; padding:0.45rem 0.75rem; border-radius:7px; border:none; font-size:0.82rem; font-weight:600; cursor:pointer; background:transparent; color:var(--slate); transition:all 0.15s; font-family:inherit; }
+.role-tab.on { background:#fff; color:var(--navy); box-shadow:0 1px 4px rgba(12,22,40,0.1); }
+.doc-checklist { display:flex; flex-direction:column; gap:0.6rem; margin-bottom:1.25rem; }
+.doc-check-item { display:flex; gap:0.75rem; align-items:flex-start; padding:0.75rem 0.9rem; border-radius:9px; border:1.5px solid var(--surface-mid); background:#fff; cursor:pointer; transition:all 0.15s; }
+.doc-check-item.checked { border-color:var(--teal); background:var(--teal-pale); }
+.doc-check-item.optional { border-style:dashed; }
+.doc-check-box { width:20px; height:20px; border-radius:5px; border:2px solid var(--surface-mid); flex-shrink:0; margin-top:1px; display:flex; align-items:center; justify-content:center; transition:all 0.15s; }
+.doc-check-item.checked .doc-check-box { background:var(--teal); border-color:var(--teal); }
+.doc-check-label { font-size:0.84rem; font-weight:600; color:var(--navy); line-height:1.3; }
+.doc-check-sub { font-size:0.76rem; color:var(--slate); margin-top:0.2rem; line-height:1.45; }
+.doc-check-optional { font-size:0.68rem; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; color:var(--teal); margin-top:0.2rem; }
+.upload-area { border:2px dashed var(--surface-mid); border-radius:10px; padding:1.5rem; text-align:center; cursor:pointer; transition:all 0.2s; }
+.upload-area:hover { border-color:var(--teal); background:var(--teal-pale); }
 .tier-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:0.75rem; }
 @media(max-width:700px){ .tier-grid{grid-template-columns:1fr;} }
 .tier-card { border:2px solid var(--surface-mid); border-radius:12px; padding:1.25rem; cursor:pointer; transition:all 0.18s; position:relative; }
@@ -61,6 +92,10 @@ export default function Intake() {
   const [saving, setSaving]   = useState(false)
   const [docs, setDocs]       = useState([])
   const [uploading, setUploading] = useState(false)
+  const [docRole, setDocRole] = useState('tenant')
+  const [checkedDocs, setCheckedDocs] = useState({})
+
+  const toggleDocCheck = (id) => setCheckedDocs(c => ({ ...c, [id]: !c[id] }))
   const [form, setForm]       = useState({
     moveIn:'', minBed:'1', maxBed:'2', minBudget:'', maxBudget:'',
     neighborhoods:[], tourTimes:[], notes:'',
@@ -124,9 +159,36 @@ export default function Intake() {
             </div>
             <div className="section-card">
               <div className="section-label"><span className="section-label-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></span>Upload Documents</div>
-              <div className="doc-upload-layout">
+
+              <div className="doc-outer-layout">
                 <div>
-                  <p style={{ fontSize:'0.83rem', color:'var(--slate)', marginBottom:'1rem' }}>Uploaded once — used to auto-fill every application.</p>
+                  {/* Role toggle */}
+                  <div className="role-tabs">
+                    <button className={`role-tab ${docRole === 'tenant' ? 'on' : ''}`} onClick={() => setDocRole('tenant')}>I'm a Tenant</button>
+                    <button className={`role-tab ${docRole === 'guarantor' ? 'on' : ''}`} onClick={() => setDocRole('guarantor')}>I Have a Guarantor</button>
+                  </div>
+
+                  {/* Checklist */}
+                  <div className="doc-checklist">
+                    {(docRole === 'tenant' ? TENANT_DOCS : GUARANTOR_DOCS).map((doc, i) => (
+                      <div
+                        key={doc.id}
+                        className={`doc-check-item${checkedDocs[doc.id] ? ' checked' : ''}${doc.optional ? ' optional' : ''}`}
+                        onClick={() => toggleDocCheck(doc.id)}
+                      >
+                        <div className="doc-check-box">
+                          {checkedDocs[doc.id] && <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>}
+                        </div>
+                        <div>
+                          <div className="doc-check-label">{i + 1}. {doc.label}</div>
+                          {doc.sub && <div className="doc-check-sub">{doc.sub}</div>}
+                          {doc.optional && <div className="doc-check-optional">Optional</div>}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Upload area */}
                   <label className="upload-area" style={{ cursor: uploading ? 'wait' : 'pointer', display:'block' }}>
                     <input type="file" accept=".pdf,image/*" multiple style={{ display:'none' }} disabled={uploading} onChange={async (e) => {
                       const files = Array.from(e.target.files)
@@ -148,7 +210,7 @@ export default function Intake() {
                         : <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
                       }
                     </div>
-                    <p style={{ fontSize:'0.85rem', color:'var(--slate)' }}><strong style={{ color:'var(--teal)' }}>Click to upload</strong> or drag & drop<br />PDF, JPG, PNG · Pay stubs, tax returns, bank statements, ID</p>
+                    <p style={{ fontSize:'0.85rem', color:'var(--slate)' }}><strong style={{ color:'var(--teal)' }}>Click to upload</strong> or drag & drop<br />PDF, JPG, PNG</p>
                   </label>
                   {docs.map((d, i) => (
                     <div className="doc-item" key={i}>
@@ -157,6 +219,8 @@ export default function Intake() {
                     </div>
                   ))}
                 </div>
+
+                {/* Sidenote */}
                 <div className="doc-sidenote">
                   <div className="doc-sidenote-title">
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
