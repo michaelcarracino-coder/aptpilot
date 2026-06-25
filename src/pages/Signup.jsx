@@ -13,6 +13,7 @@ export default function Signup() {
   const navigate   = useNavigate()
   const [searchParams] = useSearchParams()
   const refCode = searchParams.get('ref') || ''
+  const redirect = searchParams.get('redirect')
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -30,7 +31,7 @@ export default function Signup() {
         await supabase.from('profiles').update({ referred_by: refCode.toUpperCase() }).eq('id', data.user.id).catch(() => {})
       }
     }
-    navigate('/intake')
+    navigate(redirect || '/intake')
   }
 
   return (

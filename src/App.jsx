@@ -20,6 +20,7 @@ const Pricing          = lazy(() => import('./pages/Pricing'))
 const Privacy          = lazy(() => import('./pages/Privacy'))
 const Terms            = lazy(() => import('./pages/Terms'))
 const Documents        = lazy(() => import('./pages/Documents'))
+const JoinGroup        = lazy(() => import('./pages/JoinGroup'))
 
 const PageFallback = () => (
   <div style={{ display:'flex', alignItems:'center', justifyContent:'center', height:'100vh' }}>
@@ -60,6 +61,7 @@ function AppRoutes() {
         <Route path="/terms"           element={<Terms />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
+        <Route path="/join"      element={<JoinGroup />} />
         <Route path="/login"     element={user ? <Navigate to="/dashboard" /> : <Login />} />
         <Route path="/signup"    element={user ? <Navigate to="/intake" /> : <Signup />} />
         <Route path="/intake"    element={<PrivateRoute><Intake /></PrivateRoute>} />

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate, Link } from 'react-router-dom'
+import { useNavigate, Link, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 
 export default function Login() {
@@ -9,6 +9,8 @@ export default function Login() {
   const [loading, setLoading]   = useState(false)
   const { signIn } = useAuth()
   const navigate   = useNavigate()
+  const [searchParams] = useSearchParams()
+  const redirect = searchParams.get('redirect')
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -16,7 +18,7 @@ export default function Login() {
     const { error } = await signIn(email, password)
     setLoading(false)
     if (error) setError(error.message)
-    else navigate('/dashboard')
+    else navigate(redirect || '/dashboard')
   }
 
   return (

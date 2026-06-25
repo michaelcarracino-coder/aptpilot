@@ -87,12 +87,36 @@ export default function Dashboard() {
   const [copied, setCopied] = useState(false)
   const [newIds, setNewIds]    = useState(new Set())
   const [docCount, setDocCount] = useState(0)
+  const [groupInfo, setGroupInfo] = useState(null)         // { id, role, ownerName }
+  const [showGroupModal, setShowGroupModal] = useState(false)
+  const [inviteEmails, setInviteEmails] = useState([''])
+  const [inviting, setInviting] = useState(false)
+  const [inviteSent, setInviteSent] = useState(false)
   const [searchParams] = useSearchParams()
   const justPaid = searchParams.get('payment') === 'success'
   const channelRef = useRef(null)
   const toastTimer = useRef(null)
 
-  useEffect(() => { if (user) { loadData(); loadReferrals(); loadDocCount() } }, [user])
+  useEffect(() => { if (user) { loadData(); loadReferrals(); loadDocCount(); loadGroup() } }, [user])
+  useEffect(() => { if (justPaid) setShowGroupModal(true) }, [justPaid])
+
+  async function sendInvites() {
+    const validEmails = inviteEmails.map(e => e.trim()).filter(e => e.includes('@'))
+    if (!validEmails.length) return
+    setInviting(true)
+    await fetch('/api/invite-group', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        inviterUserId: user.id,
+        inviterName: profile?.full_name,
+        inviterEmail: user.email,
+        emails: validEmails,
+      }),
+    })
+    setInviting(false)
+    setInviteSent(true)
+  }
 
   async function loadDocCount() {
     const { count } = await supabase.from('user_documents').select('*', { count: 'exact', head: true }).eq('user_id', user.id)
@@ -104,10 +128,30 @@ export default function Dashboard() {
     setReferrals(count || 0)
   }
 
+  async function loadGroup() {
+    const { data: membership } = await supabase
+      .from('group_members').select('group_id, role, groups(owner_id)').eq('user_id', user.id).single()
+    if (!membership) return
+    const role = membership.role
+    const ownerId = membership.groups?.owner_id
+    if (role === 'member' && ownerId) {
+      const { data: ownerProfile } = await supabase.from('profiles').select('full_name').eq('id', ownerId).single()
+      setGroupInfo({ id: membership.group_id, role, ownerId, ownerName: ownerProfile?.full_name || 'your group owner' })
+    } else {
+      setGroupInfo({ id: membership.group_id, role, ownerId: user.id })
+    }
+  }
+
   async function loadData() {
     setLoading(true)
+    // Group members share the owner's search
+    const { data: membership } = await supabase
+      .from('group_members').select('role, groups(owner_id)').eq('user_id', user.id).single()
+    const searchUserId = (membership?.role === 'member' && membership.groups?.owner_id)
+      ? membership.groups.owner_id
+      : user.id
     const { data: searchData } = await supabase
-      .from('searches').select('*').eq('user_id', user.id)
+      .from('searches').select('*').eq('user_id', searchUserId)
       .order('created_at', { ascending: false }).limit(1).single()
     setSearch(searchData)
 
@@ -185,6 +229,66 @@ export default function Dashboard() {
   return (
     <>
       <style>{css}</style>
+
+      {/* Group invite modal */}
+      {showGroupModal && (
+        <div style={{ position:'fixed', inset:0, zIndex:1000, background:'rgba(6,9,15,0.6)', backdropFilter:'blur(6px)', display:'flex', alignItems:'center', justifyContent:'center', padding:'1.5rem' }}>
+          <div style={{ background:'#fff', borderRadius:20, maxWidth:460, width:'100%', padding:'2rem', boxShadow:'0 24px 80px rgba(0,0,0,0.25)', animation:'fadeUp 0.3s ease' }}>
+            {!inviteSent ? (
+              <>
+                <div style={{ width:48, height:48, borderRadius:13, background:'var(--teal-pale)', display:'flex', alignItems:'center', justifyContent:'center', marginBottom:'1rem' }}>
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                </div>
+                <h2 style={{ fontFamily:"'Playfair Display',serif", fontSize:'1.45rem', color:'var(--navy)', marginBottom:'0.4rem' }}>Applying with others?</h2>
+                <p style={{ color:'var(--slate)', fontSize:'0.87rem', lineHeight:1.6, marginBottom:'1.4rem' }}>
+                  Invite roommates or guarantors to join your group. They'll be able to view all your listings, tours, and search activity — no extra payment needed.
+                </p>
+                <div style={{ display:'flex', flexDirection:'column', gap:'0.5rem', marginBottom:'1rem' }}>
+                  {inviteEmails.map((email, i) => (
+                    <div key={i} style={{ display:'flex', gap:'0.5rem' }}>
+                      <input
+                        type="email"
+                        placeholder={`Email address ${i + 1}`}
+                        value={email}
+                        onChange={e => setInviteEmails(arr => arr.map((v, j) => j === i ? e.target.value : v))}
+                        style={{ flex:1, padding:'0.6rem 0.85rem', border:'1.5px solid var(--surface-mid)', borderRadius:9, fontSize:'0.87rem', fontFamily:'inherit', color:'var(--navy)', outline:'none' }}
+                      />
+                      {inviteEmails.length > 1 && (
+                        <button onClick={() => setInviteEmails(arr => arr.filter((_, j) => j !== i))} style={{ background:'none', border:'none', color:'#94A3B8', cursor:'pointer', fontSize:'1rem', padding:'0 0.25rem' }}>✕</button>
+                      )}
+                    </div>
+                  ))}
+                  <button onClick={() => setInviteEmails(arr => [...arr, ''])} style={{ alignSelf:'flex-start', background:'none', border:'none', color:'var(--teal)', fontSize:'0.82rem', fontWeight:600, cursor:'pointer', padding:0, fontFamily:'inherit' }}>
+                    + Add another person
+                  </button>
+                </div>
+                <div style={{ display:'flex', gap:'0.75rem' }}>
+                  <button className="btn btn-primary" style={{ flex:1, justifyContent:'center' }} onClick={sendInvites} disabled={inviting}>
+                    {inviting ? <span className="spinner" /> : 'Send Invites'}
+                  </button>
+                  <button className="btn btn-outline" onClick={() => setShowGroupModal(false)}>
+                    Skip
+                  </button>
+                </div>
+              </>
+            ) : (
+              <div style={{ textAlign:'center' }}>
+                <div style={{ width:52, height:52, borderRadius:14, background:'#ECFDF5', display:'flex', alignItems:'center', justifyContent:'center', margin:'0 auto 1rem' }}>
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#059669" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                </div>
+                <h2 style={{ fontFamily:"'Playfair Display',serif", fontSize:'1.45rem', color:'var(--navy)', marginBottom:'0.4rem' }}>Invites sent!</h2>
+                <p style={{ color:'var(--slate)', fontSize:'0.87rem', lineHeight:1.6, marginBottom:'1.4rem' }}>
+                  They'll receive an email with a link to join your group and view the search.
+                </p>
+                <button className="btn btn-primary" style={{ margin:'0 auto', justifyContent:'center' }} onClick={() => setShowGroupModal(false)}>
+                  Go to Dashboard
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       <div className="dash">
 
         {toast && (
@@ -198,6 +302,25 @@ export default function Dashboard() {
           <div className="success-banner">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#059669" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink:0 }}><polyline points="20 6 9 17 4 12"/></svg>
             <span>Payment confirmed — check your email for a summary of what happens next. We're already on it.</span>
+          </div>
+        )}
+
+        {groupInfo?.role === 'member' && (
+          <div style={{ background:'var(--teal-pale)', border:'1.5px solid rgba(10,191,191,0.3)', borderRadius:12, padding:'0.85rem 1.25rem', marginBottom:'1.25rem', display:'flex', alignItems:'center', gap:'0.75rem', fontSize:'0.86rem', color:'var(--navy)' }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            <span>You're viewing <strong>{groupInfo.ownerName}'s</strong> group search.</span>
+          </div>
+        )}
+
+        {groupInfo?.role === 'owner' && (
+          <div style={{ background:'#fff', border:'1.5px solid var(--surface-mid)', borderRadius:12, padding:'0.85rem 1.25rem', marginBottom:'1.25rem', display:'flex', alignItems:'center', justifyContent:'space-between', gap:'1rem', fontSize:'0.86rem', color:'var(--navy)', flexWrap:'wrap' }}>
+            <div style={{ display:'flex', alignItems:'center', gap:'0.65rem' }}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+              <span>You have a group. Invite more people to share this search.</span>
+            </div>
+            <button className="btn btn-outline" style={{ fontSize:'0.8rem', padding:'0.35rem 0.85rem' }} onClick={() => { setInviteSent(false); setInviteEmails(['']); setShowGroupModal(true) }}>
+              + Invite
+            </button>
           </div>
         )}
 
