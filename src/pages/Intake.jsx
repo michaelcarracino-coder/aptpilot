@@ -99,11 +99,22 @@ export default function Intake() {
   const handleDocUpload = async (docId, files) => {
     if (!files.length) return
     setUploadingDoc(docId)
+    const docList = docRole === 'tenant' ? TENANT_DOCS : GUARANTOR_DOCS
+    const docMeta = docList.find(d => d.id === docId)
     const uploaded = []
     for (const file of files) {
       const path = `${user.id}/${Date.now()}-${file.name}`
       const { error } = await supabase.storage.from('documents').upload(path, file)
-      if (!error) uploaded.push({ name: file.name, path })
+      if (!error) {
+        await supabase.from('user_documents').insert({
+          user_id: user.id, doc_id: docId,
+          doc_label: docMeta?.label || docId,
+          doc_role: docRole,
+          storage_path: path,
+          file_name: file.name,
+        })
+        uploaded.push({ name: file.name, path })
+      }
     }
     setDocFiles(d => ({ ...d, [docId]: [...(d[docId] || []), ...uploaded] }))
     setUploadingDoc(null)
@@ -111,6 +122,7 @@ export default function Intake() {
 
   const handleDocDelete = async (docId, filePath) => {
     await supabase.storage.from('documents').remove([filePath])
+    await supabase.from('user_documents').delete().eq('storage_path', filePath)
     setDocFiles(d => ({ ...d, [docId]: (d[docId] || []).filter(f => f.path !== filePath) }))
   }
   const [form, setForm]       = useState({

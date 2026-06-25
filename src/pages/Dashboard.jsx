@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { supabase } from '../lib/supabase'
-import { useSearchParams } from 'react-router-dom'
+import { useSearchParams, Link } from 'react-router-dom'
 
 const css = `
 .dash { max-width:1100px; margin:0 auto; padding:2.5rem 2rem; animation:fadeUp 0.4s ease both; }
@@ -352,6 +352,25 @@ export default function Dashboard() {
                 </div>
               </div>
             )}
+
+            <div>
+              <div className="sect-title">My Documents</div>
+              <Link to="/documents" style={{ textDecoration:'none' }}>
+                <div style={{ background:'#fff', borderRadius:'var(--radius)', boxShadow:'var(--shadow)', padding:'1rem 1.25rem', display:'flex', alignItems:'center', gap:'0.85rem', border:'1.5px solid transparent', transition:'border-color 0.15s', cursor:'pointer' }}
+                  onMouseEnter={e => e.currentTarget.style.borderColor='var(--teal)'}
+                  onMouseLeave={e => e.currentTarget.style.borderColor='transparent'}
+                >
+                  <div style={{ width:36, height:36, borderRadius:9, background:'var(--teal-pale)', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
+                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                  </div>
+                  <div style={{ flex:1 }}>
+                    <div style={{ fontWeight:700, fontSize:'0.88rem', color:'var(--navy)' }}>View & Download Files</div>
+                    <div style={{ fontSize:'0.78rem', color:'var(--slate)', marginTop:'0.1rem' }}>Individual files + collated PDF package</div>
+                  </div>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--slate)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+                </div>
+              </Link>
+            </div>
 
             <div>
               <div className="sect-title">Your Criteria</div>
