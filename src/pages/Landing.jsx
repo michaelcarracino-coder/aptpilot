@@ -259,7 +259,7 @@ export default function Landing() {
   }, [hasShown])
 
   return (
-    <>
+    <div style={{ marginTop: -68 }}>
       <SEO
         title="AptPilot — NYC Apartment Search Without a Broker Fee"
         description="Avoid the NYC broker fee. AptPilot searches every listing, books your tours, and submits applications automatically — starting at $299 flat fee."
@@ -602,6 +602,6 @@ export default function Landing() {
           </div>
         </div>
       </footer>
-    </>
+    </div>
   )
 }

@@ -46,6 +46,7 @@ function AppRoutes() {
   return (
     <>
       <Nav />
+      <div style={{ paddingTop: 68 }}>
       <Suspense fallback={<PageFallback />}>
       <Routes>
         <Route path="/"          element={<Landing />} />
@@ -68,6 +69,7 @@ function AppRoutes() {
         <Route path="*"          element={<Navigate to="/" />} />
       </Routes>
       </Suspense>
+      </div>
     </>
   )
 }

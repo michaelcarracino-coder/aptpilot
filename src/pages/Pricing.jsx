@@ -63,7 +63,7 @@ export default function Pricing() {
   }
 
   return (
-    <div style={{ paddingTop: 68 }}>
+    <div>
       <style>{`
         .pricing-hero { text-align:center; padding:5rem 1.5rem 3.5rem; background:var(--navy); }
         .pricing-hero h1 { font-family:'Playfair Display',serif; font-size:clamp(2.2rem,5vw,3.5rem); color:#fff; margin-bottom:0.75rem; }
