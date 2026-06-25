@@ -64,7 +64,8 @@ const css = `
 .doc-check-optional { font-size:0.68rem; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; color:var(--teal); margin-top:0.2rem; }
 .doc-upload-btn { display:inline-flex; align-items:center; gap:0.35rem; margin-top:0.55rem; font-size:0.75rem; font-weight:600; color:var(--teal); background:rgba(10,191,191,0.1); border:1.5px solid rgba(10,191,191,0.3); border-radius:6px; padding:0.3rem 0.65rem; cursor:pointer; transition:all 0.15s; font-family:inherit; }
 .doc-upload-btn:hover { background:rgba(10,191,191,0.18); }
-.doc-uploaded-file { display:flex; align-items:center; gap:0.45rem; font-size:0.75rem; color:#059669; margin-top:0.35rem; font-weight:500; }
+.doc-uploaded-file { display:flex; align-items:center; gap:0.45rem; font-size:0.75rem; color:#059669; margin-top:0.35rem; font-weight:500; width:100%; }
+.doc-uploaded-file button:hover { color:#EF4444 !important; }
 .tier-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:0.75rem; }
 @media(max-width:700px){ .tier-grid{grid-template-columns:1fr;} }
 .tier-card { border:2px solid var(--surface-mid); border-radius:12px; padding:1.25rem; cursor:pointer; transition:all 0.18s; position:relative; }
@@ -92,8 +93,8 @@ export default function Intake() {
   const [step, setStep]       = useState(1)
   const [saving, setSaving]   = useState(false)
   const [docRole, setDocRole] = useState('tenant')
-  const [docFiles, setDocFiles] = useState({})   // { [docId]: [filename, ...] }
-  const [uploadingDoc, setUploadingDoc] = useState(null)  // docId currently uploading
+  const [docFiles, setDocFiles] = useState({})   // { [docId]: [{ name, path }, ...] }
+  const [uploadingDoc, setUploadingDoc] = useState(null)
 
   const handleDocUpload = async (docId, files) => {
     if (!files.length) return
@@ -102,10 +103,15 @@ export default function Intake() {
     for (const file of files) {
       const path = `${user.id}/${Date.now()}-${file.name}`
       const { error } = await supabase.storage.from('documents').upload(path, file)
-      if (!error) uploaded.push(file.name)
+      if (!error) uploaded.push({ name: file.name, path })
     }
     setDocFiles(d => ({ ...d, [docId]: [...(d[docId] || []), ...uploaded] }))
     setUploadingDoc(null)
+  }
+
+  const handleDocDelete = async (docId, filePath) => {
+    await supabase.storage.from('documents').remove([filePath])
+    setDocFiles(d => ({ ...d, [docId]: (d[docId] || []).filter(f => f.path !== filePath) }))
   }
   const [form, setForm]       = useState({
     moveIn:'', minBed:'1', maxBed:'2', minBudget:'', maxBudget:'',
@@ -194,10 +200,15 @@ export default function Intake() {
                             <div className="doc-check-label">{i + 1}. {doc.label}</div>
                             {doc.sub && <div className="doc-check-sub">{doc.sub}</div>}
                             {doc.optional && <div className="doc-check-optional">Optional</div>}
-                            {uploaded.map((name, j) => (
+                            {uploaded.map((file, j) => (
                               <div className="doc-uploaded-file" key={j}>
                                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#059669" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                                {name}
+                                <span style={{ flex:1 }}>{file.name}</span>
+                                <button
+                                  onClick={() => handleDocDelete(doc.id, file.path)}
+                                  style={{ background:'none', border:'none', cursor:'pointer', color:'#94A3B8', padding:'0 0 0 0.3rem', lineHeight:1, fontSize:'0.9rem' }}
+                                  title="Remove file"
+                                >✕</button>
                               </div>
                             ))}
                             <label className="doc-upload-btn">
