@@ -1,43 +1,5 @@
 export const BLOG_POSTS = [
   {
-    slug: 'avoid-nyc-broker-fees',
-    title: 'How to Avoid Broker Fees When Renting in NYC',
-    excerpt: 'Broker fees in NYC can run 1-15% of annual rent. Here are the real strategies renters use to avoid paying them.',
-    date: '2026-05-12',
-    readTime: '6 min read',
-    category: 'Renting Tips',
-    image: '🏙️',
-    content: `
-New York City is one of the only major rental markets in the world where tenants routinely pay broker fees — and they're not small. Depending on the deal, you could be looking at one month's rent or up to 15% of your annual lease, often due before you even get the keys.
-
-The good news: broker fees are negotiable, avoidable, or replaceable with cheaper alternatives more often than most renters realize.
-
-## Why NYC Broker Fees Exist
-
-Unlike most U.S. cities, New York's rental market traditionally has the tenant pay the broker, not the landlord. This stems from the city's tight inventory and high-demand market, where brokers historically held more leverage over the process. Even today, a huge share of NYC listings still carry tenant-paid fees.
-
-## Strategy 1: Search No-Fee Listings Directly
-
-A growing share of NYC listings are "no-fee," meaning the landlord covers the broker's commission. These are often newer buildings, large management companies, or landlords who self-list. No-fee doesn't mean lower quality — many luxury buildings have shifted to no-fee models simply to stay competitive.
-
-## Strategy 2: Negotiate the Fee Directly
-
-Many renters don't realize broker fees are negotiable. If you're working directly with a listing agent (not splitting commission with your own broker), you can often negotiate the fee down, especially in slower rental seasons (typically winter months in NYC).
-
-## Strategy 3: Use Automated Search Tools
-
-Tools like AptPilot search every major listing platform, build your tour schedule, and submit your applications — all without taking a commission. Instead of paying 10-15% of your annual rent, you pay a single flat fee regardless of the apartment you choose.
-
-## Strategy 4: Time Your Search Strategically
-
-NYC's rental market is seasonal. Demand peaks from May through September as leases turn over for the school year and summer moves. If your timeline is flexible, searching in November through February often yields better deals and more negotiating leverage on broker fees.
-
-## The Bottom Line
-
-Broker fees aren't a fixed cost of renting in NYC — they're a negotiable, avoidable expense for renters who know where to look and how to search. Whether you go no-fee, negotiate directly, or use a flat-fee platform, there's no reason to default to paying thousands of dollars just to find an apartment.
-    `
-  },
-  {
     slug: 'best-nyc-neighborhoods-2026',
     title: 'The Best NYC Neighborhoods for Renters in 2026',
     excerpt: 'From budget-friendly Astoria to up-and-coming Bushwick, here is where smart renters are looking this year.',

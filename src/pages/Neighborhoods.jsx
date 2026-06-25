@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef } from 'react'
 import SEO from '../components/SEO'
 
 const css = `
@@ -28,7 +28,11 @@ const css = `
 
 .nbhd-map-hint { text-align: center; font-size: 0.82rem; color: var(--slate); margin-bottom: 0.75rem; letter-spacing: 0.01em; }
 .nbhd-map-wrap { border: 1px solid #d4eaee; border-radius: 14px; overflow: hidden; margin-bottom: 3rem; }
-.nbhd-map-label { height: 40px; display: flex; align-items: center; justify-content: center; font-size: 0.83rem; font-weight: 600; color: var(--teal); background: #f0fafa; border-top: 1px solid #cce8ee; transition: opacity 0.15s; }
+.nbhd-map-info { height: 44px; display: flex; align-items: center; justify-content: center; gap: 10px; background: #f0fafa; border-top: 1px solid #cce8ee; font-size: 0.86rem; }
+.nbhd-map-info strong { color: var(--navy); font-weight: 600; }
+.nbhd-map-info span { color: var(--teal); font-weight: 500; }
+.nbhd-map-info em { color: var(--slate); font-style: normal; font-size: 0.78rem; }
+.leaflet-control-attribution { font-size: 9px !important; }
 
 .apt-cta { background: linear-gradient(135deg, #0C1628 0%, #0a2a3a 100%); border-radius: 16px; padding: 2.5rem; text-align: center; margin-top: 4rem; }
 .apt-cta h3 { font-family: 'Playfair Display', serif; font-size: 1.7rem; color: #fff; margin-bottom: 0.6rem; }
@@ -36,102 +40,192 @@ const css = `
 .apt-cta a { display: inline-block; background: var(--teal); color: #0C1628; font-weight: 700; font-size: 0.95rem; padding: 0.75rem 2rem; border-radius: 100px; text-decoration: none; }
 `
 
-const MAP_REGIONS = [
-  {
-    id: 'hoboken-jc',
-    label: 'Hoboken & Jersey City',
-    d: 'M 10,138 L 130,100 L 144,168 L 142,400 L 130,420 L 10,420 Z',
-    lx: 72, ly: 262, lines: ['Hoboken /', 'Jersey City'],
-  },
-  {
-    id: 'bronx',
-    label: 'The Bronx',
-    d: 'M 160,78 L 185,60 L 204,36 L 360,24 L 382,64 L 336,152 L 264,178 L 200,168 Z',
-    lx: 278, ly: 100,
-  },
-  {
-    id: 'harlem',
-    label: 'Harlem & Upper Manhattan',
-    d: 'M 165,94 L 188,76 L 200,168 L 160,190 Z',
-    lx: null,
-  },
-  {
-    id: 'manhattan',
-    label: 'Manhattan',
-    d: 'M 160,190 L 183,172 L 208,408 L 185,428 L 158,406 Z',
-    lx: 183, ly: 302, rotate: -80,
-  },
-  {
-    id: 'queens',
-    label: 'Queens',
-    d: 'M 200,164 L 264,174 L 336,148 L 462,96 L 482,178 L 440,298 L 368,342 L 280,334 L 218,302 L 206,244 L 202,196 Z',
-    lx: 340, ly: 222,
-  },
-  {
-    id: 'brooklyn',
-    label: 'Brooklyn',
-    d: 'M 158,406 L 185,428 L 208,408 L 218,302 L 280,334 L 368,342 L 400,410 L 338,476 L 228,486 L 182,464 L 158,428 Z',
-    lx: 272, ly: 422,
-  },
+// [lat, lon] polygons per neighborhood card
+const NBHDS = [
+  // ── Manhattan ──────────────────────────────────────────────
+  { name:'Financial District',   section:'manhattan', price:'$2,800–$5,500',  fill:'#0ABFBF',
+    coords:[[40.714,-74.014],[40.714,-73.998],[40.700,-73.998],[40.700,-74.020]] },
+  { name:'Tribeca',              section:'manhattan', price:'$4,500–$15,000', fill:'#0ABFBF',
+    coords:[[40.722,-74.012],[40.722,-74.000],[40.714,-74.000],[40.714,-74.012]] },
+  { name:'SoHo / NoHo / Nolita', section:'manhattan', price:'$4,000–$12,000', fill:'#0ABFBF',
+    coords:[[40.729,-74.005],[40.729,-73.993],[40.720,-73.993],[40.720,-74.005]] },
+  { name:'Lower East Side',      section:'manhattan', price:'$2,400–$5,000',  fill:'#0ABFBF',
+    coords:[[40.729,-73.993],[40.729,-73.973],[40.714,-73.973],[40.714,-73.993]] },
+  { name:'East Village',         section:'manhattan', price:'$2,600–$5,500',  fill:'#0ABFBF',
+    coords:[[40.738,-73.993],[40.738,-73.973],[40.729,-73.973],[40.729,-73.993]] },
+  { name:'West Village',         section:'manhattan', price:'$3,500–$9,000',  fill:'#0ABFBF',
+    coords:[[40.738,-74.011],[40.738,-74.000],[40.729,-74.000],[40.729,-74.011]] },
+  { name:'Greenwich Village',    section:'manhattan', price:'$3,000–$7,000',  fill:'#0ABFBF',
+    coords:[[40.738,-74.000],[40.738,-73.993],[40.729,-73.993],[40.729,-74.000]] },
+  { name:'Chelsea',              section:'manhattan', price:'$3,200–$7,000',  fill:'#0ABFBF',
+    coords:[[40.751,-74.011],[40.751,-73.997],[40.738,-73.997],[40.738,-74.011]] },
+  { name:'Midtown',              section:'manhattan', price:'$3,000–$6,500',  fill:'#0ABFBF',
+    coords:[[40.763,-74.004],[40.763,-73.954],[40.751,-73.960],[40.751,-74.004]] },
+  { name:'Upper East Side',      section:'manhattan', price:'$2,800–$6,500',  fill:'#0ABFBF',
+    coords:[[40.795,-73.969],[40.795,-73.943],[40.763,-73.951],[40.763,-73.981]] },
+  { name:'Upper West Side',      section:'manhattan', price:'$2,800–$6,000',  fill:'#0ABFBF',
+    coords:[[40.803,-73.975],[40.803,-74.005],[40.763,-73.998],[40.763,-73.983]] },
+  // ── Harlem & Upper Manhattan ───────────────────────────────
+  { name:'Morningside Heights',  section:'harlem',    price:'$2,000–$4,000',  fill:'#00CCAA',
+    coords:[[40.810,-73.963],[40.810,-73.988],[40.803,-73.988],[40.803,-73.963]] },
+  { name:'Central Harlem',       section:'harlem',    price:'$1,800–$3,800',  fill:'#00CCAA',
+    coords:[[40.825,-73.944],[40.825,-73.966],[40.807,-73.966],[40.807,-73.944]] },
+  { name:'East Harlem',          section:'harlem',    price:'$1,600–$3,200',  fill:'#00CCAA',
+    coords:[[40.807,-73.944],[40.807,-73.923],[40.795,-73.923],[40.795,-73.944]] },
+  { name:'Washington Heights',   section:'harlem',    price:'$1,500–$2,800',  fill:'#00CCAA',
+    coords:[[40.852,-73.934],[40.852,-73.966],[40.831,-73.966],[40.831,-73.934]] },
+  { name:'Inwood',               section:'harlem',    price:'$1,400–$2,600',  fill:'#00CCAA',
+    coords:[[40.876,-73.920],[40.876,-73.952],[40.852,-73.952],[40.852,-73.920]] },
+  // ── Brooklyn ───────────────────────────────────────────────
+  { name:'Williamsburg',         section:'brooklyn',  price:'$2,800–$6,000',  fill:'#1D9E75',
+    coords:[[40.718,-73.963],[40.718,-73.942],[40.700,-73.942],[40.700,-73.963]] },
+  { name:'Greenpoint',           section:'brooklyn',  price:'$2,500–$5,000',  fill:'#1D9E75',
+    coords:[[40.734,-73.959],[40.734,-73.941],[40.718,-73.941],[40.718,-73.959]] },
+  { name:'DUMBO',                section:'brooklyn',  price:'$3,200–$8,000',  fill:'#1D9E75',
+    coords:[[40.703,-73.990],[40.703,-73.982],[40.695,-73.982],[40.695,-73.990]] },
+  { name:'Brooklyn Heights',     section:'brooklyn',  price:'$2,800–$6,500',  fill:'#1D9E75',
+    coords:[[40.698,-73.999],[40.698,-73.990],[40.690,-73.990],[40.690,-73.999]] },
+  { name:'Cobble Hill / Carroll Gardens', section:'brooklyn', price:'$2,600–$5,500', fill:'#1D9E75',
+    coords:[[40.690,-74.003],[40.690,-73.990],[40.678,-73.990],[40.678,-74.003]] },
+  { name:'Park Slope',           section:'brooklyn',  price:'$2,500–$5,500',  fill:'#1D9E75',
+    coords:[[40.679,-73.991],[40.679,-73.973],[40.662,-73.973],[40.662,-73.991]] },
+  { name:'Crown Heights',        section:'brooklyn',  price:'$1,900–$3,500',  fill:'#1D9E75',
+    coords:[[40.675,-73.963],[40.675,-73.943],[40.659,-73.943],[40.659,-73.963]] },
+  { name:'Bed-Stuy',             section:'brooklyn',  price:'$1,800–$3,800',  fill:'#1D9E75',
+    coords:[[40.697,-73.965],[40.697,-73.942],[40.679,-73.942],[40.679,-73.965]] },
+  { name:'Bushwick',             section:'brooklyn',  price:'$1,700–$3,200',  fill:'#1D9E75',
+    coords:[[40.711,-73.925],[40.711,-73.904],[40.694,-73.904],[40.694,-73.925]] },
+  { name:'Bay Ridge',            section:'brooklyn',  price:'$1,600–$2,800',  fill:'#1D9E75',
+    coords:[[40.649,-74.026],[40.649,-74.003],[40.626,-74.003],[40.626,-74.026]] },
+  // ── Queens ─────────────────────────────────────────────────
+  { name:'Long Island City',     section:'queens',    price:'$2,600–$5,500',  fill:'#2BB5A0',
+    coords:[[40.757,-73.956],[40.757,-73.932],[40.740,-73.932],[40.740,-73.956]] },
+  { name:'Astoria',              section:'queens',    price:'$2,000–$3,800',  fill:'#2BB5A0',
+    coords:[[40.776,-73.939],[40.776,-73.912],[40.757,-73.912],[40.757,-73.939]] },
+  { name:'Jackson Heights',      section:'queens',    price:'$1,500–$2,600',  fill:'#2BB5A0',
+    coords:[[40.758,-73.898],[40.758,-73.874],[40.745,-73.874],[40.745,-73.898]] },
+  { name:'Ridgewood',            section:'queens',    price:'$1,700–$3,000',  fill:'#2BB5A0',
+    coords:[[40.713,-73.909],[40.713,-73.891],[40.698,-73.891],[40.698,-73.909]] },
+  { name:'Sunnyside & Woodside', section:'queens',    price:'$1,600–$2,800',  fill:'#2BB5A0',
+    coords:[[40.749,-73.926],[40.749,-73.899],[40.733,-73.899],[40.733,-73.926]] },
+  { name:'Forest Hills & Rego Park', section:'queens', price:'$1,700–$3,200', fill:'#2BB5A0',
+    coords:[[40.738,-73.858],[40.738,-73.835],[40.719,-73.835],[40.719,-73.858]] },
+  // ── The Bronx ──────────────────────────────────────────────
+  { name:'Mott Haven',           section:'bronx',     price:'$1,500–$2,800',  fill:'#7CCBBF',
+    coords:[[40.819,-73.933],[40.819,-73.915],[40.804,-73.915],[40.804,-73.933]] },
+  { name:'Fordham / Belmont',    section:'bronx',     price:'$1,200–$2,200',  fill:'#7CCBBF',
+    coords:[[40.863,-73.907],[40.863,-73.882],[40.847,-73.882],[40.847,-73.907]] },
+  { name:'Riverdale',            section:'bronx',     price:'$1,600–$3,200',  fill:'#7CCBBF',
+    coords:[[40.903,-73.925],[40.903,-73.901],[40.883,-73.901],[40.883,-73.925]] },
+  { name:'Pelham Bay & City Island', section:'bronx', price:'$1,400–$2,400',  fill:'#7CCBBF',
+    coords:[[40.875,-73.848],[40.875,-73.820],[40.848,-73.820],[40.848,-73.848]] },
+  // ── Hoboken & Jersey City ──────────────────────────────────
+  { name:'Hoboken',              section:'hoboken-jc', price:'$2,200–$4,500', fill:'#5BBFB5',
+    coords:[[40.750,-74.061],[40.750,-74.026],[40.733,-74.026],[40.733,-74.061]] },
+  { name:'Jersey City Downtown', section:'hoboken-jc', price:'$2,400–$5,000', fill:'#5BBFB5',
+    coords:[[40.726,-74.052],[40.726,-74.030],[40.711,-74.030],[40.711,-74.052]] },
+  { name:'Journal Square',       section:'hoboken-jc', price:'$1,600–$2,800', fill:'#5BBFB5',
+    coords:[[40.742,-74.074],[40.742,-74.053],[40.727,-74.053],[40.727,-74.074]] },
+  { name:'Jersey City Heights',  section:'hoboken-jc', price:'$1,500–$2,600', fill:'#5BBFB5',
+    coords:[[40.754,-74.066],[40.754,-74.048],[40.742,-74.048],[40.742,-74.066]] },
 ]
 
 function NeighborhoodMap() {
-  const [hovered, setHovered] = useState(null)
-  const hoveredRegion = MAP_REGIONS.find(r => r.id === hovered)
+  const containerRef = useRef(null)
+  const mapRef = useRef(null)
+  const infoRef = useRef(null)
 
-  const scrollTo = (id) => {
-    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-  }
+  useEffect(() => {
+    let cancelled = false
+
+    if (!document.getElementById('leaflet-css')) {
+      const link = document.createElement('link')
+      link.id = 'leaflet-css'
+      link.rel = 'stylesheet'
+      link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css'
+      document.head.appendChild(link)
+    }
+
+    function initMap() {
+      if (cancelled || !containerRef.current || mapRef.current) return
+      const L = window.L
+
+      const map = L.map(containerRef.current, {
+        scrollWheelZoom: false,
+        zoomControl: true,
+        attributionControl: true,
+      })
+      mapRef.current = map
+
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+        attribution: '© <a href="https://openstreetmap.org">OpenStreetMap</a> © <a href="https://carto.com">CARTO</a>',
+        subdomains: 'abcd',
+        maxZoom: 19,
+      }).addTo(map)
+
+      NBHDS.forEach(nbhd => {
+        const base = { color: 'rgba(12,22,40,0.5)', weight: 1, fillColor: nbhd.fill, fillOpacity: 0.28 }
+        const hot  = { color: '#0C1628', weight: 2,   fillColor: nbhd.fill, fillOpacity: 0.65 }
+
+        const poly = L.polygon(nbhd.coords, base).addTo(map)
+
+        poly.on('mouseover', function () {
+          this.setStyle(hot).bringToFront()
+          if (infoRef.current) {
+            infoRef.current.innerHTML =
+              `<strong>${nbhd.name}</strong><span>${nbhd.price}/mo</span><em>· click to explore</em>`
+          }
+        })
+        poly.on('mouseout', function () {
+          this.setStyle(base)
+          if (infoRef.current) infoRef.current.innerHTML = '&nbsp;'
+        })
+        poly.on('click', () => {
+          document.getElementById(nbhd.section)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+        })
+
+        const center = poly.getBounds().getCenter()
+        const label = L.divIcon({
+          className: '',
+          html: `<div style="font:600 10px/1.2 Inter,system-ui,sans-serif;color:#0C1628;white-space:nowrap;text-shadow:0 0 3px #fff,0 0 3px #fff,0 0 3px #fff;pointer-events:none;transform:translate(-50%,-50%)">${nbhd.name}</div>`,
+          iconSize: [0, 0],
+        })
+        L.marker(center, { icon: label, interactive: false }).addTo(map)
+      })
+
+      const allLatLngs = NBHDS.flatMap(n => n.coords)
+      map.fitBounds(L.latLngBounds(allLatLngs), { padding: [24, 24] })
+    }
+
+    if (window.L) {
+      initMap()
+    } else if (!document.getElementById('leaflet-js')) {
+      const script = document.createElement('script')
+      script.id = 'leaflet-js'
+      script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet-src.min.js'
+      script.onload = initMap
+      document.head.appendChild(script)
+    } else {
+      document.getElementById('leaflet-js').addEventListener('load', initMap)
+    }
+
+    return () => {
+      cancelled = true
+      if (mapRef.current) { mapRef.current.remove(); mapRef.current = null }
+    }
+  }, [])
 
   return (
     <div style={{ margin: '0 0 3rem' }}>
-      <p className="nbhd-map-hint">Hover to explore · Click to jump to a section</p>
+      <p className="nbhd-map-hint">Hover a neighborhood to explore · Click to jump to its section</p>
       <div className="nbhd-map-wrap">
-        <svg viewBox="0 0 510 510" style={{ width: '100%', display: 'block' }} xmlns="http://www.w3.org/2000/svg">
-          <rect width="510" height="510" fill="#cce8f2" />
-          {MAP_REGIONS.map(r => (
-            <path
-              key={r.id}
-              d={r.d}
-              fill={hovered === r.id ? '#0ABFBF' : '#a8d8c8'}
-              stroke={hovered === r.id ? '#0C1628' : '#6db8a8'}
-              strokeWidth={hovered === r.id ? 2.5 : 1}
-              style={{ cursor: 'pointer', transition: 'fill 0.12s, stroke 0.12s, stroke-width 0.12s' }}
-              onMouseEnter={() => setHovered(r.id)}
-              onMouseLeave={() => setHovered(null)}
-              onClick={() => scrollTo(r.id)}
-            />
-          ))}
-          {MAP_REGIONS.map(r => {
-            if (r.lx === null) return null
-            const active = hovered === r.id
-            return (
-              <text
-                key={`lbl-${r.id}`}
-                textAnchor="middle"
-                dominantBaseline="middle"
-                fontSize="10"
-                fontWeight="700"
-                fill={active ? '#0C1628' : '#1a5a48'}
-                fontFamily="Inter, system-ui, sans-serif"
-                style={{ pointerEvents: 'none', userSelect: 'none' }}
-                transform={r.rotate ? `rotate(${r.rotate} ${r.lx} ${r.ly})` : undefined}
-              >
-                {r.lines
-                  ? r.lines.map((line, i) => <tspan key={i} x={r.lx} y={r.ly + (i - 0.5) * 13}>{line}</tspan>)
-                  : <tspan x={r.lx} y={r.ly}>{r.label}</tspan>
-                }
-              </text>
-            )
-          })}
-        </svg>
-        <div className="nbhd-map-label" style={{ opacity: hovered ? 1 : 0 }}>
-          {hoveredRegion ? `${hoveredRegion.label}  →  click to explore` : ' '}
-        </div>
+        <div ref={containerRef} style={{ height: 540 }} />
+        <div ref={infoRef} className="nbhd-map-info">&nbsp;</div>
       </div>
     </div>
   )
 }
+
 
 function Card({ name, vibe, price, description, tidbit }) {
   return (
