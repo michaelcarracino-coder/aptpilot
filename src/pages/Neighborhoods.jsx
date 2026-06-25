@@ -1,4 +1,6 @@
 import { useEffect, useRef } from 'react'
+import L from 'leaflet'
+import 'leaflet/dist/leaflet.css'
 import SEO from '../components/SEO'
 
 const css = `
@@ -136,83 +138,58 @@ function NeighborhoodMap() {
   const infoRef = useRef(null)
 
   useEffect(() => {
-    let cancelled = false
+    if (!containerRef.current || mapRef.current) return
 
-    if (!document.getElementById('leaflet-css')) {
-      const link = document.createElement('link')
-      link.id = 'leaflet-css'
-      link.rel = 'stylesheet'
-      link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css'
-      document.head.appendChild(link)
-    }
+    const map = L.map(containerRef.current, {
+      scrollWheelZoom: false,
+      zoomControl: true,
+      attributionControl: true,
+    })
+    mapRef.current = map
 
-    function initMap() {
-      if (cancelled || !containerRef.current || mapRef.current) return
-      const L = window.L
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+      attribution: '© <a href="https://openstreetmap.org">OpenStreetMap</a> © <a href="https://carto.com">CARTO</a>',
+      subdomains: 'abcd',
+      maxZoom: 19,
+    }).addTo(map)
 
-      const map = L.map(containerRef.current, {
-        scrollWheelZoom: false,
-        zoomControl: true,
-        attributionControl: true,
+    NBHDS.forEach(nbhd => {
+      const base = { color: 'rgba(12,22,40,0.5)', weight: 1, fillColor: nbhd.fill, fillOpacity: 0.28 }
+      const hot  = { color: '#0C1628', weight: 2,   fillColor: nbhd.fill, fillOpacity: 0.65 }
+
+      const poly = L.polygon(nbhd.coords, base).addTo(map)
+
+      poly.on('mouseover', function () {
+        this.setStyle(hot).bringToFront()
+        if (infoRef.current) {
+          infoRef.current.innerHTML =
+            `<strong>${nbhd.name}</strong><span>${nbhd.price}/mo</span><em>· click to explore</em>`
+        }
       })
-      mapRef.current = map
-
-      L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-        attribution: '© <a href="https://openstreetmap.org">OpenStreetMap</a> © <a href="https://carto.com">CARTO</a>',
-        subdomains: 'abcd',
-        maxZoom: 19,
-      }).addTo(map)
-
-      NBHDS.forEach(nbhd => {
-        const base = { color: 'rgba(12,22,40,0.5)', weight: 1, fillColor: nbhd.fill, fillOpacity: 0.28 }
-        const hot  = { color: '#0C1628', weight: 2,   fillColor: nbhd.fill, fillOpacity: 0.65 }
-
-        const poly = L.polygon(nbhd.coords, base).addTo(map)
-
-        poly.on('mouseover', function () {
-          this.setStyle(hot).bringToFront()
-          if (infoRef.current) {
-            infoRef.current.innerHTML =
-              `<strong>${nbhd.name}</strong><span>${nbhd.price}/mo</span><em>· click to explore</em>`
-          }
-        })
-        poly.on('mouseout', function () {
-          this.setStyle(base)
-          if (infoRef.current) infoRef.current.innerHTML = '&nbsp;'
-        })
-        poly.on('click', () => {
-          document.getElementById(nbhd.section)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-        })
-
-        const center = poly.getBounds().getCenter()
-        const label = L.divIcon({
-          className: '',
-          html: `<div style="font:600 10px/1.2 Inter,system-ui,sans-serif;color:#0C1628;white-space:nowrap;text-shadow:0 0 3px #fff,0 0 3px #fff,0 0 3px #fff;pointer-events:none;transform:translate(-50%,-50%)">${nbhd.name}</div>`,
-          iconSize: [0, 0],
-        })
-        L.marker(center, { icon: label, interactive: false }).addTo(map)
+      poly.on('mouseout', function () {
+        this.setStyle(base)
+        if (infoRef.current) infoRef.current.innerHTML = '&nbsp;'
+      })
+      poly.on('click', () => {
+        document.getElementById(nbhd.section)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
       })
 
-      const allLatLngs = NBHDS.flatMap(n => n.coords)
-      map.fitBounds(L.latLngBounds(allLatLngs), { padding: [24, 24] })
-      setTimeout(() => map.invalidateSize(), 100)
-    }
+      const center = poly.getBounds().getCenter()
+      const label = L.divIcon({
+        className: '',
+        html: `<div style="font:600 10px/1.2 Inter,system-ui,sans-serif;color:#0C1628;white-space:nowrap;text-shadow:0 0 3px #fff,0 0 3px #fff,0 0 3px #fff;pointer-events:none;transform:translate(-50%,-50%)">${nbhd.name}</div>`,
+        iconSize: [0, 0],
+      })
+      L.marker(center, { icon: label, interactive: false }).addTo(map)
+    })
 
-    if (window.L) {
-      initMap()
-    } else if (!document.getElementById('leaflet-js')) {
-      const script = document.createElement('script')
-      script.id = 'leaflet-js'
-      script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet-src.min.js'
-      script.onload = initMap
-      document.head.appendChild(script)
-    } else {
-      document.getElementById('leaflet-js').addEventListener('load', initMap)
-    }
+    const allLatLngs = NBHDS.flatMap(n => n.coords)
+    map.fitBounds(L.latLngBounds(allLatLngs), { padding: [24, 24] })
+    setTimeout(() => map.invalidateSize(), 100)
 
     return () => {
-      cancelled = true
-      if (mapRef.current) { mapRef.current.remove(); mapRef.current = null }
+      map.remove()
+      mapRef.current = null
     }
   }, [])
 
