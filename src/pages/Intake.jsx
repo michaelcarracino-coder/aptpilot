@@ -62,8 +62,9 @@ const css = `
 .doc-check-label { font-size:0.84rem; font-weight:600; color:var(--navy); line-height:1.3; }
 .doc-check-sub { font-size:0.76rem; color:var(--slate); margin-top:0.2rem; line-height:1.45; }
 .doc-check-optional { font-size:0.68rem; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; color:var(--teal); margin-top:0.2rem; }
-.upload-area { border:2px dashed var(--surface-mid); border-radius:10px; padding:1.5rem; text-align:center; cursor:pointer; transition:all 0.2s; }
-.upload-area:hover { border-color:var(--teal); background:var(--teal-pale); }
+.doc-upload-btn { display:inline-flex; align-items:center; gap:0.35rem; margin-top:0.55rem; font-size:0.75rem; font-weight:600; color:var(--teal); background:rgba(10,191,191,0.1); border:1.5px solid rgba(10,191,191,0.3); border-radius:6px; padding:0.3rem 0.65rem; cursor:pointer; transition:all 0.15s; font-family:inherit; }
+.doc-upload-btn:hover { background:rgba(10,191,191,0.18); }
+.doc-uploaded-file { display:flex; align-items:center; gap:0.45rem; font-size:0.75rem; color:#059669; margin-top:0.35rem; font-weight:500; }
 .tier-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:0.75rem; }
 @media(max-width:700px){ .tier-grid{grid-template-columns:1fr;} }
 .tier-card { border:2px solid var(--surface-mid); border-radius:12px; padding:1.25rem; cursor:pointer; transition:all 0.18s; position:relative; }
@@ -90,12 +91,22 @@ export default function Intake() {
 
   const [step, setStep]       = useState(1)
   const [saving, setSaving]   = useState(false)
-  const [docs, setDocs]       = useState([])
-  const [uploading, setUploading] = useState(false)
   const [docRole, setDocRole] = useState('tenant')
-  const [checkedDocs, setCheckedDocs] = useState({})
+  const [docFiles, setDocFiles] = useState({})   // { [docId]: [filename, ...] }
+  const [uploadingDoc, setUploadingDoc] = useState(null)  // docId currently uploading
 
-  const toggleDocCheck = (id) => setCheckedDocs(c => ({ ...c, [id]: !c[id] }))
+  const handleDocUpload = async (docId, files) => {
+    if (!files.length) return
+    setUploadingDoc(docId)
+    const uploaded = []
+    for (const file of files) {
+      const path = `${user.id}/${Date.now()}-${file.name}`
+      const { error } = await supabase.storage.from('documents').upload(path, file)
+      if (!error) uploaded.push(file.name)
+    }
+    setDocFiles(d => ({ ...d, [docId]: [...(d[docId] || []), ...uploaded] }))
+    setUploadingDoc(null)
+  }
   const [form, setForm]       = useState({
     moveIn:'', minBed:'1', maxBed:'2', minBudget:'', maxBudget:'',
     neighborhoods:[], tourTimes:[], notes:'',
@@ -165,60 +176,53 @@ export default function Intake() {
                   {/* Role toggle */}
                   <div className="role-tabs">
                     <button className={`role-tab ${docRole === 'tenant' ? 'on' : ''}`} onClick={() => setDocRole('tenant')}>I'm a Tenant</button>
-                    <button className={`role-tab ${docRole === 'guarantor' ? 'on' : ''}`} onClick={() => setDocRole('guarantor')}>I Have a Guarantor</button>
+                    <button className={`role-tab ${docRole === 'guarantor' ? 'on' : ''}`} onClick={() => setDocRole('guarantor')}>I'm a Guarantor</button>
                   </div>
 
-                  {/* Checklist */}
+                  {/* Per-doc checklist with individual upload */}
                   <div className="doc-checklist">
-                    {(docRole === 'tenant' ? TENANT_DOCS : GUARANTOR_DOCS).map((doc, i) => (
-                      <div
-                        key={doc.id}
-                        className={`doc-check-item${checkedDocs[doc.id] ? ' checked' : ''}${doc.optional ? ' optional' : ''}`}
-                        onClick={() => toggleDocCheck(doc.id)}
-                      >
-                        <div className="doc-check-box">
-                          {checkedDocs[doc.id] && <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>}
+                    {(docRole === 'tenant' ? TENANT_DOCS : GUARANTOR_DOCS).map((doc, i) => {
+                      const uploaded = docFiles[doc.id] || []
+                      const checked = uploaded.length > 0
+                      const isUploading = uploadingDoc === doc.id
+                      return (
+                        <div key={doc.id} className={`doc-check-item${checked ? ' checked' : ''}${doc.optional ? ' optional' : ''}`}>
+                          <div className="doc-check-box" style={{ marginTop:'2px' }}>
+                            {checked && <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>}
+                          </div>
+                          <div style={{ flex:1 }}>
+                            <div className="doc-check-label">{i + 1}. {doc.label}</div>
+                            {doc.sub && <div className="doc-check-sub">{doc.sub}</div>}
+                            {doc.optional && <div className="doc-check-optional">Optional</div>}
+                            {uploaded.map((name, j) => (
+                              <div className="doc-uploaded-file" key={j}>
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#059669" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                                {name}
+                              </div>
+                            ))}
+                            <label className="doc-upload-btn">
+                              <input
+                                type="file"
+                                accept=".pdf,image/*"
+                                multiple
+                                style={{ display:'none' }}
+                                disabled={isUploading}
+                                onChange={async (e) => {
+                                  await handleDocUpload(doc.id, Array.from(e.target.files))
+                                  e.target.value = ''
+                                }}
+                              />
+                              {isUploading
+                                ? <><span className="spinner" style={{ borderColor:'rgba(10,191,191,0.3)', borderTopColor:'var(--teal)', width:11, height:11, display:'inline-block' }} /> Uploading…</>
+                                : <>{checked ? '+ Add another file' : '↑ Upload file'}</>
+                              }
+                            </label>
+                          </div>
                         </div>
-                        <div>
-                          <div className="doc-check-label">{i + 1}. {doc.label}</div>
-                          {doc.sub && <div className="doc-check-sub">{doc.sub}</div>}
-                          {doc.optional && <div className="doc-check-optional">Optional</div>}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* Upload area */}
-                  <label className="upload-area" style={{ cursor: uploading ? 'wait' : 'pointer', display:'block' }}>
-                    <input type="file" accept=".pdf,image/*" multiple style={{ display:'none' }} disabled={uploading} onChange={async (e) => {
-                      const files = Array.from(e.target.files)
-                      if (!files.length) return
-                      setUploading(true)
-                      const uploaded = []
-                      for (const file of files) {
-                        const path = `${user.id}/${Date.now()}-${file.name}`
-                        const { error } = await supabase.storage.from('documents').upload(path, file)
-                        if (!error) uploaded.push(file.name)
-                      }
-                      setDocs(d => [...d, ...uploaded])
-                      setUploading(false)
-                      e.target.value = ''
-                    }} />
-                    <div style={{ marginBottom:'0.5rem' }}>
-                      {uploading
-                        ? <span className="spinner" style={{ borderColor:'rgba(10,191,191,0.3)', borderTopColor:'var(--teal)', width:24, height:24, display:'inline-block' }} />
-                        : <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
-                      }
-                    </div>
-                    <p style={{ fontSize:'0.85rem', color:'var(--slate)' }}><strong style={{ color:'var(--teal)' }}>Click to upload</strong> or drag & drop<br />PDF, JPG, PNG</p>
-                  </label>
-                  {docs.map((d, i) => (
-                    <div className="doc-item" key={i}>
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                      {d}
-                    </div>
-                  ))}
-                </div>
+                      )
+                    })}
+                  </div>{/* end doc-checklist */}
+                </div>{/* end left column */}
 
                 {/* Sidenote */}
                 <div className="doc-sidenote">
