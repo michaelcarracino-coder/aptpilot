@@ -70,6 +70,7 @@ const STATUS_COLORS = {
 const ONBOARD_STEPS = [
   { key: 'paid',      label: 'Payment confirmed',       sub: 'Your search is active'              },
   { key: 'criteria',  label: 'Criteria reviewed',       sub: 'We review your requirements'        },
+  { key: 'docs',      label: 'Documents uploaded',      sub: 'Your package is ready to go'        },
   { key: 'listings',  label: 'Listings sourced',        sub: 'Matching apartments identified'     },
   { key: 'outreach',  label: 'Agents contacted',        sub: 'Tour requests sent on your behalf'  },
   { key: 'tours',     label: 'Tours confirmed',         sub: 'Sit back — we handle scheduling'    },
@@ -85,12 +86,18 @@ export default function Dashboard() {
   const [referrals, setReferrals] = useState(0)
   const [copied, setCopied] = useState(false)
   const [newIds, setNewIds]    = useState(new Set())
+  const [docCount, setDocCount] = useState(0)
   const [searchParams] = useSearchParams()
   const justPaid = searchParams.get('payment') === 'success'
   const channelRef = useRef(null)
   const toastTimer = useRef(null)
 
-  useEffect(() => { if (user) { loadData(); loadReferrals() } }, [user])
+  useEffect(() => { if (user) { loadData(); loadReferrals(); loadDocCount() } }, [user])
+
+  async function loadDocCount() {
+    const { count } = await supabase.from('user_documents').select('*', { count: 'exact', head: true }).eq('user_id', user.id)
+    setDocCount(count || 0)
+  }
 
   async function loadReferrals() {
     const { count } = await supabase.from('referrals').select('*', { count: 'exact', head: true }).eq('referrer_id', user.id)
@@ -161,6 +168,7 @@ export default function Dashboard() {
   const onboardStatus = {
     paid:     true,
     criteria: listings.length > 0 || sentOutreach.length > 0,
+    docs:     docCount > 0,
     listings: listings.length > 0,
     outreach: sentOutreach.length > 0 || confirmedTours.length > 0,
     tours:    confirmedTours.length > 0,
