@@ -149,7 +149,7 @@ export default function Qualify() {
             <tbody>
               <tr><td>750+</td><td>Strong approval — the gold standard for competitive buildings</td></tr>
               <tr><td>700–749</td><td>Generally approved with solid income and clean history</td></tr>
-              <tr><td>650–699</td><td>May be approved; some landlords require extra months of rent upfront</td></tr>
+              <tr><td>650–699</td><td>May be approved with solid income and a clean rental history</td></tr>
               <tr><td>620–649</td><td>Difficult — guarantor often required, or additional deposit</td></tr>
               <tr><td>Below 620</td><td>Most institutional landlords will decline; private landlords vary</td></tr>
             </tbody>
@@ -374,7 +374,7 @@ export default function Qualify() {
 
           <ol>
             <li><strong>Have documents ready before you tour.</strong> The ability to submit within an hour of a tour is a genuine advantage. Most renters take days to gather paperwork — you won't.</li>
-            <li><strong>Offer more upfront if your financials are borderline.</strong> Offering 3–6 months of rent upfront can overcome income or credit deficiencies with many landlords, especially private ones.</li>
+            <li><strong>Consider an institutional guarantor if your financials are borderline.</strong> Services like Insurent or The Guarantors can step in as a co-signer for a fee, making you a competitive applicant even if you fall short on income or credit.</li>
             <li><strong>Write a brief personal cover letter.</strong> It sounds old-fashioned, but a short note explaining your situation (new job, relocating, stable employment history) can humanize your application to a private landlord.</li>
             <li><strong>Check your credit before applying.</strong> Dispute any errors on your report through Experian, Equifax, or TransUnion before your search. A single erroneous collection account can drop your score significantly.</li>
             <li><strong>Line up your guarantor in advance.</strong> If you think you might need one, have the conversation early and get their documents ready. Waiting until after a landlord asks is too slow.</li>
