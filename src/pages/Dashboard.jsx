@@ -75,10 +75,10 @@ const css = `
 .referral-code-box { background:rgba(10,191,191,0.12);border:1.5px solid rgba(10,191,191,0.3);border-radius:8px;padding:0.6rem 0.85rem;font-family:'Inter',monospace;font-size:0.88rem;font-weight:700;color:var(--teal);letter-spacing:0.08em;margin:0.75rem 0;display:flex;justify-content:space-between;align-items:center;cursor:pointer;transition:background 0.15s; }
 .referral-code-box:hover { background:rgba(10,191,191,0.2); }
 .readiness-card { background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);padding:1.5rem 1.75rem;margin-bottom:1.75rem;display:flex;align-items:center;gap:2rem;flex-wrap:wrap; }
-.readiness-ring-wrap { position:relative;flex-shrink:0;width:96px;height:96px; }
+.readiness-ring-wrap { position:relative;flex-shrink:0;width:110px;height:110px; }
 .readiness-ring-label { position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center; }
-.readiness-ring-pct { font-family:'Playfair Display',serif;font-size:1.55rem;color:var(--navy);line-height:1; }
-.readiness-ring-word { font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;margin-top:2px; }
+.readiness-ring-pct { font-family:'Playfair Display',serif;font-size:1.65rem;color:var(--navy);line-height:1; }
+.readiness-ring-word { font-size:0.6rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;margin-top:3px; }
 .readiness-body { flex:1;min-width:220px; }
 .readiness-title { font-family:'Playfair Display',serif;font-size:1.15rem;color:var(--navy);margin-bottom:0.2rem; }
 .readiness-sub { font-size:0.82rem;color:var(--slate);margin-bottom:1rem;line-height:1.5; }
@@ -300,9 +300,9 @@ export default function Dashboard() {
     { key: 'guarantor',  label: needsGuarantor ? 'Guarantor docs complete' : 'Guarantor (not required)', done: needsGuarantor ? guarantorComplete : true, pts: 20, action: needsGuarantor && !guarantorComplete ? '/documents' : null, actionLabel: 'Upload guarantor docs →' },
   ]
   const readinessScore = rfFactors.reduce((sum, f) => sum + (f.done ? f.pts : 0), 0)
-  const readinessWord  = readinessScore >= 90 ? 'Ready' : readinessScore >= 60 ? 'Almost' : readinessScore >= 30 ? 'In Progress' : 'Getting Started'
+  const readinessWord  = readinessScore >= 90 ? 'Ready' : readinessScore >= 60 ? 'Almost' : readinessScore >= 30 ? 'Started' : 'Early'
   const readinessColor = readinessScore >= 90 ? '#059669' : readinessScore >= 60 ? '#0ABFBF' : readinessScore >= 30 ? '#D97706' : '#94A3B8'
-  const RING_R = 40; const RING_C = 2 * Math.PI * RING_R
+  const RING_R = 46; const RING_C = 2 * Math.PI * RING_R
   const ringDash = (readinessScore / 100) * RING_C
 
   const greeting = (() => {
@@ -442,12 +442,12 @@ export default function Dashboard() {
         {/* Readiness Score */}
         <div className="readiness-card">
           <div className="readiness-ring-wrap">
-            <svg width="96" height="96" viewBox="0 0 96 96">
-              <circle cx="48" cy="48" r={RING_R} fill="none" stroke="#F1F5F9" strokeWidth="9" />
-              <circle cx="48" cy="48" r={RING_R} fill="none" stroke={readinessColor} strokeWidth="9"
+            <svg width="110" height="110" viewBox="0 0 110 110">
+              <circle cx="55" cy="55" r={RING_R} fill="none" stroke="#F1F5F9" strokeWidth="8" />
+              <circle cx="55" cy="55" r={RING_R} fill="none" stroke={readinessColor} strokeWidth="8"
                 strokeDasharray={`${ringDash} ${RING_C}`}
                 strokeLinecap="round"
-                transform="rotate(-90 48 48)"
+                transform="rotate(-90 55 55)"
                 style={{ transition: 'stroke-dasharray 0.6s ease' }}
               />
             </svg>
