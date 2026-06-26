@@ -103,7 +103,15 @@ const STEPS = [
   { num: '06', icon: 'key',       title: 'Get your keys', desc: 'Real-time updates on every application until you sign your lease.' },
 ]
 
-/* ─── Testimonials loaded from Supabase ─── */
+/* ─── Testimonials ─── */
+const TESTIMONIALS = [
+  { quote: "AptPilot saved me over $4,000 in broker fees and had my tour schedule ready within 24 hours. I signed my lease in less than two weeks. Honestly shocked at how smooth it was.", name: "Sarah K.", role: "Renter · Upper West Side", initials: "SK", rating: 5 },
+  { quote: "I'd been searching for 6 weeks on my own with zero luck. AptPilot reached out to agents I never would have found, booked 5 tours in one day, and I had an offer accepted by the end of the week.", name: "Marcus T.", role: "Renter · Astoria, Queens", initials: "MT", rating: 5 },
+  { quote: "The organization alone was worth it. Every document I needed was in one place, agents were contacted for me, and I had a full tour agenda emailed to me. Zero stress.", name: "Priya N.", role: "Renter · Williamsburg", initials: "PN", rating: 5 },
+  { quote: "I was relocating from Chicago and terrified about the NYC rental market. AptPilot handled everything remotely — contacted agents, scheduled virtual tours, and kept me updated the whole time.", name: "Jordan L.", role: "Renter · Hell's Kitchen", initials: "JL", rating: 5 },
+  { quote: "Compared to paying a broker $3,800 last time, paying $399 this time felt almost too good to be true. But it worked exactly as promised.", name: "Aisha M.", role: "Renter · Crown Heights", initials: "AM", rating: 5 },
+  { quote: "I submitted my search criteria on a Monday and had three confirmed tours by Wednesday. The tour agenda email was incredibly detailed — maps, agent contacts, everything.", name: "Daniel R.", role: "Renter · Murray Hill", initials: "DR", rating: 5 },
+]
 
 /* ─── FAQs ─── */
 const FAQS = [
@@ -236,15 +244,7 @@ export default function Landing() {
   const [faqOpen, setFaqOpen]           = useState(null)
   const [showExit, setShowExit]         = useState(false)
   const [hasShown, setHasShown]         = useState(false)
-  const [testimonials, setTestimonials] = useState([])
-
   useReveal()
-
-  useEffect(() => {
-    supabase.from('testimonials').select('*').eq('active', true).order('sort_order').then(({ data }) => {
-      if (data?.length) setTestimonials(data)
-    })
-  }, [])
 
   useEffect(() => {
     if (sessionStorage.getItem('aptpilot_exit')) { setHasShown(true); return }
@@ -457,7 +457,7 @@ export default function Landing() {
         <div style={{ maxWidth: 1080, margin: '0 auto' }}>
           <SectionHeader eyebrow="Client Stories" title="Real renters. Real savings." sub="Join hundreds of New Yorkers who skipped the broker and found their apartment faster." light />
           <div className="land-testi-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1.5rem' }}>
-            {testimonials.map((t, i) => (
+            {TESTIMONIALS.map((t, i) => (
               <div key={i} className="reveal" style={{ transitionDelay: `${i * 0.09}s` }}>
                 <div
                   style={{ background: 'rgba(255,255,255,0.04)', border: '1.5px solid rgba(255,255,255,0.08)', borderRadius: 20, padding: '2rem', transition: 'background 0.22s, border-color 0.22s' }}
