@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import SEO from '../components/SEO'
+import PaywallGate from '../components/PaywallGate'
 
 const css = `
 .nbhd-page { max-width: 920px; margin: 0 auto; padding: 5rem 1.5rem 6rem; }
@@ -263,6 +264,10 @@ export default function Neighborhoods() {
           </div>
         </div>
 
+        <PaywallGate
+          title="Unlock the full NYC neighborhood guide"
+          subtitle="Sign up free to explore Harlem, Brooklyn, Queens, the Bronx, Hoboken, and Jersey City — with rent ranges, vibe breakdowns, and insider tips for every area."
+        >
         {/* ── Harlem ── */}
         <div className="nbhd-section" id="harlem">
           <h2>Harlem & Upper Manhattan</h2>
@@ -515,6 +520,8 @@ export default function Neighborhoods() {
             />
           </div>
         </div>
+
+        </PaywallGate>
 
         <div className="apt-cta">
           <h3>Know your neighborhood?</h3>

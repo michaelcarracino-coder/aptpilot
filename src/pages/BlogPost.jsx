@@ -2,6 +2,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 import SEO from '../components/SEO'
+import PaywallGate from '../components/PaywallGate'
 
 const css = `
 .post-page { max-width: 680px; margin: 0 auto; padding: 3rem 1.5rem 5rem; animation: fadeUp 0.4s ease both; }
@@ -101,7 +102,13 @@ export default function BlogPost() {
         </div>
         <div className="post-hero">{post.image}</div>
         <div className="post-body">
-          {renderContent(post.content)}
+          {renderContent(post.content).slice(0, 3)}
+          <PaywallGate
+            title="Read the full article"
+            subtitle="Create a free AptPilot account to unlock every guide, checklist, and NYC rental tip."
+          >
+            {renderContent(post.content).slice(3)}
+          </PaywallGate>
         </div>
         <div className="post-cta">
           <h3>Ready to find your next apartment?</h3>
