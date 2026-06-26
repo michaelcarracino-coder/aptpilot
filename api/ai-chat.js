@@ -27,23 +27,25 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' })
 
   const { userId, message, conversationHistory } = req.body
-  if (!userId || !message) return res.status(400).json({ error: 'Missing userId or message' })
+  if (!message) return res.status(400).json({ error: 'Missing message' })
 
   try {
-    // Fetch user context
-    const [{ data: profile }, { data: search }, { data: listings }, { data: docs }] = await Promise.all([
-      supabase.from('profiles').select('full_name').eq('id', userId).single(),
-      supabase.from('searches').select('min_budget, max_budget, min_bed, max_bed, move_in, neighborhoods, tier').eq('user_id', userId).order('created_at', { ascending: false }).limit(1).single(),
-      supabase.from('listings').select('address, status, price').eq('user_id', userId).order('created_at', { ascending: false }).limit(10),
-      supabase.from('user_documents').select('doc_id, doc_role').eq('user_id', userId),
-    ])
-
-    const contextBlock = [
-      profile?.full_name ? `User: ${profile.full_name}` : '',
-      search ? `Search: $${search.min_budget}–$${search.max_budget}/mo, ${search.min_bed}–${search.max_bed} bed, move-in ${search.move_in || 'ASAP'}, neighborhoods: ${(search.neighborhoods || []).join(', ')}` : '',
-      listings?.length ? `Listings (${listings.length}): ${listings.map(l => `${l.address} (${l.status}, $${l.price}/mo)`).join(' | ')}` : 'No listings yet',
-      docs?.length ? `Docs uploaded: ${docs.length} files` : 'No documents uploaded yet',
-    ].filter(Boolean).join('\n')
+    // Fetch user context only if logged in
+    let contextBlock = ''
+    if (userId) {
+      const [{ data: profile }, { data: search }, { data: listings }, { data: docs }] = await Promise.all([
+        supabase.from('profiles').select('full_name').eq('id', userId).single(),
+        supabase.from('searches').select('min_budget, max_budget, min_bed, max_bed, move_in, neighborhoods, tier').eq('user_id', userId).order('created_at', { ascending: false }).limit(1).single(),
+        supabase.from('listings').select('address, status, price').eq('user_id', userId).order('created_at', { ascending: false }).limit(10),
+        supabase.from('user_documents').select('doc_id, doc_role').eq('user_id', userId),
+      ])
+      contextBlock = [
+        profile?.full_name ? `User: ${profile.full_name}` : '',
+        search ? `Search: $${search.min_budget}–$${search.max_budget}/mo, ${search.min_bed}–${search.max_bed} bed, move-in ${search.move_in || 'ASAP'}, neighborhoods: ${(search.neighborhoods || []).join(', ')}` : '',
+        listings?.length ? `Listings (${listings.length}): ${listings.map(l => `${l.address} (${l.status}, $${l.price}/mo)`).join(' | ')}` : 'No listings yet',
+        docs?.length ? `Docs uploaded: ${docs.length} files` : 'No documents uploaded yet',
+      ].filter(Boolean).join('\n')
+    }
 
     // Build messages array for Claude
     const history = (conversationHistory || []).slice(-10).map(m => ({
@@ -65,11 +67,13 @@ export default async function handler(req, res) {
 
     const reply = response.content[0].text
 
-    // Persist both messages to DB
-    await supabase.from('messages').insert({ user_id: userId, body: message, from_admin: false })
-    const { data: savedReply } = await supabase.from('messages').insert({ user_id: userId, body: reply, from_admin: true }).select().single()
+    // Persist messages to DB only for logged-in users
+    if (userId) {
+      await supabase.from('messages').insert({ user_id: userId, body: message, from_admin: false })
+      await supabase.from('messages').insert({ user_id: userId, body: reply, from_admin: true })
+    }
 
-    return res.status(200).json({ reply, messageId: savedReply?.id })
+    return res.status(200).json({ reply })
   } catch (err) {
     console.error('AI chat error:', err)
     return res.status(500).json({ error: 'AI response failed' })

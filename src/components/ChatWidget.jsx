@@ -147,8 +147,6 @@ export default function ChatWidget() {
     }
   }, [messages, open])
 
-  if (!user) return null
-
   async function send() {
     const body = input.trim()
     if (!body || loading) return
@@ -160,7 +158,7 @@ export default function ChatWidget() {
       const res = await fetch('/api/ai-chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: user.id, message: body, conversationHistory: messages.slice(-8) }),
+        body: JSON.stringify({ userId: user?.id || null, message: body, conversationHistory: messages.slice(-8) }),
       })
       const { reply } = await res.json()
       if (reply) {
