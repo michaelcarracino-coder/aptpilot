@@ -258,6 +258,12 @@ input, select, textarea { font-family: inherit; }
   flex-shrink: 0;
 }
 
+/* ─── MOBILE GLOBAL ─── */
+@media (max-width: 640px) {
+  .auth-card { padding: 1.75rem 1.25rem; }
+  .page-body { padding-top: 68px; }
+}
+
 /* ─── AUTH PAGES ─── */
 .auth-page {
   min-height: calc(100vh - 68px);

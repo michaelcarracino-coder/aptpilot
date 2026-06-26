@@ -142,7 +142,7 @@ function SavingsCalc({ navigate }) {
       <div style={{ maxWidth: 860, margin: '0 auto' }}>
         <SectionHeader eyebrow="Savings Calculator" title="How Much Will You Save?" sub="See exactly what AptPilot saves you vs. a traditional NYC broker fee." />
         <div className="reveal" style={{ background: '#fff', borderRadius: 24, boxShadow: 'var(--shadow-xl)', overflow: 'hidden' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr' }}>
+          <div className="land-calc-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr' }}>
             {/* Left: input */}
             <div style={{ padding: '2.75rem' }}>
               <div style={{ fontSize: '0.74rem', fontWeight: 700, color: 'var(--slate-dark)', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: '0.65rem' }}>Monthly Rent</div>
@@ -159,7 +159,7 @@ function SavingsCalc({ navigate }) {
             </div>
 
             {/* Right: result */}
-            <div style={{ background: 'var(--navy)', padding: '2.75rem', display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '1.25rem' }}>
+            <div className="land-calc-right" style={{ background: 'var(--navy)', padding: '2.75rem', display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '1.25rem' }}>
               {[
                 { label: 'Traditional broker fee', val: `$${brokerFee.toLocaleString()}` },
                 { label: 'AptPilot flat fee', val: '$399' },
@@ -260,6 +260,21 @@ export default function Landing() {
 
   return (
     <div style={{ marginTop: -68 }}>
+      <style>{`
+        @media(max-width:640px){
+          .land-trust-grid { grid-template-columns: repeat(2,1fr) !important; gap:1.25rem !important; }
+          .land-steps-grid { grid-template-columns: 1fr !important; }
+          .land-testi-grid { grid-template-columns: 1fr !important; }
+          .land-pricing-grid { grid-template-columns: 1fr !important; }
+          .land-calc-grid { grid-template-columns: 1fr !important; }
+          .land-calc-right { border-radius: 0 0 24px 24px !important; }
+          .land-footer-grid { grid-template-columns: 1fr !important; gap:2rem !important; }
+          .land-section { padding: 4rem 1.25rem !important; }
+          .land-photo-text { padding: 0 1.5rem !important; }
+          .land-hero { padding: 7rem 1.25rem 5rem !important; }
+          .land-stat-row { gap: 1.5rem 2.5rem !important; }
+        }
+      `}</style>
       <SEO
         title="AptPilot — NYC Apartment Search Without a Broker Fee"
         description="Avoid the NYC broker fee. AptPilot searches every listing, books your tours, and submits applications automatically — starting at $299 flat fee."
@@ -268,7 +283,7 @@ export default function Landing() {
       <ExitModal show={showExit} onClose={() => setShowExit(false)} />
 
       {/* ── HERO ── */}
-      <section style={{ minHeight: '100vh', position: 'relative', overflow: 'hidden', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '8rem 2rem 6rem' }}>
+      <section className="land-hero" style={{ minHeight: '100vh', position: 'relative', overflow: 'hidden', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '8rem 2rem 6rem' }}>
         {/* NYC skyline photo layer */}
         <div style={{
           position: 'absolute', inset: 0, zIndex: 0,
@@ -304,7 +319,7 @@ export default function Landing() {
             <button className="btn btn-ghost btn-lg" onClick={() => navigate('/login')}>I have an account</button>
           </div>
 
-          <div style={{ display: 'flex', gap: 'clamp(2rem, 5vw, 4.5rem)', marginTop: '5rem', justifyContent: 'center', flexWrap: 'wrap', animation: 'fadeUp 0.55s 0.4s ease both' }}>
+          <div className="land-stat-row" style={{ display: 'flex', gap: 'clamp(2rem, 5vw, 4.5rem)', marginTop: '5rem', justifyContent: 'center', flexWrap: 'wrap', animation: 'fadeUp 0.55s 0.4s ease both' }}>
             {[['$0', 'Broker fees'], ['$399', 'vs. $3–6K broker fee'], ['1 day', 'Tour agenda delivered'], ['1-click', 'Application submission']].map(([v, l]) => (
               <div key={l} style={{ textAlign: 'center' }}>
                 <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 'clamp(1.7rem, 3vw, 2.2rem)', color: '#0ABFBF', fontWeight: 600, lineHeight: 1 }}>{v}</div>
@@ -337,7 +352,7 @@ export default function Landing() {
       {/* ── TRUST STRIP ── */}
       <section style={{ padding: '3.5rem 2rem', background: '#fff', borderBottom: '1px solid var(--surface-mid)' }}>
         <div style={{ maxWidth: 1000, margin: '0 auto' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: '2rem', alignItems: 'center' }}>
+          <div className="land-trust-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: '2rem', alignItems: 'center' }}>
             {[
               { stat: '500+', label: 'Searches completed' },
               { stat: '92%', label: 'Find an apartment within 3 weeks' },
@@ -371,10 +386,10 @@ export default function Landing() {
       </section>
 
       {/* ── HOW IT WORKS ── */}
-      <section id="how-it-works" style={{ padding: '8rem 2rem', background: '#fff' }}>
+      <section id="how-it-works" className="land-section" style={{ padding: '8rem 2rem', background: '#fff' }}>
         <div style={{ maxWidth: 1100, margin: '0 auto' }}>
           <SectionHeader eyebrow="How It Works" title="From criteria to keys — we handle everything." sub="Tell us what you need. We do the searching, scheduling, and applying." />
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1.5rem' }}>
+          <div className="land-steps-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1.5rem' }}>
             {STEPS.map((step, i) => (
               <div key={i} className="reveal" style={{ transitionDelay: `${i * 0.07}s` }}>
                 <div
@@ -405,7 +420,7 @@ export default function Landing() {
           style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 70%', display: 'block' }}
         />
         <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(90deg, rgba(6,9,15,0.82) 0%, rgba(6,9,15,0.45) 50%, rgba(6,9,15,0.15) 100%)' }} />
-        <div className="reveal" style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', padding: '0 6vw' }}>
+        <div className="reveal land-photo-text" style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', padding: '0 6vw' }}>
           <div style={{ maxWidth: 520 }}>
             <div style={{ display: 'inline-block', background: 'rgba(10,191,191,0.12)', border: '1px solid rgba(10,191,191,0.28)', color: '#0ABFBF', padding: '0.3rem 1rem', borderRadius: 100, fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '1.25rem' }}>Every Block. Every Borough.</div>
             <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 'clamp(2rem, 4vw, 3rem)', color: '#fff', fontWeight: 700, lineHeight: 1.15, marginBottom: '1rem' }}>
@@ -443,10 +458,10 @@ export default function Landing() {
       </section>
 
       {/* ── TESTIMONIALS ── */}
-      <section style={{ padding: '8rem 2rem', background: 'var(--navy)' }}>
+      <section className="land-section" style={{ padding: '8rem 2rem', background: 'var(--navy)' }}>
         <div style={{ maxWidth: 1080, margin: '0 auto' }}>
           <SectionHeader eyebrow="Client Stories" title="Real renters. Real savings." sub="Join hundreds of New Yorkers who skipped the broker and found their apartment faster." light />
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1.5rem' }}>
+          <div className="land-testi-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1.5rem' }}>
             {testimonials.map((t, i) => (
               <div key={i} className="reveal" style={{ transitionDelay: `${i * 0.09}s` }}>
                 <div
@@ -473,10 +488,10 @@ export default function Landing() {
       </section>
 
       {/* ── PRICING ── */}
-      <section style={{ padding: '8rem 2rem', background: 'var(--surface)' }}>
+      <section className="land-section" style={{ padding: '8rem 2rem', background: 'var(--surface)' }}>
         <div style={{ maxWidth: 1000, margin: '0 auto' }}>
           <SectionHeader eyebrow="Pricing" title="Simple, transparent pricing." sub="Pay once. No subscription. No commission. Save thousands vs. a traditional broker." />
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1.25rem' }}>
+          <div className="land-pricing-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1.25rem' }}>
             {[
               { name: 'Standard', price: '$299', period: 'one-time', features: ['Full listing search', 'Personalized tour agenda', 'Automated tour scheduling', 'Real-time listing alerts', 'Dedicated email support', 'Move-in checklist'], featured: false },
               { name: 'Core', price: '$399', period: 'one-time', features: ['Everything in Standard', 'Auto-filled applications', 'Negotiation support', 'Real-time application updates', 'Agent follow-up handled', 'Priority scheduling'], featured: true, badge: 'Most Popular' },
@@ -517,7 +532,7 @@ export default function Landing() {
       </section>
 
       {/* ── FAQ ── */}
-      <section id="faq" style={{ padding: '8rem 2rem', background: '#fff' }}>
+      <section id="faq" className="land-section" style={{ padding: '8rem 2rem', background: '#fff' }}>
         <div style={{ maxWidth: 760, margin: '0 auto' }}>
           <SectionHeader eyebrow="FAQ" title="Everything you need to know." sub="Answers to the most common questions before getting started." />
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
@@ -552,7 +567,7 @@ export default function Landing() {
       {/* ── FOOTER ── */}
       <footer style={{ background: '#06090F', borderTop: '1px solid rgba(255,255,255,0.06)', padding: '4rem 2rem 2.5rem' }}>
         <div style={{ maxWidth: 1100, margin: '0 auto' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr', gap: '3rem', marginBottom: '3rem' }}>
+          <div className="land-footer-grid" style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr', gap: '3rem', marginBottom: '3rem' }}>
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.55rem', marginBottom: '1rem' }}>
                 <div style={{ width: 28, height: 28, borderRadius: 7, flexShrink: 0, background: 'linear-gradient(135deg, #0ABFBF, #00E5CC)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: '0.85rem', color: '#0C1628' }}>A</div>
