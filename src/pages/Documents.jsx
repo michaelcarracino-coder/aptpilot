@@ -62,6 +62,7 @@ export default function Documents() {
   const [loading, setLoading] = useState(true)
   const [collating, setCollating] = useState(false)
   const [deletingPath, setDeletingPath] = useState(null)
+  const [uploadingSlot, setUploadingSlot] = useState(null)
 
   useEffect(() => { if (user) loadDocs() }, [user, role])
 
@@ -88,6 +89,25 @@ export default function Documents() {
   async function viewFile(path) {
     const { data } = await supabase.storage.from('documents').createSignedUrl(path, 60)
     if (data?.signedUrl) window.open(data.signedUrl, '_blank')
+  }
+
+  async function handleUpload(slot, file) {
+    if (!file) return
+    setUploadingSlot(slot.id)
+    const ext = file.name.split('.').pop()
+    const path = `${user.id}/${role}/${slot.id}/${Date.now()}.${ext}`
+    const { error: storageErr } = await supabase.storage.from('documents').upload(path, file, { upsert: false })
+    if (!storageErr) {
+      await supabase.from('user_documents').insert({
+        user_id: user.id,
+        doc_id: slot.id,
+        doc_role: role,
+        file_name: file.name,
+        storage_path: path,
+      })
+      await loadDocs()
+    }
+    setUploadingSlot(null)
   }
 
   async function downloadFile(path, name) {
@@ -161,7 +181,7 @@ export default function Documents() {
       <style>{css}</style>
       <div className="docs-page">
         <h1>My Documents</h1>
-        <p className="sub">All your files in one place — download individually or as a single collated PDF.</p>
+        <p className="sub">Upload once, use everywhere — download individual files or a single collated PDF package ready to hand any landlord.</p>
 
         <div className="docs-role-tabs">
           <button className={`docs-role-tab ${role === 'tenant' ? 'on' : ''}`} onClick={() => setRole('tenant')}>Tenant</button>
@@ -209,8 +229,14 @@ export default function Documents() {
                     </div>
                     {(done || !slot.optional) && (
                       <div className="doc-slot-body">
-                        {done
-                          ? files.map(row => (
+                        <label style={{ display:'inline-flex', alignItems:'center', gap:'0.4rem', cursor:'pointer', fontSize:'0.8rem', fontWeight:600, color:'var(--teal)', padding:'0.35rem 0', alignSelf:'flex-start' }}>
+                          {uploadingSlot === slot.id
+                            ? <><span className="spinner" style={{ borderColor:'rgba(10,191,191,0.3)', borderTopColor:'var(--teal)', width:12, height:12, display:'inline-block' }} /> Uploading…</>
+                            : <><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg> {done ? 'Upload another' : 'Upload file'}</>
+                          }
+                          <input type="file" accept=".pdf,.jpg,.jpeg,.png" style={{ display:'none' }} onChange={e => handleUpload(slot, e.target.files[0])} disabled={uploadingSlot === slot.id} />
+                        </label>
+                        {done && files.map(row => (
                             <div className="doc-file-row" key={row.id}>
                               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
                               <span className="doc-file-name">{row.file_name}</span>
@@ -233,7 +259,7 @@ export default function Documents() {
                               </div>
                             </div>
                           ))
-                          : <div className="doc-empty">No file uploaded yet — go to your intake form to upload.</div>
+                          : null
                         }
                       </div>
                     )}
