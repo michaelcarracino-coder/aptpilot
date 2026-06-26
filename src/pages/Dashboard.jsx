@@ -71,9 +71,34 @@ const css = `
 .tag-partial { background:#FEF3C7;color:#D97706; }
 .tag-incomplete { background:#FEF2F2;color:#EF4444; }
 .referral-card { background:linear-gradient(135deg,var(--navy),var(--navy-soft));border-radius:var(--radius);padding:1.25rem;color:#fff; }
+.s-apply_requested { background:#F5F3FF;color:#7C3AED; }
+.apply-btn { margin-top:0.5rem;display:inline-flex;align-items:center;gap:0.35rem;font-size:0.75rem;font-weight:700;padding:0.3rem 0.75rem;border-radius:100px;border:1.5px solid #7C3AED;background:transparent;color:#7C3AED;cursor:pointer;font-family:inherit;transition:all 0.15s; }
+.apply-btn:hover { background:#F5F3FF; }
+.apply-btn.sent { border-color:#059669;color:#059669;cursor:default; }
+.edit-modal-overlay { position:fixed;inset:0;background:rgba(6,9,15,0.5);backdrop-filter:blur(5px);z-index:1000;display:flex;align-items:center;justify-content:center;padding:1.5rem; }
+.edit-modal { background:#fff;border-radius:18px;max-width:440px;width:100%;padding:1.75rem;box-shadow:0 24px 80px rgba(0,0,0,0.2);animation:fadeUp 0.22s ease; }
+.edit-modal h3 { font-family:'Playfair Display',serif;font-size:1.2rem;color:var(--navy);margin-bottom:1.1rem; }
+.em-field { display:flex;flex-direction:column;gap:0.3rem;margin-bottom:0.85rem; }
+.em-field label { font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:var(--slate); }
+.em-field input { padding:0.5rem 0.8rem;border:1.5px solid var(--surface-mid);border-radius:8px;font-size:0.88rem;font-family:inherit;color:var(--navy);outline:none;transition:border-color 0.15s; }
+.em-field input:focus { border-color:var(--teal); }
+.em-row { display:grid;grid-template-columns:1fr 1fr;gap:0.75rem; }
 .referral-card h3 { font-family:'Playfair Display',serif;font-size:1rem;margin-bottom:0.35rem; }
 .referral-code-box { background:rgba(10,191,191,0.12);border:1.5px solid rgba(10,191,191,0.3);border-radius:8px;padding:0.6rem 0.85rem;font-family:'Inter',monospace;font-size:0.88rem;font-weight:700;color:var(--teal);letter-spacing:0.08em;margin:0.75rem 0;display:flex;justify-content:space-between;align-items:center;cursor:pointer;transition:background 0.15s; }
 .referral-code-box:hover { background:rgba(10,191,191,0.2); }
+.msg-card { background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);display:flex;flex-direction:column;overflow:hidden;margin-top:1.25rem; }
+.msg-thread { flex:1;overflow-y:auto;max-height:260px;padding:1rem;display:flex;flex-direction:column;gap:0.6rem; }
+.msg-bubble { max-width:82%;padding:0.55rem 0.85rem;border-radius:14px;font-size:0.84rem;line-height:1.5; }
+.msg-bubble.mine { align-self:flex-end;background:var(--navy);color:#fff;border-bottom-right-radius:4px; }
+.msg-bubble.theirs { align-self:flex-start;background:var(--surface);color:var(--navy);border-bottom-left-radius:4px; }
+.msg-bubble .msg-time { font-size:0.68rem;opacity:0.55;margin-top:0.2rem; }
+.msg-input-row { display:flex;gap:0.5rem;padding:0.75rem 1rem;border-top:1px solid var(--surface-mid); }
+.msg-input { flex:1;border:1.5px solid var(--surface-mid);border-radius:9px;padding:0.5rem 0.75rem;font-size:0.85rem;font-family:inherit;color:var(--navy);outline:none;transition:border-color 0.15s; }
+.msg-input:focus { border-color:var(--teal); }
+.msg-send-btn { background:var(--navy);color:#fff;border:none;border-radius:9px;padding:0.5rem 1rem;font-size:0.82rem;font-weight:700;cursor:pointer;font-family:inherit;transition:background 0.15s; }
+.msg-send-btn:hover { background:#1a2d4f; }
+.msg-send-btn:disabled { opacity:0.5;cursor:not-allowed; }
+.msg-unread-dot { width:7px;height:7px;border-radius:50%;background:#EF4444;display:inline-block;margin-left:5px;vertical-align:middle; }
 .readiness-card { background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);padding:1.5rem 1.75rem;margin-bottom:1.75rem;display:flex;align-items:center;gap:2rem;flex-wrap:wrap; }
 .readiness-ring-wrap { position:relative;flex-shrink:0;width:110px;height:110px; }
 .readiness-ring-label { position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center; }
@@ -95,6 +120,7 @@ const STATUS_COLORS = {
   outreach_sent: '#2563EB',
   confirmed: '#059669',
   declined: '#EF4444',
+  apply_requested: '#7C3AED',
 }
 
 const ONBOARD_STEPS = [
@@ -120,6 +146,13 @@ export default function Dashboard() {
   const [groupInfo, setGroupInfo] = useState(null)
   const [groupMembers, setGroupMembers] = useState([])
   const [showGroupModal, setShowGroupModal] = useState(false)
+  const [showEditCriteria, setShowEditCriteria] = useState(false)
+  const [criteriaForm, setCriteriaForm] = useState({})
+  const [savingCriteria, setSavingCriteria] = useState(false)
+  const [messages, setMessages] = useState([])
+  const [msgInput, setMsgInput] = useState('')
+  const [sendingMsg, setSendingMsg] = useState(false)
+  const msgThreadRef = useRef(null)
   const [inviteEmails, setInviteEmails] = useState([''])
   const [inviting, setInviting] = useState(false)
   const [inviteSent, setInviteSent] = useState(false)
@@ -128,8 +161,41 @@ export default function Dashboard() {
   const channelRef = useRef(null)
   const toastTimer = useRef(null)
 
-  useEffect(() => { if (user) { loadData(); loadReferrals(); loadDocCount(); loadGroup(); loadGroupMembers() } }, [user])
+  useEffect(() => { if (user) { loadData(); loadReferrals(); loadDocCount(); loadGroup(); loadGroupMembers(); loadMessages() } }, [user])
   useEffect(() => { if (justPaid) setShowGroupModal(true) }, [justPaid])
+
+  async function loadMessages() {
+    const { data } = await supabase.from('messages').select('*').eq('user_id', user.id).order('created_at', { ascending: true })
+    setMessages(data || [])
+    setTimeout(() => { if (msgThreadRef.current) msgThreadRef.current.scrollTop = msgThreadRef.current.scrollHeight }, 50)
+  }
+
+  async function sendMessage() {
+    const body = msgInput.trim()
+    if (!body) return
+    setSendingMsg(true)
+    setMsgInput('')
+    const { data } = await supabase.from('messages').insert({ user_id: user.id, body, from_admin: false }).select().single()
+    if (data) setMessages(prev => [...prev, data])
+    setTimeout(() => { if (msgThreadRef.current) msgThreadRef.current.scrollTop = msgThreadRef.current.scrollHeight }, 50)
+    setSendingMsg(false)
+  }
+
+  async function saveCriteria() {
+    if (!search?.id) return
+    setSavingCriteria(true)
+    await supabase.from('searches').update({
+      min_budget:    criteriaForm.min_budget ? Number(criteriaForm.min_budget) : search.min_budget,
+      max_budget:    criteriaForm.max_budget ? Number(criteriaForm.max_budget) : search.max_budget,
+      min_bed:       criteriaForm.min_bed    ? Number(criteriaForm.min_bed)    : search.min_bed,
+      max_bed:       criteriaForm.max_bed    ? Number(criteriaForm.max_bed)    : search.max_bed,
+      move_in:       criteriaForm.move_in    || search.move_in,
+      neighborhoods: criteriaForm.neighborhoods || search.neighborhoods,
+    }).eq('id', search.id)
+    await loadData()
+    setSavingCriteria(false)
+    setShowEditCriteria(false)
+  }
 
   async function loadGroupMembers() {
     const TENANT_REQUIRED  = ['t1','t2','t3','t4']
@@ -375,6 +441,48 @@ export default function Dashboard() {
         </div>
       )}
 
+      {showEditCriteria && (
+        <div className="edit-modal-overlay" onClick={e => e.target === e.currentTarget && setShowEditCriteria(false)}>
+          <div className="edit-modal">
+            <h3>Edit Search Criteria</h3>
+            <div className="em-row">
+              <div className="em-field">
+                <label>Min Budget</label>
+                <input type="number" placeholder={search?.min_budget} defaultValue={search?.min_budget} onChange={e => setCriteriaForm(f => ({ ...f, min_budget: e.target.value }))} />
+              </div>
+              <div className="em-field">
+                <label>Max Budget</label>
+                <input type="number" placeholder={search?.max_budget} defaultValue={search?.max_budget} onChange={e => setCriteriaForm(f => ({ ...f, max_budget: e.target.value }))} />
+              </div>
+            </div>
+            <div className="em-row">
+              <div className="em-field">
+                <label>Min Beds</label>
+                <input type="number" placeholder={search?.min_bed} defaultValue={search?.min_bed} onChange={e => setCriteriaForm(f => ({ ...f, min_bed: e.target.value }))} />
+              </div>
+              <div className="em-field">
+                <label>Max Beds</label>
+                <input type="number" placeholder={search?.max_bed} defaultValue={search?.max_bed} onChange={e => setCriteriaForm(f => ({ ...f, max_bed: e.target.value }))} />
+              </div>
+            </div>
+            <div className="em-field">
+              <label>Move-In Date</label>
+              <input type="date" defaultValue={search?.move_in} onChange={e => setCriteriaForm(f => ({ ...f, move_in: e.target.value }))} />
+            </div>
+            <div className="em-field">
+              <label>Neighborhoods (comma separated)</label>
+              <input placeholder="Williamsburg, Astoria..." defaultValue={(search?.neighborhoods || []).join(', ')} onChange={e => setCriteriaForm(f => ({ ...f, neighborhoods: e.target.value.split(',').map(s => s.trim()).filter(Boolean) }))} />
+            </div>
+            <div style={{ display:'flex', gap:'0.75rem', marginTop:'0.25rem' }}>
+              <button className="btn btn-primary" style={{ flex:1, justifyContent:'center' }} onClick={saveCriteria} disabled={savingCriteria}>
+                {savingCriteria ? <span className="spinner" /> : 'Save Changes'}
+              </button>
+              <button className="btn btn-outline" onClick={() => setShowEditCriteria(false)}>Cancel</button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="dash">
 
         {toast && (
@@ -509,7 +617,10 @@ export default function Dashboard() {
             </div>
           )}
           <div>
-            <div className="sect-title">Your Criteria</div>
+            <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'0.75rem' }}>
+              <div className="sect-title" style={{ margin:0 }}>Your Criteria</div>
+              <button onClick={() => { setCriteriaForm({}); setShowEditCriteria(true) }} style={{ fontSize:'0.75rem', fontWeight:600, color:'var(--teal)', background:'none', border:'none', cursor:'pointer', fontFamily:'inherit', padding:0 }}>Edit →</button>
+            </div>
             <div className="criteria-card">
               {[
                 ['Budget',        search ? `$${search.min_budget || '?'} – $${search.max_budget || '?'}/mo` : '—'],
@@ -610,10 +721,11 @@ export default function Dashboard() {
                     </div>
                     <div style={{ marginTop:'0.35rem' }}>
                       <span className={`status-pill s-${l.status}`}>
-                        {l.status === 'pending'       ? 'Finding tour time'  :
-                         l.status === 'outreach_sent' ? 'Agent contacted'    :
-                         l.status === 'confirmed'     ? 'Tour confirmed'     :
-                         l.status === 'declined'      ? 'Not available'      : l.status}
+                        {l.status === 'pending'          ? 'Finding tour time'  :
+                         l.status === 'outreach_sent'    ? 'Agent contacted'    :
+                         l.status === 'confirmed'        ? 'Tour confirmed'     :
+                         l.status === 'declined'         ? 'Not available'      :
+                         l.status === 'apply_requested'  ? 'Apply requested'    : l.status}
                       </span>
                       {l.listing_url && (
                         <a href={l.listing_url} target="_blank" rel="noopener noreferrer"
@@ -622,6 +734,28 @@ export default function Dashboard() {
                         </a>
                       )}
                     </div>
+                    {l.notes && l.status === 'confirmed' && (
+                      <div style={{ marginTop:'0.4rem', fontSize:'0.78rem', color:'var(--slate)', background:'#F8FAFB', borderRadius:6, padding:'0.35rem 0.6rem' }}>
+                        📅 {l.notes}
+                      </div>
+                    )}
+                    {(l.status === 'confirmed' || l.status === 'outreach_sent') && l.status !== 'apply_requested' && (
+                      <button
+                        className={`apply-btn${l.status === 'apply_requested' ? ' sent' : ''}`}
+                        onClick={async () => {
+                          await supabase.from('listings').update({ status: 'apply_requested' }).eq('id', l.id)
+                          setListings(prev => prev.map(x => x.id === l.id ? { ...x, status: 'apply_requested' } : x))
+                          showToast(`Apply request sent for ${l.address}`)
+                        }}
+                      >
+                        ✦ I want to apply for this one
+                      </button>
+                    )}
+                    {l.status === 'apply_requested' && (
+                      <div style={{ marginTop:'0.4rem', fontSize:'0.78rem', color:'#7C3AED', fontWeight:600 }}>
+                        ✓ Apply request sent — we'll be in touch
+                      </div>
+                    )}
                   </div>
                   <div style={{ textAlign:'right', flexShrink:0 }}>
                     <div className="tour-price">{l.price ? `$${l.price.toLocaleString()}` : '—'}<small>/month</small></div>
@@ -645,8 +779,9 @@ export default function Dashboard() {
                       <div style={{ fontSize:'0.77rem', color:'var(--slate)', marginTop:'0.15rem' }}>
                         {l.status === 'pending'       ? 'Searching for tour availability' :
                          l.status === 'outreach_sent' ? 'Tour request sent to agent'      :
-                         l.status === 'confirmed'     ? 'Tour confirmed'                  :
-                         l.status === 'declined'      ? 'Listing not available'           : l.status}
+                         l.status === 'confirmed'        ? 'Tour confirmed'                  :
+                         l.status === 'declined'         ? 'Listing not available'           :
+                         l.status === 'apply_requested'  ? 'Apply request sent to team'      : l.status}
                       </div>
                     </div>
                   </div>
@@ -672,6 +807,33 @@ export default function Dashboard() {
                 </div>
               </div>
             )}
+
+            <div>
+              <div className="sect-title">Messages</div>
+              <div className="msg-card">
+                <div className="msg-thread" ref={msgThreadRef}>
+                  {messages.length === 0
+                    ? <p style={{ color:'var(--slate)', fontSize:'0.82rem', textAlign:'center', margin:'auto' }}>No messages yet — send us a note and we'll get back to you.</p>
+                    : messages.map(m => (
+                      <div key={m.id} className={`msg-bubble ${m.from_admin ? 'theirs' : 'mine'}`}>
+                        {m.body}
+                        <div className="msg-time">{new Date(m.created_at).toLocaleString('en-US', { month:'short', day:'numeric', hour:'numeric', minute:'2-digit' })}</div>
+                      </div>
+                    ))
+                  }
+                </div>
+                <div className="msg-input-row">
+                  <input
+                    className="msg-input"
+                    placeholder="Message AptPilot..."
+                    value={msgInput}
+                    onChange={e => setMsgInput(e.target.value)}
+                    onKeyDown={e => e.key === 'Enter' && !e.shiftKey && sendMessage()}
+                  />
+                  <button className="msg-send-btn" onClick={sendMessage} disabled={sendingMsg || !msgInput.trim()}>Send</button>
+                </div>
+              </div>
+            </div>
 
             <div>
               <div className="sect-title">My Documents</div>

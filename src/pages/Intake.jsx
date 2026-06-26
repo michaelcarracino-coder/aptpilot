@@ -186,77 +186,11 @@ export default function Intake() {
                 <div className="field" style={{ justifyContent:'flex-end' }}><label>Email (from account)</label><input value={user?.email} disabled style={{ background:'var(--surface)', color:'var(--slate)' }} /></div>
               </div>
             </div>
-            <div className="section-card">
-              <div className="section-label"><span className="section-label-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></span>Upload Documents</div>
-
-              <div className="doc-outer-layout">
-                <div>
-                  {/* Role toggle */}
-                  <div className="role-tabs">
-                    <button className={`role-tab ${docRole === 'tenant' ? 'on' : ''}`} onClick={() => setDocRole('tenant')}>I'm a Tenant</button>
-                    <button className={`role-tab ${docRole === 'guarantor' ? 'on' : ''}`} onClick={() => setDocRole('guarantor')}>I'm a Guarantor</button>
-                  </div>
-
-                  {/* Per-doc checklist with individual upload */}
-                  <div className="doc-checklist">
-                    {(docRole === 'tenant' ? TENANT_DOCS : GUARANTOR_DOCS).map((doc, i) => {
-                      const uploaded = docFiles[doc.id] || []
-                      const checked = uploaded.length > 0
-                      const isUploading = uploadingDoc === doc.id
-                      return (
-                        <div key={doc.id} className={`doc-check-item${checked ? ' checked' : ''}${doc.optional ? ' optional' : ''}`}>
-                          <div className="doc-check-box" style={{ marginTop:'2px' }}>
-                            {checked && <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>}
-                          </div>
-                          <div style={{ flex:1 }}>
-                            <div className="doc-check-label">{i + 1}. {doc.label}</div>
-                            {doc.sub && <div className="doc-check-sub">{doc.sub}</div>}
-                            {doc.optional && <div className="doc-check-optional">Optional</div>}
-                            {uploaded.map((file, j) => (
-                              <div className="doc-uploaded-file" key={j}>
-                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#059669" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                                <span style={{ flex:1 }}>{file.name}</span>
-                                <button
-                                  onClick={() => handleDocDelete(doc.id, file.path)}
-                                  style={{ background:'none', border:'none', cursor:'pointer', color:'#94A3B8', padding:'0 0 0 0.3rem', lineHeight:1, fontSize:'0.9rem' }}
-                                  title="Remove file"
-                                >✕</button>
-                              </div>
-                            ))}
-                            <label className="doc-upload-btn">
-                              <input
-                                type="file"
-                                accept=".pdf,image/*"
-                                multiple
-                                style={{ display:'none' }}
-                                disabled={isUploading}
-                                onChange={async (e) => {
-                                  await handleDocUpload(doc.id, Array.from(e.target.files))
-                                  e.target.value = ''
-                                }}
-                              />
-                              {isUploading
-                                ? <><span className="spinner" style={{ borderColor:'rgba(10,191,191,0.3)', borderTopColor:'var(--teal)', width:11, height:11, display:'inline-block' }} /> Uploading…</>
-                                : <>{checked ? '+ Add another file' : '↑ Upload file'}</>
-                              }
-                            </label>
-                          </div>
-                        </div>
-                      )
-                    })}
-                  </div>{/* end doc-checklist */}
-                </div>{/* end left column */}
-
-                {/* Sidenote */}
-                <div className="doc-sidenote">
-                  <div className="doc-sidenote-title">
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                    Why do I need to upload my documents?
-                  </div>
-                  <p className="doc-sidenote-body">
-                    Having your documents prepared before viewing is vital to the approval process. Many apartments in NYC are first come, first serve — so having everything ready gives you a huge leg up against the competition.
-                  </p>
-                </div>
+            <div style={{ background:'linear-gradient(135deg,#EFF8F8,#E0F5F5)', border:'1.5px solid rgba(10,191,191,0.25)', borderRadius:12, padding:'1.25rem 1.5rem', display:'flex', gap:'1rem', alignItems:'flex-start' }}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink:0, marginTop:2 }}><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              <div>
+                <div style={{ fontWeight:700, fontSize:'0.88rem', color:'var(--navy)', marginBottom:'0.25rem' }}>Documents are uploaded from your dashboard</div>
+                <div style={{ fontSize:'0.82rem', color:'#4A6080', lineHeight:1.6 }}>After completing this form, head to <strong>My Documents</strong> in your dashboard to upload your ID, pay stubs, bank statements, and tax returns. Having everything ready before touring gives you a major edge — apartments in NYC move fast.</div>
               </div>
             </div>
           </div>

@@ -35,6 +35,14 @@ const css = `
 .s-outreach_sent { background:#EFF6FF; color:#2563EB; }
 .s-confirmed { background:#ECFDF5; color:#059669; }
 .s-declined { background:#FEF2F2; color:#EF4444; }
+.s-apply_requested { background:#F5F3FF; color:#7C3AED; }
+.admin-msg-panel { background:#fff; border-radius:12px; box-shadow:var(--shadow); padding:1.25rem; margin-bottom:1.5rem; }
+.admin-msg-panel h3 { font-size:0.85rem; font-weight:700; color:var(--navy); margin-bottom:0.85rem; display:flex; align-items:center; gap:0.5rem; }
+.admin-msg-thread { display:flex; flex-direction:column; gap:0.5rem; max-height:220px; overflow-y:auto; margin-bottom:0.75rem; }
+.admin-msg-bubble { max-width:80%; padding:0.5rem 0.8rem; border-radius:12px; font-size:0.83rem; line-height:1.5; }
+.admin-msg-bubble.from-user { align-self:flex-start; background:#F1F5F9; color:var(--navy); }
+.admin-msg-bubble.from-admin { align-self:flex-end; background:var(--navy); color:#fff; }
+.admin-msg-bubble .msg-meta { font-size:0.68rem; opacity:0.55; margin-top:0.2rem; }
 .outreach-btn { background:var(--teal); color:white; border:none; border-radius:7px; padding:0.4rem 0.85rem; font-size:0.78rem; font-weight:600; cursor:pointer; font-family:inherit; transition:all 0.15s; }
 .outreach-btn:hover { background:var(--teal-hover); }
 .outreach-btn:disabled { opacity:0.5; cursor:not-allowed; }
@@ -51,6 +59,9 @@ export default function AdminListings() {
   const [saving, setSaving] = useState(false)
   const [sendingId, setSendingId] = useState(null)
   const [tourTimes, setTourTimes] = useState({})
+  const [searchMessages, setSearchMessages] = useState([])
+  const [adminMsgInput, setAdminMsgInput] = useState('')
+  const [sendingAdminMsg, setSendingAdminMsg] = useState(false)
   const [form, setForm] = useState({
     address:'', unit:'', bedrooms:'', bathrooms:'', sqft:'', price:'',
     agent_name:'', agent_email:'', agent_phone:'', listing_url:'', notes:''
@@ -76,6 +87,18 @@ export default function AdminListings() {
     setSelectedSearch(search)
     const { data } = await supabase.from('listings').select('*').eq('search_id', search.id).order('created_at', { ascending: false })
     setListings(data || [])
+    const { data: msgs } = await supabase.from('messages').select('*').eq('user_id', search.user_id).order('created_at', { ascending: true })
+    setSearchMessages(msgs || [])
+  }
+
+  async function sendAdminReply() {
+    const body = adminMsgInput.trim()
+    if (!body || !selectedSearch) return
+    setSendingAdminMsg(true)
+    setAdminMsgInput('')
+    const { data } = await supabase.from('messages').insert({ user_id: selectedSearch.user_id, body, from_admin: true }).select().single()
+    if (data) setSearchMessages(prev => [...prev, data])
+    setSendingAdminMsg(false)
   }
 
   async function handleAddListing(e) {
@@ -170,6 +193,35 @@ export default function AdminListings() {
             </div>
           ))}
         </div>
+
+        {selectedSearch && searchMessages.length > 0 && (
+          <div className="admin-msg-panel">
+            <h3>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+              Messages — {selectedSearch.profiles?.email}
+            </h3>
+            <div className="admin-msg-thread">
+              {searchMessages.map(m => (
+                <div key={m.id} className={`admin-msg-bubble ${m.from_admin ? 'from-admin' : 'from-user'}`}>
+                  {m.body}
+                  <div className="msg-meta">{m.from_admin ? 'AptPilot' : 'User'} · {new Date(m.created_at).toLocaleString('en-US', { month:'short', day:'numeric', hour:'numeric', minute:'2-digit' })}</div>
+                </div>
+              ))}
+            </div>
+            <div style={{ display:'flex', gap:'0.5rem' }}>
+              <input
+                style={{ flex:1, padding:'0.5rem 0.75rem', border:'1.5px solid var(--surface-mid)', borderRadius:8, fontSize:'0.85rem', fontFamily:'inherit', outline:'none' }}
+                placeholder="Reply to user..."
+                value={adminMsgInput}
+                onChange={e => setAdminMsgInput(e.target.value)}
+                onKeyDown={e => e.key === 'Enter' && sendAdminReply()}
+              />
+              <button className="outreach-btn" onClick={sendAdminReply} disabled={sendingAdminMsg || !adminMsgInput.trim()}>
+                {sendingAdminMsg ? '...' : 'Send'}
+              </button>
+            </div>
+          </div>
+        )}
 
         {selectedSearch && (
           <>
