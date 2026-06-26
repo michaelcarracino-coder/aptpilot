@@ -42,94 +42,107 @@ const css = `
 .apt-cta a { display: inline-block; background: var(--teal); color: #0C1628; font-weight: 700; font-size: 0.95rem; padding: 0.75rem 2rem; border-radius: 100px; text-decoration: none; }
 `
 
-// [lat, lon] polygons per neighborhood card
-const NBHDS = [
-  // ── Manhattan ──────────────────────────────────────────────
-  { name:'Financial District',   section:'manhattan', price:'$2,800–$5,500',  fill:'#0ABFBF',
-    coords:[[40.714,-74.014],[40.714,-73.998],[40.700,-73.998],[40.700,-74.020]] },
-  { name:'Tribeca',              section:'manhattan', price:'$4,500–$15,000', fill:'#0ABFBF',
-    coords:[[40.722,-74.012],[40.722,-74.000],[40.714,-74.000],[40.714,-74.012]] },
-  { name:'SoHo / NoHo / Nolita', section:'manhattan', price:'$4,000–$12,000', fill:'#0ABFBF',
-    coords:[[40.729,-74.005],[40.729,-73.993],[40.720,-73.993],[40.720,-74.005]] },
-  { name:'Lower East Side',      section:'manhattan', price:'$2,400–$5,000',  fill:'#0ABFBF',
-    coords:[[40.729,-73.993],[40.729,-73.973],[40.714,-73.973],[40.714,-73.993]] },
-  { name:'East Village',         section:'manhattan', price:'$2,600–$5,500',  fill:'#0ABFBF',
-    coords:[[40.738,-73.993],[40.738,-73.973],[40.729,-73.973],[40.729,-73.993]] },
-  { name:'West Village',         section:'manhattan', price:'$3,500–$9,000',  fill:'#0ABFBF',
-    coords:[[40.738,-74.011],[40.738,-74.000],[40.729,-74.000],[40.729,-74.011]] },
-  { name:'Greenwich Village',    section:'manhattan', price:'$3,000–$7,000',  fill:'#0ABFBF',
-    coords:[[40.738,-74.000],[40.738,-73.993],[40.729,-73.993],[40.729,-74.000]] },
-  { name:'Chelsea',              section:'manhattan', price:'$3,200–$7,000',  fill:'#0ABFBF',
-    coords:[[40.751,-74.011],[40.751,-73.997],[40.738,-73.997],[40.738,-74.011]] },
-  { name:'Midtown',              section:'manhattan', price:'$3,000–$6,500',  fill:'#0ABFBF',
-    coords:[[40.763,-74.004],[40.763,-73.954],[40.751,-73.960],[40.751,-74.004]] },
-  { name:'Upper East Side',      section:'manhattan', price:'$2,800–$6,500',  fill:'#0ABFBF',
-    coords:[[40.795,-73.969],[40.795,-73.943],[40.763,-73.951],[40.763,-73.981]] },
-  { name:'Upper West Side',      section:'manhattan', price:'$2,800–$6,000',  fill:'#0ABFBF',
-    coords:[[40.803,-73.975],[40.803,-74.005],[40.763,-73.998],[40.763,-73.983]] },
-  // ── Harlem & Upper Manhattan ───────────────────────────────
-  { name:'Morningside Heights',  section:'harlem',    price:'$2,000–$4,000',  fill:'#00CCAA',
-    coords:[[40.810,-73.963],[40.810,-73.988],[40.803,-73.988],[40.803,-73.963]] },
-  { name:'Central Harlem',       section:'harlem',    price:'$1,800–$3,800',  fill:'#00CCAA',
-    coords:[[40.825,-73.944],[40.825,-73.966],[40.807,-73.966],[40.807,-73.944]] },
-  { name:'East Harlem',          section:'harlem',    price:'$1,600–$3,200',  fill:'#00CCAA',
-    coords:[[40.807,-73.944],[40.807,-73.923],[40.795,-73.923],[40.795,-73.944]] },
-  { name:'Washington Heights',   section:'harlem',    price:'$1,500–$2,800',  fill:'#00CCAA',
-    coords:[[40.852,-73.934],[40.852,-73.966],[40.831,-73.966],[40.831,-73.934]] },
-  { name:'Inwood',               section:'harlem',    price:'$1,400–$2,600',  fill:'#00CCAA',
-    coords:[[40.876,-73.920],[40.876,-73.952],[40.852,-73.952],[40.852,-73.920]] },
-  // ── Brooklyn ───────────────────────────────────────────────
-  { name:'Williamsburg',         section:'brooklyn',  price:'$2,800–$6,000',  fill:'#1D9E75',
-    coords:[[40.718,-73.963],[40.718,-73.942],[40.700,-73.942],[40.700,-73.963]] },
-  { name:'Greenpoint',           section:'brooklyn',  price:'$2,500–$5,000',  fill:'#1D9E75',
-    coords:[[40.734,-73.959],[40.734,-73.941],[40.718,-73.941],[40.718,-73.959]] },
-  { name:'DUMBO',                section:'brooklyn',  price:'$3,200–$8,000',  fill:'#1D9E75',
-    coords:[[40.703,-73.990],[40.703,-73.982],[40.695,-73.982],[40.695,-73.990]] },
-  { name:'Brooklyn Heights',     section:'brooklyn',  price:'$2,800–$6,500',  fill:'#1D9E75',
-    coords:[[40.698,-73.999],[40.698,-73.990],[40.690,-73.990],[40.690,-73.999]] },
-  { name:'Cobble Hill / Carroll Gardens', section:'brooklyn', price:'$2,600–$5,500', fill:'#1D9E75',
-    coords:[[40.690,-74.003],[40.690,-73.990],[40.678,-73.990],[40.678,-74.003]] },
-  { name:'Park Slope',           section:'brooklyn',  price:'$2,500–$5,500',  fill:'#1D9E75',
-    coords:[[40.679,-73.991],[40.679,-73.973],[40.662,-73.973],[40.662,-73.991]] },
-  { name:'Crown Heights',        section:'brooklyn',  price:'$1,900–$3,500',  fill:'#1D9E75',
-    coords:[[40.675,-73.963],[40.675,-73.943],[40.659,-73.943],[40.659,-73.963]] },
-  { name:'Bed-Stuy',             section:'brooklyn',  price:'$1,800–$3,800',  fill:'#1D9E75',
-    coords:[[40.697,-73.965],[40.697,-73.942],[40.679,-73.942],[40.679,-73.965]] },
-  { name:'Bushwick',             section:'brooklyn',  price:'$1,700–$3,200',  fill:'#1D9E75',
-    coords:[[40.711,-73.925],[40.711,-73.904],[40.694,-73.904],[40.694,-73.925]] },
-  { name:'Bay Ridge',            section:'brooklyn',  price:'$1,600–$2,800',  fill:'#1D9E75',
-    coords:[[40.649,-74.026],[40.649,-74.003],[40.626,-74.003],[40.626,-74.026]] },
-  // ── Queens ─────────────────────────────────────────────────
-  { name:'Long Island City',     section:'queens',    price:'$2,600–$5,500',  fill:'#2BB5A0',
-    coords:[[40.757,-73.956],[40.757,-73.932],[40.740,-73.932],[40.740,-73.956]] },
-  { name:'Astoria',              section:'queens',    price:'$2,000–$3,800',  fill:'#2BB5A0',
-    coords:[[40.776,-73.939],[40.776,-73.912],[40.757,-73.912],[40.757,-73.939]] },
-  { name:'Jackson Heights',      section:'queens',    price:'$1,500–$2,600',  fill:'#2BB5A0',
-    coords:[[40.758,-73.898],[40.758,-73.874],[40.745,-73.874],[40.745,-73.898]] },
-  { name:'Ridgewood',            section:'queens',    price:'$1,700–$3,000',  fill:'#2BB5A0',
-    coords:[[40.713,-73.909],[40.713,-73.891],[40.698,-73.891],[40.698,-73.909]] },
-  { name:'Sunnyside & Woodside', section:'queens',    price:'$1,600–$2,800',  fill:'#2BB5A0',
-    coords:[[40.749,-73.926],[40.749,-73.899],[40.733,-73.899],[40.733,-73.926]] },
-  { name:'Forest Hills & Rego Park', section:'queens', price:'$1,700–$3,200', fill:'#2BB5A0',
-    coords:[[40.738,-73.858],[40.738,-73.835],[40.719,-73.835],[40.719,-73.858]] },
-  // ── The Bronx ──────────────────────────────────────────────
-  { name:'Mott Haven',           section:'bronx',     price:'$1,500–$2,800',  fill:'#7CCBBF',
-    coords:[[40.819,-73.933],[40.819,-73.915],[40.804,-73.915],[40.804,-73.933]] },
-  { name:'Fordham / Belmont',    section:'bronx',     price:'$1,200–$2,200',  fill:'#7CCBBF',
-    coords:[[40.863,-73.907],[40.863,-73.882],[40.847,-73.882],[40.847,-73.907]] },
-  { name:'Riverdale',            section:'bronx',     price:'$1,600–$3,200',  fill:'#7CCBBF',
-    coords:[[40.903,-73.925],[40.903,-73.901],[40.883,-73.901],[40.883,-73.925]] },
-  { name:'Pelham Bay & City Island', section:'bronx', price:'$1,400–$2,400',  fill:'#7CCBBF',
-    coords:[[40.875,-73.848],[40.875,-73.820],[40.848,-73.820],[40.848,-73.848]] },
-  // ── Hoboken & Jersey City ──────────────────────────────────
-  { name:'Hoboken',              section:'hoboken-jc', price:'$2,200–$4,500', fill:'#5BBFB5',
-    coords:[[40.750,-74.061],[40.750,-74.026],[40.733,-74.026],[40.733,-74.061]] },
-  { name:'Jersey City Downtown', section:'hoboken-jc', price:'$2,400–$5,000', fill:'#5BBFB5',
-    coords:[[40.726,-74.052],[40.726,-74.030],[40.711,-74.030],[40.711,-74.052]] },
-  { name:'Journal Square',       section:'hoboken-jc', price:'$1,600–$2,800', fill:'#5BBFB5',
-    coords:[[40.742,-74.074],[40.742,-74.053],[40.727,-74.053],[40.727,-74.074]] },
-  { name:'Jersey City Heights',  section:'hoboken-jc', price:'$1,500–$2,600', fill:'#5BBFB5',
-    coords:[[40.754,-74.066],[40.754,-74.048],[40.742,-74.048],[40.742,-74.066]] },
+const BOROUGHS = [
+  {
+    id: 'manhattan',
+    label: 'Manhattan',
+    price: '$2,400–$15,000/mo',
+    fill: '#0ABFBF',
+    coords: [
+      [40.876,-73.910],[40.868,-73.916],[40.857,-73.929],[40.848,-73.934],
+      [40.836,-73.941],[40.820,-73.950],[40.807,-73.958],[40.800,-73.960],
+      [40.795,-73.972],[40.785,-73.977],[40.775,-73.980],[40.763,-73.983],
+      [40.755,-73.990],[40.745,-73.997],[40.735,-74.005],[40.726,-74.010],
+      [40.718,-74.012],[40.710,-74.015],[40.702,-74.018],[40.700,-74.016],
+      [40.700,-74.000],[40.705,-73.990],[40.710,-73.976],[40.718,-73.968],
+      [40.726,-73.966],[40.735,-73.970],[40.740,-73.975],[40.748,-73.978],
+      [40.757,-73.978],[40.763,-73.975],[40.770,-73.970],[40.780,-73.963],
+      [40.790,-73.954],[40.800,-73.944],[40.810,-73.938],[40.820,-73.932],
+      [40.830,-73.926],[40.840,-73.921],[40.852,-73.918],[40.860,-73.912],
+      [40.876,-73.910],
+    ],
+  },
+  {
+    id: 'harlem',
+    label: 'Harlem & Upper Manhattan',
+    price: '$1,400–$4,000/mo',
+    fill: '#00CCAA',
+    coords: [
+      [40.876,-73.910],[40.868,-73.916],[40.857,-73.929],[40.848,-73.934],
+      [40.836,-73.941],[40.820,-73.950],[40.807,-73.958],[40.800,-73.960],
+      [40.795,-73.972],[40.785,-73.977],[40.775,-73.980],[40.763,-73.983],
+      [40.763,-73.975],[40.770,-73.970],[40.780,-73.963],[40.790,-73.954],
+      [40.800,-73.944],[40.810,-73.938],[40.820,-73.932],[40.830,-73.926],
+      [40.840,-73.921],[40.852,-73.918],[40.860,-73.912],[40.876,-73.910],
+    ],
+  },
+  {
+    id: 'brooklyn',
+    label: 'Brooklyn',
+    price: '$1,600–$8,000/mo',
+    fill: '#1D9E75',
+    coords: [
+      [40.740,-74.020],[40.739,-74.016],[40.732,-74.010],[40.722,-74.003],
+      [40.712,-73.997],[40.700,-73.994],[40.690,-73.988],[40.680,-73.980],
+      [40.668,-73.972],[40.658,-73.960],[40.650,-73.950],[40.640,-73.940],
+      [40.630,-73.930],[40.620,-73.940],[40.612,-73.958],[40.610,-73.970],
+      [40.614,-73.982],[40.620,-73.993],[40.628,-74.002],[40.635,-74.010],
+      [40.642,-74.018],[40.650,-74.025],[40.658,-74.022],[40.665,-74.018],
+      [40.672,-74.013],[40.682,-74.006],[40.692,-74.000],[40.702,-73.995],
+      [40.710,-73.990],[40.720,-73.987],[40.730,-73.988],[40.736,-73.992],
+      [40.740,-73.998],[40.740,-74.020],
+    ],
+  },
+  {
+    id: 'queens',
+    label: 'Queens',
+    price: '$1,500–$5,500/mo',
+    fill: '#2BB5A0',
+    coords: [
+      [40.800,-73.962],[40.793,-73.958],[40.785,-73.950],[40.775,-73.942],
+      [40.765,-73.932],[40.758,-73.920],[40.753,-73.908],[40.748,-73.896],
+      [40.742,-73.880],[40.738,-73.862],[40.734,-73.844],[40.728,-73.832],
+      [40.718,-73.832],[40.708,-73.840],[40.698,-73.852],[40.690,-73.862],
+      [40.680,-73.870],[40.672,-73.878],[40.665,-73.886],[40.660,-73.896],
+      [40.655,-73.908],[40.652,-73.920],[40.650,-73.932],[40.650,-73.940],
+      [40.658,-73.960],[40.668,-73.972],[40.680,-73.980],[40.690,-73.988],
+      [40.700,-73.994],[40.712,-73.997],[40.722,-74.003],[40.732,-74.010],
+      [40.739,-74.016],[40.740,-74.020],[40.740,-73.998],[40.736,-73.992],
+      [40.730,-73.988],[40.720,-73.987],[40.710,-73.990],[40.718,-73.968],
+      [40.726,-73.966],[40.735,-73.970],[40.745,-73.975],[40.755,-73.975],
+      [40.763,-73.975],[40.763,-73.983],[40.775,-73.980],[40.785,-73.977],
+      [40.795,-73.972],[40.800,-73.960],[40.800,-73.962],
+    ],
+  },
+  {
+    id: 'bronx',
+    label: 'The Bronx',
+    price: '$1,200–$3,200/mo',
+    fill: '#7CCBBF',
+    coords: [
+      [40.916,-73.896],[40.910,-73.880],[40.902,-73.862],[40.892,-73.846],
+      [40.880,-73.830],[40.868,-73.820],[40.858,-73.824],[40.848,-73.836],
+      [40.840,-73.848],[40.832,-73.858],[40.826,-73.870],[40.820,-73.880],
+      [40.815,-73.892],[40.812,-73.904],[40.810,-73.916],[40.810,-73.938],
+      [40.820,-73.932],[40.830,-73.926],[40.840,-73.921],[40.852,-73.918],
+      [40.860,-73.912],[40.868,-73.916],[40.876,-73.910],[40.882,-73.900],
+      [40.890,-73.892],[40.900,-73.890],[40.910,-73.892],[40.916,-73.896],
+    ],
+  },
+  {
+    id: 'hoboken-jc',
+    label: 'Hoboken & Jersey City',
+    price: '$1,500–$5,000/mo',
+    fill: '#5BBFB5',
+    coords: [
+      [40.768,-74.078],[40.762,-74.070],[40.754,-74.062],[40.746,-74.055],
+      [40.738,-74.050],[40.728,-74.045],[40.718,-74.040],[40.708,-74.038],
+      [40.700,-74.038],[40.695,-74.042],[40.694,-74.050],[40.696,-74.058],
+      [40.700,-74.065],[40.706,-74.072],[40.714,-74.076],[40.722,-74.080],
+      [40.730,-74.082],[40.740,-74.082],[40.750,-74.080],[40.760,-74.078],
+      [40.768,-74.078],
+    ],
+  },
 ]
 
 function NeighborhoodMap() {
@@ -153,17 +166,27 @@ function NeighborhoodMap() {
       maxZoom: 19,
     }).addTo(map)
 
-    NBHDS.forEach(nbhd => {
-      const base = { color: 'rgba(12,22,40,0.5)', weight: 1, fillColor: nbhd.fill, fillOpacity: 0.28 }
-      const hot  = { color: '#0C1628', weight: 2,   fillColor: nbhd.fill, fillOpacity: 0.65 }
+    BOROUGHS.forEach(b => {
+      const base = { color: 'rgba(12,22,40,0.4)', weight: 1.5, fillColor: b.fill, fillOpacity: 0.30 }
+      const hot  = { color: '#0C1628',             weight: 2.5, fillColor: b.fill, fillOpacity: 0.58 }
 
-      const poly = L.polygon(nbhd.coords, base).addTo(map)
+      const poly = L.polygon(b.coords, base).addTo(map)
+
+      const center = poly.getBounds().getCenter()
+      const label = L.divIcon({
+        className: '',
+        html: `<div style="font:700 12px/1.3 Inter,system-ui,sans-serif;color:#0C1628;white-space:nowrap;
+               text-shadow:0 0 4px #fff,0 0 4px #fff,0 0 4px #fff,0 0 4px #fff;
+               pointer-events:none;transform:translate(-50%,-50%)">${b.label}</div>`,
+        iconSize: [0, 0],
+      })
+      L.marker(center, { icon: label, interactive: false }).addTo(map)
 
       poly.on('mouseover', function () {
         this.setStyle(hot).bringToFront()
         if (infoRef.current) {
           infoRef.current.innerHTML =
-            `<strong>${nbhd.name}</strong><span>${nbhd.price}/mo</span><em>· click to explore</em>`
+            `<strong>${b.label}</strong><span>${b.price}</span><em>· click to explore</em>`
         }
       })
       poly.on('mouseout', function () {
@@ -171,33 +194,22 @@ function NeighborhoodMap() {
         if (infoRef.current) infoRef.current.innerHTML = '&nbsp;'
       })
       poly.on('click', () => {
-        document.getElementById(nbhd.section)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+        document.getElementById(b.id)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
       })
-
-      const center = poly.getBounds().getCenter()
-      const label = L.divIcon({
-        className: '',
-        html: `<div style="font:600 10px/1.2 Inter,system-ui,sans-serif;color:#0C1628;white-space:nowrap;text-shadow:0 0 3px #fff,0 0 3px #fff,0 0 3px #fff;pointer-events:none;transform:translate(-50%,-50%)">${nbhd.name}</div>`,
-        iconSize: [0, 0],
-      })
-      L.marker(center, { icon: label, interactive: false }).addTo(map)
     })
 
-    const allLatLngs = NBHDS.flatMap(n => n.coords)
-    map.fitBounds(L.latLngBounds(allLatLngs), { padding: [24, 24] })
+    const allCoords = BOROUGHS.flatMap(b => b.coords)
+    map.fitBounds(L.latLngBounds(allCoords), { padding: [32, 32] })
     setTimeout(() => map.invalidateSize(), 100)
 
-    return () => {
-      map.remove()
-      mapRef.current = null
-    }
+    return () => { map.remove(); mapRef.current = null }
   }, [])
 
   return (
     <div style={{ margin: '0 0 3rem' }}>
-      <p className="nbhd-map-hint">Hover a neighborhood to explore · Click to jump to its section</p>
+      <p className="nbhd-map-hint">Hover a borough to explore · Click to jump to its section</p>
       <div className="nbhd-map-wrap">
-        <div ref={containerRef} style={{ height: 540, width: '100%' }} />
+        <div ref={containerRef} style={{ height: 480, width: '100%' }} />
         <div ref={infoRef} className="nbhd-map-info">&nbsp;</div>
       </div>
     </div>
