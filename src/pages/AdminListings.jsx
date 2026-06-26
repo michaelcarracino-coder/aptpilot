@@ -66,6 +66,8 @@ export default function AdminListings() {
     address:'', unit:'', bedrooms:'', bathrooms:'', sqft:'', price:'',
     agent_name:'', agent_email:'', agent_phone:'', listing_url:'', notes:''
   })
+  const [scraping, setScraping] = useState(false)
+  const [scrapeError, setScrapeError] = useState('')
 
   useEffect(() => { if (user) loadSearches() }, [user])
   useEffect(() => {
@@ -101,19 +103,64 @@ export default function AdminListings() {
     setSendingAdminMsg(false)
   }
 
+  async function scrapeUrl(url) {
+    if (!url || !url.includes('streeteasy.com')) return
+    setScraping(true)
+    setScrapeError('')
+    try {
+      const res = await fetch('/api/scrape-listing', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url }),
+      })
+      const data = await res.json()
+      if (data.error) { setScrapeError('Could not auto-fill — fill in manually.'); return }
+      setForm(f => ({
+        ...f,
+        address: data.address || f.address,
+        unit: data.unit || f.unit,
+        price: data.price || f.price,
+        bedrooms: data.bedrooms || f.bedrooms,
+        bathrooms: data.bathrooms || f.bathrooms,
+        sqft: data.sqft || f.sqft,
+        agent_name: data.agent_name || f.agent_name,
+        agent_email: data.agent_email || f.agent_email,
+        agent_phone: data.agent_phone || f.agent_phone,
+        listing_url: url,
+      }))
+    } catch { setScrapeError('Could not auto-fill — fill in manually.') }
+    setScraping(false)
+  }
+
   async function handleAddListing(e) {
     e.preventDefault()
     if (!selectedSearch) return
     setSaving(true)
-    const { error } = await supabase.from('listings').insert({
+    const { data: inserted, error } = await supabase.from('listings').insert({
       ...form,
       price: parseInt(form.price),
       search_id: selectedSearch.id,
       user_id: selectedSearch.user_id,
       status: 'pending',
-    })
-    if (!error) {
+    }).select().single()
+
+    if (!error && inserted) {
       setForm({ address:'', unit:'', bedrooms:'', bathrooms:'', sqft:'', price:'', agent_name:'', agent_email:'', agent_phone:'', listing_url:'', notes:'' })
+      setScrapeError('')
+      // Auto-send outreach if agent contact info is present
+      if (inserted.agent_email || inserted.agent_phone) {
+        await fetch('/api/outreach-agent', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            listing: inserted,
+            userEmail: selectedSearch?.profiles?.email,
+            userName: selectedSearch?.profiles?.full_name,
+            tourTimes: selectedSearch?.tour_times || [],
+            searchId: selectedSearch?.id,
+          }),
+        })
+      }
       selectSearch(selectedSearch)
     }
     setSaving(false)
@@ -228,6 +275,35 @@ export default function AdminListings() {
             {/* Add listing form */}
             <form className="add-listing-form" onSubmit={handleAddListing}>
               <h2>Add Listing for {selectedSearch.profiles?.email}</h2>
+
+              {/* StreetEasy URL auto-fill */}
+              <div className="field" style={{ marginBottom:'1rem' }}>
+                <label style={{ display:'flex', alignItems:'center', gap:'0.4rem' }}>
+                  StreetEasy URL
+                  <span style={{ fontSize:'0.72rem', color:'var(--teal)', fontWeight:600, background:'var(--teal-pale)', borderRadius:4, padding:'0.1rem 0.4rem' }}>Auto-fills form</span>
+                </label>
+                <div style={{ display:'flex', gap:'0.5rem' }}>
+                  <input
+                    placeholder="https://streeteasy.com/building/..."
+                    value={form.listing_url}
+                    onChange={e => { setForm(f=>({...f, listing_url:e.target.value})); setScrapeError('') }}
+                    onBlur={e => scrapeUrl(e.target.value)}
+                    style={{ flex:1 }}
+                  />
+                  <button
+                    type="button"
+                    className="outreach-btn"
+                    onClick={() => scrapeUrl(form.listing_url)}
+                    disabled={scraping || !form.listing_url}
+                    style={{ whiteSpace:'nowrap' }}
+                  >
+                    {scraping ? '…' : 'Auto-fill'}
+                  </button>
+                </div>
+                {scrapeError && <div style={{ fontSize:'0.75rem', color:'#D97706', marginTop:'0.3rem' }}>{scrapeError}</div>}
+                {scraping && <div style={{ fontSize:'0.75rem', color:'var(--teal)', marginTop:'0.3rem' }}>Fetching listing data…</div>}
+              </div>
+
               <div className="form-3">
                 <div className="field"><label>Address</label><input placeholder="245 E 63rd St" value={form.address} onChange={e => setForm(f=>({...f,address:e.target.value}))} required /></div>
                 <div className="field"><label>Unit</label><input placeholder="Apt 8C" value={form.unit} onChange={e => setForm(f=>({...f,unit:e.target.value}))} /></div>
@@ -243,9 +319,9 @@ export default function AdminListings() {
                 <div className="field"><label>Agent Email</label><input type="email" placeholder="agent@realty.com" value={form.agent_email} onChange={e => setForm(f=>({...f,agent_email:e.target.value}))} /></div>
                 <div className="field"><label>Agent Phone</label><input placeholder="+1 (212) 555-0100" value={form.agent_phone} onChange={e => setForm(f=>({...f,agent_phone:e.target.value}))} /></div>
               </div>
-              <div className="form-2">
-                <div className="field"><label>StreetEasy URL</label><input placeholder="https://streeteasy.com/..." value={form.listing_url} onChange={e => setForm(f=>({...f,listing_url:e.target.value}))} /></div>
-                <div className="field"><label>Notes</label><input placeholder="Doorman, laundry in unit..." value={form.notes} onChange={e => setForm(f=>({...f,notes:e.target.value}))} /></div>
+              <div className="field" style={{ marginBottom:'0.75rem' }}>
+                <label>Notes</label>
+                <input placeholder="Doorman, laundry in unit, no fee…" value={form.notes} onChange={e => setForm(f=>({...f,notes:e.target.value}))} />
               </div>
               <button className="btn btn-primary" type="submit" disabled={saving}>
                 {saving ? <span className="spinner"/> : '+ Add Listing'}
@@ -271,13 +347,15 @@ export default function AdminListings() {
                   </div>
                 </div>
                 <div className="listing-actions">
-                  <button
-                    className="outreach-btn"
-                    onClick={() => sendOutreach(l)}
-                    disabled={sendingId === l.id || l.status === 'outreach_sent' || l.status === 'confirmed'}
-                  >
-                    {sendingId === l.id ? '...' : l.status === 'outreach_sent' ? 'Sent ✓' : l.status === 'confirmed' ? 'Confirmed ✓' : 'Send Outreach'}
-                  </button>
+                  {(l.status === 'outreach_sent' || l.status === 'confirmed') ? null : (
+                    <button
+                      className="outreach-btn"
+                      onClick={() => sendOutreach(l)}
+                      disabled={sendingId === l.id}
+                    >
+                      {sendingId === l.id ? '...' : 'Send Outreach'}
+                    </button>
+                  )}
                   {l.status === 'outreach_sent' && (
                     <>
                       <input
