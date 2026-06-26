@@ -99,6 +99,19 @@ const css = `
 .msg-send-btn:hover { background:#1a2d4f; }
 .msg-send-btn:disabled { opacity:0.5;cursor:not-allowed; }
 .msg-unread-dot { width:7px;height:7px;border-radius:50%;background:#EF4444;display:inline-block;margin-left:5px;vertical-align:middle; }
+.commute-card { background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);padding:1.25rem;margin-bottom:1.75rem; }
+.commute-work-row { display:flex;gap:0.5rem;margin-bottom:0.5rem; }
+.commute-work-row input { flex:1;border:1.5px solid var(--surface-mid);border-radius:9px;padding:0.5rem 0.75rem;font-size:0.85rem;font-family:inherit;color:var(--navy);outline:none;transition:border-color 0.15s; }
+.commute-work-row input:focus { border-color:var(--teal); }
+.commute-work-row button { background:var(--teal);color:#0C1628;border:none;border-radius:9px;padding:0.5rem 0.9rem;font-size:0.8rem;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap; }
+.commute-hint { font-size:0.75rem;color:var(--slate);margin-bottom:1rem; }
+.commute-listing { border-top:1px solid var(--surface-mid);padding:0.75rem 0;font-size:0.82rem; }
+.commute-listing:first-child { border-top:none; }
+.commute-listing-addr { font-weight:600;color:var(--navy);font-size:0.84rem;margin-bottom:0.5rem; }
+.commute-modes { display:flex;flex-wrap:wrap;gap:0.4rem; }
+.commute-mode { display:inline-flex;align-items:center;gap:0.3rem;background:#F8FAFB;border:1px solid var(--surface-mid);border-radius:8px;padding:0.3rem 0.55rem;font-size:0.78rem;color:var(--navy);font-weight:600;text-decoration:none;transition:background 0.12s;cursor:pointer; }
+.commute-mode:hover { background:var(--teal-pale);border-color:var(--teal); }
+.commute-mode span { font-weight:400;color:var(--slate); }
 .readiness-card { background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);padding:1.5rem 1.75rem;margin-bottom:1.75rem;display:flex;align-items:center;gap:2rem;flex-wrap:wrap; }
 .readiness-ring-wrap { position:relative;flex-shrink:0;width:110px;height:110px; }
 .readiness-ring-label { position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center; }
@@ -160,6 +173,10 @@ export default function Dashboard() {
   const justPaid = searchParams.get('payment') === 'success'
   const channelRef = useRef(null)
   const toastTimer = useRef(null)
+  const [workAddress, setWorkAddress] = useState(() => localStorage.getItem('aptpilot_work_addr') || '')
+  const [commuteInput, setCommuteInput] = useState('')
+  const [commuteResults, setCommuteResults] = useState({})
+  const [commuteLoading, setCommuteLoading] = useState({})
 
   useEffect(() => { if (user) { loadData(); loadReferrals(); loadDocCount(); loadGroup(); loadGroupMembers(); loadMessages() } }, [user])
   useEffect(() => { if (justPaid) setShowGroupModal(true) }, [justPaid])
@@ -226,7 +243,7 @@ export default function Dashboard() {
     }
 
     // Try fetching group members first
-    const res = await fetch(`/api/group-status?userId=${user.id}`)
+    const res = await fetch(`/api/group?action=status&userId=${user.id}`)
     if (res.ok) {
       const json = await res.json()
       if (json.members?.length > 0) { setGroupMembers(json.members); return }
@@ -252,10 +269,11 @@ export default function Dashboard() {
     const validEmails = inviteEmails.map(e => e.trim()).filter(e => e.includes('@'))
     if (!validEmails.length) return
     setInviting(true)
-    await fetch('/api/invite-group', {
+    await fetch('/api/group', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
+        action: 'invite',
         inviterUserId: user.id,
         inviterName: profile?.full_name,
         inviterEmail: user.email,
@@ -288,6 +306,31 @@ export default function Dashboard() {
     } else {
       setGroupInfo({ id: membership.group_id, role, ownerId: user.id })
     }
+  }
+
+  async function fetchCommute(listingId, listingAddress) {
+    if (!workAddress) return
+    setCommuteLoading(prev => ({ ...prev, [listingId]: true }))
+    try {
+      const res = await fetch('/api/commute', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ from: listingAddress, to: workAddress }),
+      })
+      const data = await res.json()
+      setCommuteResults(prev => ({ ...prev, [listingId]: data }))
+    } catch {
+      setCommuteResults(prev => ({ ...prev, [listingId]: { error: 'Could not calculate' } }))
+    }
+    setCommuteLoading(prev => ({ ...prev, [listingId]: false }))
+  }
+
+  async function saveWorkAddress() {
+    const addr = commuteInput.trim()
+    if (!addr) return
+    localStorage.setItem('aptpilot_work_addr', addr)
+    setWorkAddress(addr)
+    setCommuteResults({})
   }
 
   async function loadData() {
@@ -708,6 +751,53 @@ export default function Dashboard() {
               <div className="kpi-sub">{k.sub}</div>
             </div>
           ))}
+        </div>
+
+        <div className="commute-card">
+          <div className="sect-title">Commute Calculator</div>
+          <div className="commute-work-row">
+            <input
+              placeholder="Enter your work address (e.g. 30 Rockefeller Plaza, New York)…"
+              defaultValue={workAddress}
+              onChange={e => setCommuteInput(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && saveWorkAddress()}
+            />
+            <button onClick={saveWorkAddress}>Set</button>
+          </div>
+          {workAddress
+            ? <p className="commute-hint">Door-to-door estimates from each listing to <strong>{workAddress}</strong>. Click any mode to open directions in Google Maps.</p>
+            : <p className="commute-hint">Set your work address to see door-to-door commute times from every listing — subway, bike, walk, drive, and bus.</p>
+          }
+          {workAddress && listings.length > 0 && listings.map(l => {
+            const addr = `${l.address}${l.unit ? `, ${l.unit}` : ''}`
+            const result = commuteResults[l.id]
+            const isLoading = commuteLoading[l.id]
+            return (
+              <div className="commute-listing" key={l.id}>
+                <div className="commute-listing-addr">{addr}</div>
+                {!result && !isLoading && (
+                  <button className="commute-mode" onClick={() => fetchCommute(l.id, addr)}>Calculate →</button>
+                )}
+                {isLoading && <span style={{ fontSize:'0.78rem', color:'var(--slate)' }}>Calculating…</span>}
+                {result?.error && <span style={{ fontSize:'0.78rem', color:'#EF4444' }}>{result.error}</span>}
+                {result?.modes && (
+                  <div className="commute-modes">
+                    {result.modes.map(m => (
+                      <a key={m.id} href={m.url} target="_blank" rel="noopener noreferrer" className="commute-mode">
+                        {m.emoji} {m.label} <span>~{m.minutes} min</span>
+                      </a>
+                    ))}
+                    <span style={{ fontSize:'0.73rem', color:'var(--slate)', alignSelf:'center', marginLeft:'0.25rem' }}>
+                      {result.distanceMiles} mi
+                    </span>
+                  </div>
+                )}
+              </div>
+            )
+          })}
+          {workAddress && listings.length === 0 && (
+            <p style={{ fontSize:'0.82rem', color:'var(--slate)' }}>Commute times will appear here once listings are added to your search.</p>
+          )}
         </div>
 
         <div className="two-col">

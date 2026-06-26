@@ -20,10 +20,10 @@ export default function JoinGroup() {
 
   async function processJoin() {
     setStatus('joining')
-    const res = await fetch('/api/join-group', {
+    const res = await fetch('/api/group', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ token, userId: user.id }),
+      body: JSON.stringify({ action: 'join', token, userId: user.id }),
     })
     const json = await res.json()
     if (!res.ok) {
