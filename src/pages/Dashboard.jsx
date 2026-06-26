@@ -175,9 +175,25 @@ export default function Dashboard() {
     if (!body) return
     setSendingMsg(true)
     setMsgInput('')
-    const { data } = await supabase.from('messages').insert({ user_id: user.id, body, from_admin: false }).select().single()
-    if (data) setMessages(prev => [...prev, data])
+    // Optimistically add user message to UI
+    const tempMsg = { id: `temp-${Date.now()}`, user_id: user.id, body, from_admin: false, created_at: new Date().toISOString() }
+    setMessages(prev => [...prev, tempMsg])
     setTimeout(() => { if (msgThreadRef.current) msgThreadRef.current.scrollTop = msgThreadRef.current.scrollHeight }, 50)
+    try {
+      const res = await fetch('/api/ai-chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: user.id, message: body, conversationHistory: messages.slice(-10) }),
+      })
+      const { reply } = await res.json()
+      if (reply) {
+        const aiMsg = { id: `ai-${Date.now()}`, user_id: user.id, body: reply, from_admin: true, created_at: new Date().toISOString() }
+        setMessages(prev => [...prev, aiMsg])
+        setTimeout(() => { if (msgThreadRef.current) msgThreadRef.current.scrollTop = msgThreadRef.current.scrollHeight }, 50)
+      }
+    } catch (e) {
+      console.error('AI chat error', e)
+    }
     setSendingMsg(false)
   }
 

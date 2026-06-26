@@ -402,7 +402,7 @@ export default function Documents() {
                           }
                           <input type="file" accept=".pdf,.jpg,.jpeg,.png" style={{ display:'none' }} onChange={e => handleUpload(slot, e.target.files[0])} disabled={uploadingSlot === slot.id} />
                         </label>
-                        {done && files.map(row => (
+                        {done ? files.map(row => (
                             <div className="doc-file-row" key={row.id}>
                               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
                               <span className="doc-file-name">{row.file_name}</span>
