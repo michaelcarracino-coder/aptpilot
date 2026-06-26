@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { lazy, Suspense } from 'react'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import Nav from './components/Nav'
+import ChatWidget from './components/ChatWidget'
 
 const Landing          = lazy(() => import('./pages/Landing'))
 const Login            = lazy(() => import('./pages/Login'))
@@ -49,6 +50,7 @@ function AppRoutes() {
   return (
     <>
       <Nav />
+      <ChatWidget />
       <div style={{ paddingTop: 68 }}>
       <Suspense fallback={<PageFallback />}>
       <Routes>
