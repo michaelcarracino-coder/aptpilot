@@ -53,6 +53,15 @@ const css = `
 .progress-bar-wrap { background:var(--surface-mid); border-radius:100px; height:6px; overflow:hidden; margin-bottom:0.4rem; }
 .progress-bar-fill { background:var(--teal); height:100%; border-radius:100px; transition:width 0.3s ease; }
 .progress-label { font-size:0.78rem; color:var(--slate); }
+.summary-modal-overlay { position:fixed;inset:0;background:rgba(6,9,15,0.55);backdrop-filter:blur(6px);z-index:1000;display:flex;align-items:center;justify-content:center;padding:1.5rem; }
+.summary-modal { background:#fff;border-radius:20px;max-width:480px;width:100%;padding:2rem;box-shadow:0 24px 80px rgba(0,0,0,0.22);animation:fadeUp 0.25s ease; }
+.summary-modal h2 { font-family:'Playfair Display',serif;font-size:1.35rem;color:var(--navy);margin-bottom:0.3rem; }
+.summary-modal .modal-sub { font-size:0.82rem;color:var(--slate);margin-bottom:1.4rem;line-height:1.55; }
+.summary-field { display:flex;flex-direction:column;gap:0.3rem;margin-bottom:0.9rem; }
+.summary-field label { font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:var(--slate); }
+.summary-field input, .summary-field select { padding:0.55rem 0.85rem;border:1.5px solid var(--surface-mid);border-radius:9px;font-size:0.88rem;font-family:inherit;color:var(--navy);outline:none;transition:border-color 0.15s; }
+.summary-field input:focus, .summary-field select:focus { border-color:var(--teal); }
+.summary-field-row { display:grid;grid-template-columns:1fr 1fr;gap:0.75rem; }
 `
 
 export default function Documents() {
@@ -63,8 +72,20 @@ export default function Documents() {
   const [collating, setCollating] = useState(false)
   const [deletingPath, setDeletingPath] = useState(null)
   const [uploadingSlot, setUploadingSlot] = useState(null)
+  const [showSummaryModal, setShowSummaryModal] = useState(false)
+  const [generatingSummary, setGeneratingSummary] = useState(false)
+  const [profile, setProfile] = useState(null)
+  const [search, setSearch] = useState(null)
+  const [summaryFields, setSummaryFields] = useState({ phone: '', employer: '', income: '', credit: '' })
 
-  useEffect(() => { if (user) loadDocs() }, [user, role])
+  useEffect(() => { if (user) { loadDocs(); loadMeta() } }, [user, role])
+
+  async function loadMeta() {
+    const { data: p } = await supabase.from('profiles').select('full_name, referral_code').eq('id', user.id).single()
+    setProfile(p)
+    const { data: s } = await supabase.from('searches').select('*').eq('user_id', user.id).order('created_at', { ascending: false }).limit(1).single()
+    setSearch(s)
+  }
 
   async function loadDocs() {
     setLoading(true)
@@ -171,6 +192,101 @@ export default function Documents() {
     setCollating(false)
   }
 
+  async function generateSummary() {
+    setGeneratingSummary(true)
+    try {
+      const { PDFDocument, rgb, StandardFonts } = await import('pdf-lib')
+      const doc = await PDFDocument.create()
+      const page = doc.addPage([612, 792])
+      const { width, height } = page.getSize()
+      const fontBold = await doc.embedFont(StandardFonts.HelveticaBold)
+      const fontReg  = await doc.embedFont(StandardFonts.Helvetica)
+      const navy  = rgb(0.047, 0.086, 0.157)
+      const teal  = rgb(0.039, 0.749, 0.749)
+      const slate = rgb(0.42, 0.48, 0.56)
+      const white = rgb(1, 1, 1)
+      const light = rgb(0.95, 0.98, 0.98)
+      const M = 52
+      let y = height - M
+
+      // Header bar
+      page.drawRectangle({ x: 0, y: height - 72, width, height: 72, color: navy })
+      page.drawText('AptPilot', { x: M, y: height - 44, size: 22, font: fontBold, color: white })
+      page.drawText('Applicant Summary', { x: M, y: height - 62, size: 10, font: fontReg, color: teal })
+      const dateStr = new Date().toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' })
+      page.drawText(dateStr, { x: width - M - fontReg.widthOfTextAtSize(dateStr, 9), y: height - 52, size: 9, font: fontReg, color: rgb(0.6, 0.7, 0.8) })
+      y = height - 100
+
+      const section = (title) => {
+        y -= 10
+        page.drawRectangle({ x: M, y: y - 2, width: width - M * 2, height: 22, color: light })
+        page.drawRectangle({ x: M, y: y - 2, width: 3, height: 22, color: teal })
+        page.drawText(title.toUpperCase(), { x: M + 10, y: y + 5, size: 8.5, font: fontBold, color: navy })
+        y -= 28
+      }
+      const row = (label, value) => {
+        if (!value) return
+        page.drawText(label, { x: M, y, size: 9, font: fontReg, color: slate })
+        page.drawText(String(value), { x: M + 160, y, size: 9, font: fontBold, color: navy })
+        y -= 18
+      }
+
+      section('Applicant Information')
+      row('Name',    profile?.full_name || '—')
+      row('Email',   user.email)
+      row('Phone',   summaryFields.phone || '—')
+      row('Employer', summaryFields.employer || '—')
+      y -= 4
+
+      section('Financial Profile')
+      row('Annual Income',      summaryFields.income ? `$${Number(summaryFields.income).toLocaleString()}` : '—')
+      row('Credit Score Range', summaryFields.credit || '—')
+      if (search?.max_budget)
+        row('40x Requirement',  `$${(search.max_budget * 40).toLocaleString()}/yr gross income`)
+      y -= 4
+
+      section('Rental Criteria')
+      if (search?.min_budget && search?.max_budget)
+        row('Budget',       `$${search.min_budget.toLocaleString()} – $${search.max_budget.toLocaleString()}/mo`)
+      if (search?.min_bed != null)
+        row('Bedrooms',     `${search.min_bed}${search.max_bed && search.max_bed !== search.min_bed ? ` – ${search.max_bed}` : ''}`)
+      row('Move-In',        search?.move_in || 'Flexible')
+      if (search?.neighborhoods?.length)
+        row('Neighborhoods', search.neighborhoods.slice(0, 4).join(', ') + (search.neighborhoods.length > 4 ? ' +more' : ''))
+      y -= 4
+
+      section('Documents Included')
+      const allDocs = [...TENANT_DOCS, ...GUARANTOR_DOCS]
+      const { data: allRows } = await supabase.from('user_documents').select('doc_id').eq('user_id', user.id)
+      const uploadedIds = new Set((allRows || []).map(r => r.doc_id))
+      for (const d of allDocs) {
+        const uploaded = uploadedIds.has(d.id)
+        page.drawText(uploaded ? '✓' : '○', { x: M, y, size: 9, font: fontBold, color: uploaded ? teal : slate })
+        page.drawText(d.label + (d.optional ? ' (optional)' : ''), { x: M + 18, y, size: 9, font: fontReg, color: uploaded ? navy : slate })
+        y -= 16
+      }
+
+      // Footer
+      page.drawLine({ start: { x: M, y: 48 }, end: { x: width - M, y: 48 }, thickness: 0.5, color: rgb(0.88, 0.91, 0.94) })
+      page.drawText('Generated by AptPilot · aptpilot.co', { x: M, y: 32, size: 8, font: fontReg, color: slate })
+      page.drawText('This document is for informational purposes only and does not constitute a formal rental application.', { x: M, y: 18, size: 7, font: fontReg, color: rgb(0.7, 0.75, 0.8) })
+
+      const bytes = await doc.save()
+      const blob = new Blob([bytes], { type: 'application/pdf' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `AptPilot_Summary_${(profile?.full_name || 'Applicant').replace(/\s+/g, '_')}.pdf`
+      a.click()
+      URL.revokeObjectURL(url)
+      setShowSummaryModal(false)
+    } catch (e) {
+      console.error('Summary generation failed:', e)
+      alert('Could not generate summary. Please try again.')
+    }
+    setGeneratingSummary(false)
+  }
+
   const docList = role === 'tenant' ? TENANT_DOCS : GUARANTOR_DOCS
   const totalRequired = docList.filter(d => !d.optional).length
   const completedRequired = docList.filter(d => !d.optional && rows.some(r => r.doc_id === d.id)).length
@@ -179,6 +295,52 @@ export default function Documents() {
   return (
     <>
       <style>{css}</style>
+
+      {showSummaryModal && (
+        <div className="summary-modal-overlay" onClick={e => e.target === e.currentTarget && setShowSummaryModal(false)}>
+          <div className="summary-modal">
+            <h2>Applicant Summary Sheet</h2>
+            <p className="modal-sub">Fill in any missing details — we'll combine this with your profile, search criteria, and document checklist into a clean PDF you can hand any landlord.</p>
+            <div className="summary-field-row">
+              <div className="summary-field">
+                <label>Phone Number</label>
+                <input placeholder="(212) 555-0100" value={summaryFields.phone} onChange={e => setSummaryFields(f => ({ ...f, phone: e.target.value }))} />
+              </div>
+              <div className="summary-field">
+                <label>Employer / Company</label>
+                <input placeholder="Acme Corp" value={summaryFields.employer} onChange={e => setSummaryFields(f => ({ ...f, employer: e.target.value }))} />
+              </div>
+            </div>
+            <div className="summary-field-row">
+              <div className="summary-field">
+                <label>Annual Gross Income</label>
+                <input type="number" placeholder="120000" value={summaryFields.income} onChange={e => setSummaryFields(f => ({ ...f, income: e.target.value }))} />
+              </div>
+              <div className="summary-field">
+                <label>Credit Score Range</label>
+                <select value={summaryFields.credit} onChange={e => setSummaryFields(f => ({ ...f, credit: e.target.value }))}>
+                  <option value="">Select range</option>
+                  <option>750+</option>
+                  <option>700–749</option>
+                  <option>650–699</option>
+                  <option>600–649</option>
+                  <option>Below 600</option>
+                </select>
+              </div>
+            </div>
+            <div style={{ display:'flex', gap:'0.75rem', marginTop:'0.5rem' }}>
+              <button className="collate-btn" style={{ flex:1, justifyContent:'center' }} onClick={generateSummary} disabled={generatingSummary}>
+                {generatingSummary
+                  ? <><span className="spinner" style={{ borderColor:'rgba(255,255,255,0.3)', borderTopColor:'#fff', width:14, height:14, display:'inline-block' }} /> Generating…</>
+                  : 'Download Summary PDF'
+                }
+              </button>
+              <button className="btn btn-outline" onClick={() => setShowSummaryModal(false)}>Cancel</button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="docs-page">
         <h1>My Documents</h1>
         <p className="sub">Upload once, use everywhere — download individual files or a single collated PDF package ready to hand any landlord.</p>
@@ -200,6 +362,10 @@ export default function Documents() {
           <span style={{ fontWeight:700, fontSize:'0.9rem', color:'var(--navy)' }}>
             {rows.length} file{rows.length !== 1 ? 's' : ''} uploaded
           </span>
+          <button className="collate-btn" style={{ background:'var(--teal)', color:'#0C1628' }} onClick={() => setShowSummaryModal(true)}>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+            Summary Sheet
+          </button>
           <button className="collate-btn" onClick={collateAndDownload} disabled={collating || rows.length === 0}>
             {collating
               ? <><span className="spinner" style={{ borderColor:'rgba(255,255,255,0.3)', borderTopColor:'#fff', width:14, height:14, display:'inline-block' }} /> Generating PDF…</>
