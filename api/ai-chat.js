@@ -1,7 +1,4 @@
-import Anthropic from '@anthropic-ai/sdk'
 import { createClient } from '@supabase/supabase-js'
-
-const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 
 const supabase = createClient(
   process.env.VITE_SUPABASE_URL,
@@ -58,14 +55,22 @@ export default async function handler(req, res) {
       { role: 'user', content: message },
     ]
 
-    const response = await anthropic.messages.create({
-      model: 'claude-haiku-4-5-20251001',
-      max_tokens: 400,
-      system: SYSTEM_PROMPT + (contextBlock ? `\n\nUser context:\n${contextBlock}` : ''),
-      messages,
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'x-api-key': process.env.ANTHROPIC_API_KEY,
+        'anthropic-version': '2023-06-01',
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 400,
+        system: SYSTEM_PROMPT + (contextBlock ? `\n\nUser context:\n${contextBlock}` : ''),
+        messages,
+      }),
     })
-
-    const reply = response.content[0].text
+    const data = await response.json()
+    const reply = data.content[0].text
 
     // Persist messages to DB only for logged-in users
     if (userId) {
