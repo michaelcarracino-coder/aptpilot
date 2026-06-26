@@ -92,7 +92,7 @@ export default async function handler(req, res) {
                   <div style="display:flex;flex-direction:column;gap:0.75rem;margin-bottom:1.5rem;">
                     ${[
                       ['1', 'We review your criteria', 'Our team reviews your move-in date, budget, and neighborhoods within the hour.'],
-                      ['2', 'We pull matching listings', 'We search StreetEasy, Zillow, and off-market sources for apartments that fit.'],
+                      ['2', 'We pull matching listings', 'We search StreetEasy, Zillow, Apartments.com, and more for apartments that fit.'],
                       ['3', 'We contact agents', 'We email and text agents on your behalf to request tours at your available times.'],
                       ['4', 'Your tour agenda is ready', 'Log in to your dashboard to see confirmed tours, listing details, and status updates.'],
                     ].map(([n, title, desc]) => `

@@ -108,7 +108,7 @@ const STEPS = [
 /* ─── FAQs ─── */
 const FAQS = [
   { q: "Is AptPilot legal in New York City?", a: "Yes. AptPilot is a technology platform, not a licensed broker. We automate tasks you authorize us to perform on your behalf — searching listings, scheduling tours, and submitting applications with your documents. Think of us as a very smart personal assistant." },
-  { q: "What listing platforms do you search?", a: "AptPilot searches across all major NYC listing platforms including StreetEasy, Zillow, Apartments.com, Rent.com, and more. Pro plan members also get access to off-market listings sourced through our agent and owner network." },
+  { q: "What listing platforms do you search?", a: "AptPilot searches across all major NYC listing platforms including StreetEasy, Zillow, Apartments.com, Rent.com, and more." },
   { q: "How does the application submission work?", a: "You upload your documents once — pay stubs, tax returns, bank statements, and ID. When you find an apartment you love, click Apply in your dashboard and AptPilot auto-fills and submits the application. You review and confirm before anything is sent." },
   { q: "Will landlords accept AI-scheduled tours?", a: "Yes — tour requests are sent professionally via email and phone, the same way any person or assistant would reach out. In our experience, the vast majority of landlords and agents confirm without issue." },
   { q: "How is AptPilot different from StreetEasy or Zillow?", a: "StreetEasy and Zillow are search portals — they show you listings but leave all the work to you. AptPilot actually does the work: contacts agents, books tours, builds your agenda, and submits applications. It's the difference between a map and a chauffeur." },
@@ -336,7 +336,7 @@ export default function Landing() {
         <div style={{ display: 'flex', width: 'max-content', animation: 'marquee 28s linear infinite' }}>
           {[...Array(2)].map((_, i) => (
             <div key={i} style={{ display: 'flex', alignItems: 'center' }}>
-              {['StreetEasy', 'Zillow', 'Apartments.com', 'Rent.com', 'Trulia', 'Facebook Marketplace', 'Craigslist', 'Off-Market Listings'].map(name => (
+              {['StreetEasy', 'Zillow', 'Apartments.com', 'Rent.com', 'Trulia', 'Facebook Marketplace', 'Craigslist'].map(name => (
                 <span key={name} style={{ padding: '0 2.5rem', fontSize: '0.8rem', fontWeight: 600, color: 'rgba(255,255,255,0.28)', letterSpacing: '0.07em', textTransform: 'uppercase', whiteSpace: 'nowrap', borderRight: '1px solid rgba(255,255,255,0.07)' }}>{name}</span>
               ))}
             </div>
