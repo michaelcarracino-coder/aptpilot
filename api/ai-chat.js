@@ -70,6 +70,10 @@ export default async function handler(req, res) {
       }),
     })
     const data = await response.json()
+    if (!response.ok || !data.content) {
+      console.error('Anthropic error:', JSON.stringify(data))
+      return res.status(500).json({ error: 'AI response failed' })
+    }
     const reply = data.content[0].text
 
     // Persist messages to DB only for logged-in users
