@@ -74,6 +74,20 @@ const css = `
 .referral-card h3 { font-family:'Playfair Display',serif;font-size:1rem;margin-bottom:0.35rem; }
 .referral-code-box { background:rgba(10,191,191,0.12);border:1.5px solid rgba(10,191,191,0.3);border-radius:8px;padding:0.6rem 0.85rem;font-family:'Inter',monospace;font-size:0.88rem;font-weight:700;color:var(--teal);letter-spacing:0.08em;margin:0.75rem 0;display:flex;justify-content:space-between;align-items:center;cursor:pointer;transition:background 0.15s; }
 .referral-code-box:hover { background:rgba(10,191,191,0.2); }
+.readiness-card { background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);padding:1.5rem 1.75rem;margin-bottom:1.75rem;display:flex;align-items:center;gap:2rem;flex-wrap:wrap; }
+.readiness-ring-wrap { position:relative;flex-shrink:0;width:96px;height:96px; }
+.readiness-ring-label { position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center; }
+.readiness-ring-pct { font-family:'Playfair Display',serif;font-size:1.55rem;color:var(--navy);line-height:1; }
+.readiness-ring-word { font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;margin-top:2px; }
+.readiness-body { flex:1;min-width:220px; }
+.readiness-title { font-family:'Playfair Display',serif;font-size:1.15rem;color:var(--navy);margin-bottom:0.2rem; }
+.readiness-sub { font-size:0.82rem;color:var(--slate);margin-bottom:1rem;line-height:1.5; }
+.readiness-factors { display:flex;flex-direction:column;gap:0.45rem; }
+.rf { display:flex;align-items:center;gap:0.6rem;font-size:0.83rem; }
+.rf-dot { width:8px;height:8px;border-radius:50%;flex-shrink:0; }
+.rf-label { color:var(--navy);font-weight:500;flex:1; }
+.rf-action { color:var(--teal);font-size:0.76rem;font-weight:600;text-decoration:none;white-space:nowrap; }
+.rf-action:hover { text-decoration:underline; }
 `
 
 const STATUS_COLORS = {
@@ -271,6 +285,26 @@ export default function Dashboard() {
   }
   const showOnboard = listings.length === 0
 
+  // Readiness score
+  const myMember = groupMembers.find(m => m.userId === user?.id)
+  const tenantComplete   = myMember?.tenant?.status === 'complete'
+  const tenantPartial    = myMember?.tenant?.status === 'partial'
+  const guarantorComplete = myMember?.guarantor?.status === 'complete'
+  const needsGuarantor   = !!myMember?.guarantor
+
+  const rfFactors = [
+    { key: 'criteria',   label: 'Search criteria set',       done: !!search,          pts: 20, action: null },
+    { key: 'docs_any',   label: 'Documents started',         done: docCount > 0,      pts: 15, action: '/documents', actionLabel: 'Upload docs →' },
+    { key: 'tenant',     label: 'Tenant docs complete',      done: tenantComplete,    pts: 30, action: '/documents', actionLabel: tenantPartial ? 'Finish uploading →' : 'Upload docs →' },
+    { key: 'profile',    label: 'Profile name on file',      done: !!(profile?.full_name), pts: 15, action: null },
+    { key: 'guarantor',  label: needsGuarantor ? 'Guarantor docs complete' : 'Guarantor (not required)', done: needsGuarantor ? guarantorComplete : true, pts: 20, action: needsGuarantor && !guarantorComplete ? '/documents' : null, actionLabel: 'Upload guarantor docs →' },
+  ]
+  const readinessScore = rfFactors.reduce((sum, f) => sum + (f.done ? f.pts : 0), 0)
+  const readinessWord  = readinessScore >= 90 ? 'Ready' : readinessScore >= 60 ? 'Almost' : readinessScore >= 30 ? 'In Progress' : 'Getting Started'
+  const readinessColor = readinessScore >= 90 ? '#059669' : readinessScore >= 60 ? '#0ABFBF' : readinessScore >= 30 ? '#D97706' : '#94A3B8'
+  const RING_R = 40; const RING_C = 2 * Math.PI * RING_R
+  const ringDash = (readinessScore / 100) * RING_C
+
   const greeting = (() => {
     const h = new Date().getHours()
     if (h < 12) return 'Good morning'
@@ -402,6 +436,49 @@ export default function Dashboard() {
             >
               {portalLoading ? '...' : 'Billing →'}
             </button>
+          </div>
+        </div>
+
+        {/* Readiness Score */}
+        <div className="readiness-card">
+          <div className="readiness-ring-wrap">
+            <svg width="96" height="96" viewBox="0 0 96 96">
+              <circle cx="48" cy="48" r={RING_R} fill="none" stroke="#F1F5F9" strokeWidth="9" />
+              <circle cx="48" cy="48" r={RING_R} fill="none" stroke={readinessColor} strokeWidth="9"
+                strokeDasharray={`${ringDash} ${RING_C}`}
+                strokeLinecap="round"
+                transform="rotate(-90 48 48)"
+                style={{ transition: 'stroke-dasharray 0.6s ease' }}
+              />
+            </svg>
+            <div className="readiness-ring-label">
+              <span className="readiness-ring-pct">{readinessScore}%</span>
+              <span className="readiness-ring-word" style={{ color: readinessColor }}>{readinessWord}</span>
+            </div>
+          </div>
+          <div className="readiness-body">
+            <div className="readiness-title">Application Readiness</div>
+            <div className="readiness-sub">
+              {readinessScore === 100
+                ? 'You\'re fully prepared — any NYC landlord can receive your application today.'
+                : 'Complete the steps below to be ready the moment you find the right apartment.'}
+            </div>
+            <div className="readiness-factors">
+              {rfFactors.map(f => (
+                <div className="rf" key={f.key}>
+                  <div className="rf-dot" style={{ background: f.done ? '#059669' : '#E2E8F0' }} />
+                  <span className="rf-label" style={{ color: f.done ? 'var(--navy)' : 'var(--slate)', textDecoration: f.done ? 'none' : 'none' }}>
+                    {f.label}
+                  </span>
+                  {!f.done && f.action && (
+                    <Link to={f.action} className="rf-action">{f.actionLabel}</Link>
+                  )}
+                  {f.done && (
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#059669" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                  )}
+                </div>
+              ))}
+            </div>
           </div>
         </div>
 
