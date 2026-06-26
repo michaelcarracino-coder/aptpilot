@@ -190,10 +190,11 @@ export default function AdminListings() {
       return
     }
     setSendingId(listing.id)
-    await fetch('/api/notify-tour-confirmed', {
+    await fetch('/api/notify', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
+        type: 'tour-confirmed',
         listing,
         userEmail: selectedSearch?.profiles?.email,
         userName: selectedSearch?.profiles?.full_name,

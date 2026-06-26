@@ -121,10 +121,11 @@ export default async function handler(req, res) {
         }
 
         if (search) {
-          await fetch(`https://aptpilot.vercel.app/api/notify-new-search`, {
+          await fetch(`https://aptpilot.vercel.app/api/notify`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
+              type: 'new-search',
               searchId: search.id,
               userId,
               userEmail: userEmail || session.customer_email || '',
