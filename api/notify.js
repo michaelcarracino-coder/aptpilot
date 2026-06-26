@@ -1,4 +1,4 @@
-// Merged notify handler. type = 'new-search' | 'tour-confirmed'
+// Merged notify handler. type = 'new-search' | 'tour-confirmed' | 'review-request'
 import { createClient } from '@supabase/supabase-js'
 
 const supabase = createClient(process.env.VITE_SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY)
@@ -10,6 +10,7 @@ export default async function handler(req, res) {
   try {
     if (type === 'new-search') return await handleNewSearch(req, res)
     if (type === 'tour-confirmed') return await handleTourConfirmed(req, res)
+    if (type === 'review-request') return await handleReviewRequest(req, res)
     return res.status(400).json({ error: 'Unknown type' })
   } catch (err) {
     console.error('Notify error:', err)
@@ -173,4 +174,49 @@ function buildAgendaEmail({ tours, userName, totalConfirmed }) {
       <p style="color:#94A3B8;font-size:0.77rem;text-align:center;margin:0;">More tours may be added as agents respond. Your dashboard always has the latest.</p>
     </div>
   `
+}
+
+// ── REVIEW REQUEST ──────────────────────────────────────────────────────────
+async function handleReviewRequest(req, res) {
+  const { userEmail, userName, discountCode } = req.body
+  if (!userEmail) return res.status(400).json({ error: 'Missing userEmail' })
+
+  const firstName = userName?.split(' ')[0] || 'there'
+  const code = discountCode || 'REVIEW50'
+
+  const html = `
+    <div style="font-family:sans-serif;max-width:580px;margin:0 auto;padding:2rem;background:#F2F5FA;">
+      <div style="background:#0C1628;border-radius:16px;padding:2rem;margin-bottom:1.25rem;text-align:center;">
+        <div style="display:inline-flex;align-items:center;gap:0.5rem;margin-bottom:1.25rem;">
+          <div style="width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,#0ABFBF,#00E5CC);display:flex;align-items:center;justify-content:center;font-weight:900;color:#0C1628;font-size:1rem;">A</div>
+          <span style="font-family:Georgia,serif;font-size:1.2rem;font-weight:700;color:#fff;">Apt<span style="color:#0ABFBF;">Pilot</span></span>
+        </div>
+        <h1 style="color:#fff;font-family:Georgia,serif;font-size:1.75rem;margin:0 0 0.5rem;line-height:1.2;">How did we do?</h1>
+        <p style="color:rgba(255,255,255,0.5);margin:0;font-size:0.88rem;">Your feedback helps future renters find their perfect apartment.</p>
+      </div>
+
+      <div style="background:#fff;border-radius:14px;padding:1.5rem 1.75rem;margin-bottom:1.25rem;border:1.5px solid #E8EDF5;">
+        <p style="color:#0C1628;font-size:0.95rem;line-height:1.7;margin:0 0 1rem;">Hi ${firstName} — we hope your search went smoothly. If AptPilot helped you save time, money, or stress, we'd love a quick review. It takes less than 2 minutes and means the world to us.</p>
+        <a href="https://aptpilot.vercel.app" style="display:block;text-align:center;background:#0ABFBF;color:#0C1628;font-weight:700;padding:0.9rem 2rem;border-radius:100px;text-decoration:none;font-size:0.95rem;">Leave a Review →</a>
+      </div>
+
+      <div style="background:#0C1628;border-radius:14px;padding:1.5rem 1.75rem;text-align:center;">
+        <p style="color:rgba(255,255,255,0.6);font-size:0.82rem;margin:0 0 0.75rem;">As a thank-you, here's <strong style="color:#0ABFBF;">$50 off</strong> your next AptPilot search — share it with a friend too.</p>
+        <div style="background:rgba(10,191,191,0.1);border:1.5px dashed rgba(10,191,191,0.4);border-radius:10px;padding:0.85rem 1.5rem;display:inline-block;">
+          <span style="font-family:Georgia,serif;font-size:1.6rem;font-weight:700;color:#0ABFBF;letter-spacing:0.06em;">${code}</span>
+        </div>
+        <p style="color:rgba(255,255,255,0.35);font-size:0.75rem;margin:0.75rem 0 0;">Apply at checkout. Valid for 60 days.</p>
+      </div>
+
+      <p style="color:#94A3B8;font-size:0.77rem;text-align:center;margin-top:1.25rem;">Questions? Reply to this email and we'll get back to you.</p>
+    </div>
+  `
+
+  await sendEmail({
+    to: userEmail,
+    subject: `How was your AptPilot search, ${firstName}? (+ $50 off inside)`,
+    html,
+  })
+
+  return res.status(200).json({ success: true })
 }

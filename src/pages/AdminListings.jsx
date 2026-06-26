@@ -62,6 +62,7 @@ export default function AdminListings() {
   const [searchMessages, setSearchMessages] = useState([])
   const [adminMsgInput, setAdminMsgInput] = useState('')
   const [sendingAdminMsg, setSendingAdminMsg] = useState(false)
+  const [sendingReview, setSendingReview] = useState(false)
   const [form, setForm] = useState({
     address:'', unit:'', bedrooms:'', bathrooms:'', sqft:'', price:'',
     agent_name:'', agent_email:'', agent_phone:'', listing_url:'', notes:''
@@ -207,6 +208,23 @@ export default function AdminListings() {
     selectSearch(selectedSearch)
   }
 
+  async function requestReview() {
+    if (!selectedSearch) return
+    setSendingReview(true)
+    await fetch('/api/notify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        type: 'review-request',
+        userEmail: selectedSearch.profiles?.email,
+        userName: selectedSearch.profiles?.full_name,
+        discountCode: 'REVIEW50',
+      }),
+    })
+    setSendingReview(false)
+    alert('Review request sent!')
+  }
+
   async function deleteListing(id) {
     if (!confirm('Delete this listing?')) return
     await supabase.from('listings').delete().eq('id', id)
@@ -275,7 +293,18 @@ export default function AdminListings() {
           <>
             {/* Add listing form */}
             <form className="add-listing-form" onSubmit={handleAddListing}>
-              <h2>Add Listing for {selectedSearch.profiles?.email}</h2>
+              <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'1.25rem' }}>
+                <h2 style={{ margin:0 }}>Add Listing for {selectedSearch.profiles?.email}</h2>
+                <button
+                  type="button"
+                  className="outreach-btn"
+                  style={{ background:'#7C3AED', whiteSpace:'nowrap' }}
+                  onClick={requestReview}
+                  disabled={sendingReview}
+                >
+                  {sendingReview ? '...' : '⭐ Request Review'}
+                </button>
+              </div>
 
               {/* StreetEasy URL auto-fill */}
               <div className="field" style={{ marginBottom:'1rem' }}>
