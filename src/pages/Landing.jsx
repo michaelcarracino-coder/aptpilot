@@ -329,11 +329,6 @@ export default function Landing() {
           </div>
         </div>
 
-        {/* Scroll indicator */}
-        <div style={{ position: 'absolute', bottom: '2.5rem', left: '50%', transform: 'translateX(-50%)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', zIndex: 3, animation: 'fadeUp 0.6s 0.8s ease both' }}>
-          <span style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.28)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Scroll</span>
-          <div style={{ width: 1, height: 40, background: 'linear-gradient(to bottom, rgba(10,191,191,0.5), transparent)' }} />
-        </div>
       </section>
 
       {/* ── PLATFORM MARQUEE ── */}
