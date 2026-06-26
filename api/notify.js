@@ -166,7 +166,7 @@ function buildAgendaEmail({ tours, userName, totalConfirmed }) {
           <li>Bring a government-issued ID to every showing</li>
           <li>Take photos and note anything that needs repair</li>
           <li>Ask the agent about utilities, move-in fees, and lease length</li>
-          <li>If you love an apartment, let us know — we'll submit your application the same day</li>
+          <li>If you love an apartment, let us know — your documents are organized and ready to go</li>
         </ul>
       </div>
       <a href="https://aptpilot.vercel.app/dashboard" style="display:block;text-align:center;background:#0ABFBF;color:#0C1628;font-weight:700;padding:0.9rem 2rem;border-radius:100px;text-decoration:none;font-size:0.95rem;margin-bottom:1rem;">View Live Dashboard →</a>

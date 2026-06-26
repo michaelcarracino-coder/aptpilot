@@ -30,7 +30,7 @@ export default function Privacy() {
 
         <h2>2. How We Use Your Information</h2>
         <ul>
-          <li>To perform your apartment search — contacting listing agents, scheduling tours, and submitting applications on your behalf</li>
+          <li>To perform your apartment search — contacting listing agents, scheduling tours, and organizing your application documents</li>
           <li>To send you transactional emails (tour confirmations, agent outreach updates, application status)</li>
           <li>To process your payment via Stripe</li>
           <li>To improve our service and detect abuse</li>

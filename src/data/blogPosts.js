@@ -87,7 +87,7 @@ Most NYC applications carry a non-refundable fee per applicant, typically $20-10
 
 The biggest mistake renters make is gathering documents reactively, after they've already found an apartment. By then, a delay of even a day can mean losing the unit to a faster applicant.
 
-The smartest approach: gather everything above before you start touring. AptPilot lets you upload your full document set once, then auto-fills and submits applications instantly the moment you decide on an apartment — no scrambling, no missed opportunities.
+The smartest approach: gather everything above before you start touring. AptPilot lets you upload your full document set once, keeping everything organized so you're ready to apply the moment you decide on an apartment — no scrambling, no missed opportunities.
     `
   },
 ]

@@ -99,7 +99,7 @@ const STEPS = [
   { num: '02', icon: 'search',    title: 'We search every platform', desc: 'AptPilot scans StreetEasy, Zillow, Apartments.com and more in real time.' },
   { num: '03', icon: 'calendar',  title: 'Tours booked automatically', desc: 'We contact agents and schedule tours during your available windows — no back-and-forth.' },
   { num: '04', icon: 'building',  title: 'Tour your shortlist', desc: 'Receive a clean tour agenda. Show up, see apartments, and decide.' },
-  { num: '05', icon: 'zap',       title: 'One-click application', desc: 'Docs pre-uploaded. Hit apply and we submit instantly to the landlord.' },
+  { num: '05', icon: 'zap',       title: 'Your application, organized', desc: 'All your documents are uploaded and ready. When you find a place you love, your package is set to go.' },
   { num: '06', icon: 'key',       title: 'Get your keys', desc: 'Real-time updates on every application until you sign your lease.' },
 ]
 
@@ -107,11 +107,11 @@ const STEPS = [
 
 /* ─── FAQs ─── */
 const FAQS = [
-  { q: "Is AptPilot legal in New York City?", a: "Yes. AptPilot is a technology platform, not a licensed broker. We automate tasks you authorize us to perform on your behalf — searching listings, scheduling tours, and submitting applications with your documents. Think of us as a very smart personal assistant." },
+  { q: "Is AptPilot legal in New York City?", a: "Yes. AptPilot is a technology platform, not a licensed broker. We help you search listings, schedule tours, and organize your application documents. Think of us as a very smart personal assistant." },
   { q: "What listing platforms do you search?", a: "AptPilot searches across all major NYC listing platforms including StreetEasy, Zillow, Apartments.com, Rent.com, and more." },
-  { q: "How does the application submission work?", a: "You upload your documents once — pay stubs, tax returns, bank statements, and ID. When you find an apartment you love, click Apply in your dashboard and AptPilot auto-fills and submits the application. You review and confirm before anything is sent." },
+  { q: "How does the application process work?", a: "You upload your documents once — pay stubs, tax returns, bank statements, and ID. AptPilot keeps everything organized in one place so you're ready to apply the moment you find the right apartment." },
   { q: "Will landlords accept AI-scheduled tours?", a: "Yes — tour requests are sent professionally via email and phone, the same way any person or assistant would reach out. In our experience, the vast majority of landlords and agents confirm without issue." },
-  { q: "How is AptPilot different from StreetEasy or Zillow?", a: "StreetEasy and Zillow are search portals — they show you listings but leave all the work to you. AptPilot actually does the work: contacts agents, books tours, builds your agenda, and submits applications. It's the difference between a map and a chauffeur." },
+  { q: "How is AptPilot different from StreetEasy or Zillow?", a: "StreetEasy and Zillow are search portals — they show you listings but leave all the work to you. AptPilot contacts agents, books tours, builds your agenda, and keeps your application documents organized and ready. It's the difference between a map and a chauffeur." },
   { q: "What if I want a refund?", a: "If AptPilot fails to schedule a single tour within 7 days of your search launching (with reasonable criteria), we'll issue a full refund. Contact support@aptpilot.com with any concerns." },
 ]
 
@@ -277,7 +277,7 @@ export default function Landing() {
       `}</style>
       <SEO
         title="AptPilot — NYC Apartment Search Without a Broker Fee"
-        description="Avoid the NYC broker fee. AptPilot searches every listing, books your tours, and submits applications automatically — starting at $299 flat fee."
+        description="Avoid the NYC broker fee. AptPilot searches every listing, books your tours, and keeps your application organized — starting at $299 flat fee."
         canonical="https://aptpilot.vercel.app/"
       />
       <ExitModal show={showExit} onClose={() => setShowExit(false)} />
@@ -310,7 +310,7 @@ export default function Landing() {
           </h1>
 
           <p style={{ fontSize: 'clamp(1rem, 2vw, 1.2rem)', color: 'rgba(255,255,255,0.55)', maxWidth: 580, margin: '0 auto 2.5rem', lineHeight: 1.8, animation: 'fadeUp 0.55s 0.2s ease both' }}>
-            AptPilot searches every listing, books your tours, and submits your applications —
+            AptPilot searches every listing, books your tours, and keeps your application organized —
             all for a one-time flat fee. <strong style={{ color: 'rgba(255,255,255,0.8)' }}>No broker. No stress.</strong>
           </p>
 
@@ -320,7 +320,7 @@ export default function Landing() {
           </div>
 
           <div className="land-stat-row" style={{ display: 'flex', gap: 'clamp(2rem, 5vw, 4.5rem)', marginTop: '5rem', justifyContent: 'center', flexWrap: 'wrap', animation: 'fadeUp 0.55s 0.4s ease both' }}>
-            {[['$0', 'Broker fees'], ['$399', 'vs. $3–6K broker fee'], ['1 day', 'Tour agenda delivered'], ['1-click', 'Application submission']].map(([v, l]) => (
+            {[['$0', 'Broker fees'], ['$399', 'vs. $3–6K broker fee'], ['1 day', 'Tour agenda delivered'], ['Ready', 'Application organized']].map(([v, l]) => (
               <div key={l} style={{ textAlign: 'center' }}>
                 <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 'clamp(1.7rem, 3vw, 2.2rem)', color: '#0ABFBF', fontWeight: 600, lineHeight: 1 }}>{v}</div>
                 <div style={{ fontSize: '0.78rem', color: 'rgba(255,255,255,0.38)', marginTop: '0.35rem', letterSpacing: '0.02em' }}>{l}</div>
@@ -489,7 +489,7 @@ export default function Landing() {
           <div className="land-pricing-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1.25rem' }}>
             {[
               { name: 'Standard', price: '$299', period: 'one-time', features: ['Full listing search', 'Personalized tour agenda', 'Automated tour scheduling', 'Real-time listing alerts', 'Dedicated email support', 'Move-in checklist'], featured: false },
-              { name: 'Core', price: '$399', period: 'one-time', features: ['Everything in Standard', 'Auto-filled applications', 'Negotiation support', 'Real-time application updates', 'Agent follow-up handled', 'Priority scheduling'], featured: true, badge: 'Most Popular' },
+              { name: 'Core', price: '$399', period: 'one-time', features: ['Everything in Standard', 'Application document organizer', 'Negotiation support', 'Real-time application updates', 'Agent follow-up handled', 'Priority scheduling'], featured: true, badge: 'Most Popular' },
               { name: 'Pro', price: '$499', period: 'one-time', features: ['Everything in Core', '1-on-1 NYC broker access', '24/7 phone & text support', 'Broker-led lease negotiation', 'Prioritized scheduling', 'White-glove move-in'], featured: false },
             ].map((plan, i) => (
               <div key={i} className="reveal" style={{ transitionDelay: `${i * 0.08}s`, position: 'relative' }}>

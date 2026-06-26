@@ -261,7 +261,7 @@ export default function Intake() {
               <div className="tier-grid">
                 {[
                   { id:'standard', name:'Standard', price:'$299', feats:['Full listing search','Tour agenda','Automated scheduling','Real-time alerts','Dedicated support'] },
-                  { id:'core', name:'Core', price:'$399', badge:'Most Popular', feats:['Everything in Standard','Auto-filled applications','Negotiation support','Application tracking','Priority scheduling'] },
+                  { id:'core', name:'Core', price:'$399', badge:'Most Popular', feats:['Everything in Standard','Application document organizer','Negotiation support','Application tracking','Priority scheduling'] },
                   { id:'pro', name:'Pro', price:'$499', feats:['Everything in Core','1-on-1 NYC broker','24/7 broker access','Last-minute tour priority','Lease review'] },
                 ].map(t => (
                   <div key={t.id} className={`tier-card ${form.tier === t.id ? 'on' : ''}`} onClick={() => set('tier', t.id)}>

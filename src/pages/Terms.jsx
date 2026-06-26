@@ -24,7 +24,7 @@ export default function Terms() {
           <li>Search NYC listings matching your submitted criteria</li>
           <li>Contact listing agents to inquire about availability and schedule tours</li>
           <li>Send you listings and tour confirmations via your AptPilot dashboard and email</li>
-          <li>Assist with rental application submission for listings you select</li>
+          <li>Organize your application documents so you're ready to apply for listings you select</li>
         </ul>
         <p>AptPilot acts as your search assistant. We do not guarantee any specific listing will be available, that any agent will respond, or that you will sign a lease. We do guarantee our effort and the money-back commitment described in Section 4.</p>
 

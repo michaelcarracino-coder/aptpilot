@@ -188,7 +188,7 @@ export default function Qualify() {
         <div className="q-section" id="documents">
           <h2>Documents You'll Need</h2>
           <p>
-            Competitive NYC apartments move fast — often same-day. Having your full document package ready to submit instantly is a genuine competitive advantage.
+            Competitive NYC apartments move fast — often same-day. Having your full document package organized and ready is a genuine competitive advantage.
           </p>
 
           <div className="doc-grid">
@@ -386,7 +386,7 @@ export default function Qualify() {
         {/* ── CTA ── */}
         <div className="apt-cta">
           <h3>Ready to start your search?</h3>
-          <p>AptPilot handles the outreach, tours, and application submissions — so you can focus on finding the right place, not chasing down agents.</p>
+          <p>AptPilot handles the outreach, tours, and keeps your application documents organized — so you can focus on finding the right place, not chasing down agents.</p>
           <a href="/signup">Get started →</a>
         </div>
 

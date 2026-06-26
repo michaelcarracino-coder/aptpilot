@@ -22,7 +22,7 @@ const PLANS = [
     tag: 'Most Popular',
     features: [
       'Everything in Standard',
-      'Auto-filled rental applications',
+      'Application document organizer',
       'Negotiation support',
       'Application progress tracking',
       'Priority tour scheduling',
@@ -44,12 +44,12 @@ const PLANS = [
 ]
 
 const FAQS = [
-  { q: 'What does AptPilot actually do?', a: 'We search every listing source in NYC, contact agents on your behalf, schedule tours at your available times, and help you submit applications — all for a single flat fee.' },
+  { q: 'What does AptPilot actually do?', a: 'We search every listing source in NYC, contact agents on your behalf, schedule tours at your available times, and keep your application documents organized and ready — all for a single flat fee.' },
   { q: 'Is this a subscription?', a: 'No. It\'s a one-time payment per search. You pay once, we find your apartment.' },
   { q: 'How is this different from a broker?', a: 'A broker typically charges one month\'s rent (up to $4,000+). We charge a flat fee that covers the entire search from listing to lease, no recurring cost.' },
   { q: 'What if I don\'t find an apartment?', a: 'We\'ll work with you until you do. If we can\'t find a qualifying match within your criteria, reach out and we\'ll discuss a solution.' },
   { q: 'What\'s the chauffeur add-on?', a: 'On your tour day, we book a car to take you between every showing — so you\'re not sweating on the subway between 5 tours. Billed per day booked.' },
-  { q: 'Which plan should I pick?', a: 'Core is the most popular — it includes auto-filled applications which saves hours and removes a major rejection risk. Go Pro if you want a dedicated NYC broker by your side.' },
+  { q: 'Which plan should I pick?', a: 'Core is the most popular — it includes our application document organizer which keeps everything ready and removes last-minute scrambling. Go Pro if you want a dedicated NYC broker by your side.' },
 ]
 
 export default function Pricing() {
