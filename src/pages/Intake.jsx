@@ -129,7 +129,7 @@ export default function Intake() {
     moveIn:'', minBed:'1', maxBed:'2', minBudget:'', maxBudget:'',
     neighborhoods:[], tourTimes:[], notes:'',
     tier:'core', chauffeur:false,
-    phone:'',
+    phone:'', workAddress:'',
   })
 
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }))
@@ -141,6 +141,9 @@ export default function Intake() {
 
   const handleSubmit = async () => {
     setSaving(true)
+    if (form.workAddress) {
+      await supabase.from('profiles').update({ work_address: form.workAddress }).eq('id', user.id)
+    }
     const { data, error } = await supabase.from('searches').insert({
       user_id:       user.id,
       move_in:       form.moveIn || null,
@@ -217,6 +220,10 @@ export default function Intake() {
                 </div>
               </div>
               <div className="field"><label>Must-Haves</label><textarea placeholder="e.g. In-unit laundry, doorman, no-fee, pet friendly..." value={form.notes} onChange={e => set('notes', e.target.value)} /></div>
+              <div className="field" style={{ marginTop:'0.5rem' }}>
+                <label>Work Address <span style={{ fontWeight:400, color:'var(--slate)', fontSize:'0.78rem' }}>— used to calculate commute times for each listing</span></label>
+                <input placeholder="e.g. 30 Rockefeller Plaza, New York, NY" value={form.workAddress} onChange={e => set('workAddress', e.target.value)} />
+              </div>
             </div>
             <div className="section-card">
               <div className="section-label"><span className="section-label-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></span>Preferred Neighborhoods</div>

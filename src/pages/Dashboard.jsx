@@ -99,17 +99,7 @@ const css = `
 .msg-send-btn:hover { background:#1a2d4f; }
 .msg-send-btn:disabled { opacity:0.5;cursor:not-allowed; }
 .msg-unread-dot { width:7px;height:7px;border-radius:50%;background:#EF4444;display:inline-block;margin-left:5px;vertical-align:middle; }
-.commute-card { background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);padding:1.25rem;margin-bottom:1.75rem; }
-.commute-work-row { display:flex;gap:0.5rem;margin-bottom:0.5rem; }
-.commute-work-row input { flex:1;border:1.5px solid var(--surface-mid);border-radius:9px;padding:0.5rem 0.75rem;font-size:0.85rem;font-family:inherit;color:var(--navy);outline:none;transition:border-color 0.15s; }
-.commute-work-row input:focus { border-color:var(--teal); }
-.commute-work-row button { background:var(--teal);color:#0C1628;border:none;border-radius:9px;padding:0.5rem 0.9rem;font-size:0.8rem;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap; }
-.commute-hint { font-size:0.75rem;color:var(--slate);margin-bottom:1rem; }
-.commute-listing { border-top:1px solid var(--surface-mid);padding:0.75rem 0;font-size:0.82rem; }
-.commute-listing:first-child { border-top:none; }
-.commute-listing-addr { font-weight:600;color:var(--navy);font-size:0.84rem;margin-bottom:0.5rem; }
-.commute-modes { display:flex;flex-wrap:wrap;gap:0.4rem; }
-.commute-mode { display:inline-flex;align-items:center;gap:0.3rem;background:#F8FAFB;border:1px solid var(--surface-mid);border-radius:8px;padding:0.3rem 0.55rem;font-size:0.78rem;color:var(--navy);font-weight:600;text-decoration:none;transition:background 0.12s;cursor:pointer; }
+.commute-mode { display:inline-flex;align-items:center;gap:0.25rem;background:#F8FAFB;border:1px solid var(--surface-mid);border-radius:6px;padding:0.2rem 0.45rem;font-size:0.72rem;color:var(--navy);font-weight:600;text-decoration:none;transition:background 0.12s; }
 .commute-mode:hover { background:var(--teal-pale);border-color:var(--teal); }
 .commute-mode span { font-weight:400;color:var(--slate); }
 .readiness-card { background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);padding:1.5rem 1.75rem;margin-bottom:1.75rem;display:flex;align-items:center;gap:2rem;flex-wrap:wrap; }
@@ -173,10 +163,10 @@ export default function Dashboard() {
   const justPaid = searchParams.get('payment') === 'success'
   const channelRef = useRef(null)
   const toastTimer = useRef(null)
-  const [workAddress, setWorkAddress] = useState(() => localStorage.getItem('aptpilot_work_addr') || '')
-  const [commuteInput, setCommuteInput] = useState('')
   const [commuteResults, setCommuteResults] = useState({})
   const [commuteLoading, setCommuteLoading] = useState({})
+  const [workAddrInput, setWorkAddrInput] = useState('')
+  const [savingWorkAddr, setSavingWorkAddr] = useState(false)
 
   useEffect(() => { if (user) { loadData(); loadReferrals(); loadDocCount(); loadGroup(); loadGroupMembers(); loadMessages() } }, [user])
   useEffect(() => { if (justPaid) setShowGroupModal(true) }, [justPaid])
@@ -308,14 +298,15 @@ export default function Dashboard() {
     }
   }
 
-  async function fetchCommute(listingId, listingAddress) {
-    if (!workAddress) return
+  async function fetchCommute(listingId, listingAddress, dest) {
+    const workAddr = dest || profile?.work_address
+    if (!workAddr) return
     setCommuteLoading(prev => ({ ...prev, [listingId]: true }))
     try {
       const res = await fetch('/api/commute', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ from: listingAddress, to: workAddress }),
+        body: JSON.stringify({ from: listingAddress, to: workAddr }),
       })
       const data = await res.json()
       setCommuteResults(prev => ({ ...prev, [listingId]: data }))
@@ -326,11 +317,20 @@ export default function Dashboard() {
   }
 
   async function saveWorkAddress() {
-    const addr = commuteInput.trim()
+    const addr = workAddrInput.trim()
     if (!addr) return
-    localStorage.setItem('aptpilot_work_addr', addr)
-    setWorkAddress(addr)
+    setSavingWorkAddr(true)
+    await supabase.from('profiles').update({ work_address: addr }).eq('id', user.id)
+    setSavingWorkAddr(false)
+    setWorkAddrInput('')
     setCommuteResults({})
+    // Trigger commutes for all current listings with the new address
+    listings.forEach(l => {
+      const a = `${l.address}${l.unit ? `, ${l.unit}` : ''}`
+      fetchCommute(l.id, a, addr)
+    })
+    // Reload page so profile.work_address updates and prompt disappears
+    window.location.reload()
   }
 
   async function loadData() {
@@ -350,8 +350,17 @@ export default function Dashboard() {
       const { data: listingData } = await supabase
         .from('listings').select('*').eq('search_id', searchData.id)
         .order('created_at', { ascending: false })
-      setListings(listingData || [])
+      const loaded = listingData || []
+      setListings(loaded)
       subscribeToListings(searchData.id)
+      // Auto-calculate commutes if work address is set
+      const { data: prof } = await supabase.from('profiles').select('work_address').eq('id', user.id).single()
+      if (prof?.work_address && loaded.length > 0) {
+        loaded.forEach(l => {
+          const addr = `${l.address}${l.unit ? `, ${l.unit}` : ''}`
+          fetchCommute(l.id, addr, prof.work_address)
+        })
+      }
     }
     setLoading(false)
   }
@@ -753,53 +762,6 @@ export default function Dashboard() {
           ))}
         </div>
 
-        <div className="commute-card">
-          <div className="sect-title">Commute Calculator</div>
-          <div className="commute-work-row">
-            <input
-              placeholder="Enter your work address (e.g. 30 Rockefeller Plaza, New York)…"
-              defaultValue={workAddress}
-              onChange={e => setCommuteInput(e.target.value)}
-              onKeyDown={e => e.key === 'Enter' && saveWorkAddress()}
-            />
-            <button onClick={saveWorkAddress}>Set</button>
-          </div>
-          {workAddress
-            ? <p className="commute-hint">Door-to-door estimates from each listing to <strong>{workAddress}</strong>. Click any mode to open directions in Google Maps.</p>
-            : <p className="commute-hint">Set your work address to see door-to-door commute times from every listing — subway, bike, walk, drive, and bus.</p>
-          }
-          {workAddress && listings.length > 0 && listings.map(l => {
-            const addr = `${l.address}${l.unit ? `, ${l.unit}` : ''}`
-            const result = commuteResults[l.id]
-            const isLoading = commuteLoading[l.id]
-            return (
-              <div className="commute-listing" key={l.id}>
-                <div className="commute-listing-addr">{addr}</div>
-                {!result && !isLoading && (
-                  <button className="commute-mode" onClick={() => fetchCommute(l.id, addr)}>Calculate →</button>
-                )}
-                {isLoading && <span style={{ fontSize:'0.78rem', color:'var(--slate)' }}>Calculating…</span>}
-                {result?.error && <span style={{ fontSize:'0.78rem', color:'#EF4444' }}>{result.error}</span>}
-                {result?.modes && (
-                  <div className="commute-modes">
-                    {result.modes.map(m => (
-                      <a key={m.id} href={m.url} target="_blank" rel="noopener noreferrer" className="commute-mode">
-                        {m.emoji} {m.label} <span>~{m.minutes} min</span>
-                      </a>
-                    ))}
-                    <span style={{ fontSize:'0.73rem', color:'var(--slate)', alignSelf:'center', marginLeft:'0.25rem' }}>
-                      {result.distanceMiles} mi
-                    </span>
-                  </div>
-                )}
-              </div>
-            )
-          })}
-          {workAddress && listings.length === 0 && (
-            <p style={{ fontSize:'0.82rem', color:'var(--slate)' }}>Commute times will appear here once listings are added to your search.</p>
-          )}
-        </div>
-
         <div className="two-col">
           <div>
             <div className="sect-title">Your Apartments</div>
@@ -862,12 +824,50 @@ export default function Dashboard() {
                         ✓ Apply request sent — we'll be in touch
                       </div>
                     )}
+                    {/* Commute row */}
+                    {(() => {
+                      const addr = `${l.address}${l.unit ? `, ${l.unit}` : ''}`
+                      const cr = commuteResults[l.id]
+                      const cl = commuteLoading[l.id]
+                      if (cl) return <div style={{ marginTop:'0.5rem', fontSize:'0.75rem', color:'var(--slate)' }}>Calculating commutes…</div>
+                      if (cr?.modes) return (
+                        <div style={{ marginTop:'0.5rem', display:'flex', flexWrap:'wrap', gap:'0.35rem', alignItems:'center' }}>
+                          <span style={{ fontSize:'0.72rem', color:'var(--slate)', marginRight:'0.1rem' }}>Commute:</span>
+                          {cr.modes.map(m => (
+                            <a key={m.id} href={m.url} target="_blank" rel="noopener noreferrer" className="commute-mode">
+                              {m.emoji} <span>~{m.minutes}m</span>
+                            </a>
+                          ))}
+                          <span style={{ fontSize:'0.7rem', color:'var(--slate)' }}>{cr.distanceMiles} mi</span>
+                        </div>
+                      )
+                      if (cr?.error) return <div style={{ marginTop:'0.5rem', fontSize:'0.73rem', color:'#EF4444' }}>Commute unavailable</div>
+                      return null
+                    })()}
                   </div>
                   <div style={{ textAlign:'right', flexShrink:0 }}>
                     <div className="tour-price">{l.price ? `$${l.price.toLocaleString()}` : '—'}<small>/month</small></div>
                   </div>
                 </div>
               ))
+            )}
+            {/* Prompt to set work address if missing */}
+            {listings.length > 0 && !profile?.work_address && (
+              <div style={{ marginTop:'0.75rem', background:'#F8FAFB', borderRadius:10, padding:'0.85rem 1rem', border:'1.5px dashed var(--surface-mid)' }}>
+                <div style={{ fontSize:'0.82rem', color:'var(--navy)', fontWeight:600, marginBottom:'0.4rem' }}>🗺 Add your work address to see commute times</div>
+                <div style={{ display:'flex', gap:'0.5rem' }}>
+                  <input
+                    placeholder="e.g. 30 Rockefeller Plaza, New York"
+                    value={workAddrInput}
+                    onChange={e => setWorkAddrInput(e.target.value)}
+                    onKeyDown={e => e.key === 'Enter' && saveWorkAddress()}
+                    style={{ flex:1, border:'1.5px solid var(--surface-mid)', borderRadius:8, padding:'0.45rem 0.7rem', fontSize:'0.82rem', fontFamily:'inherit', color:'var(--navy)', outline:'none' }}
+                  />
+                  <button onClick={saveWorkAddress} disabled={savingWorkAddr || !workAddrInput.trim()} style={{ background:'var(--teal)', color:'#0C1628', border:'none', borderRadius:8, padding:'0.45rem 0.9rem', fontSize:'0.8rem', fontWeight:700, cursor:'pointer', fontFamily:'inherit', opacity: savingWorkAddr ? 0.6 : 1 }}>
+                    {savingWorkAddr ? '…' : 'Save'}
+                  </button>
+                </div>
+              </div>
             )}
           </div>
 
