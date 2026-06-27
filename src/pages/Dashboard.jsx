@@ -696,7 +696,6 @@ export default function Dashboard() {
                 ['Bedrooms',      search ? `${search.min_bed} – ${search.max_bed} bed` : '—'],
                 ['Bathrooms',     search?.min_bath ? `${search.min_bath}+ bath` : 'Any'],
                 ['Min Sqft',      search?.min_sqft ? `${search.min_sqft.toLocaleString()} sf` : 'Any'],
-                ['No-Fee Only',   search?.no_fee ? 'Yes' : 'No'],
                 ['Move-In',       search?.move_in || 'ASAP'],
                 ['Neighborhoods', (search?.neighborhoods || []).slice(0,3).join(', ') || '—'],
                 ['Building Type', (search?.building_types || []).join(', ') || 'Any'],

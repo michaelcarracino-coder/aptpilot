@@ -138,7 +138,7 @@ export default function Intake() {
     neighborhoods:[], tourTimes:[], notes:'',
     tier:'core', chauffeur:false,
     phone:'', workAddress:'',
-    minBath:'Any', noFee:false, amenities:[], buildingTypes:[], minSqft:'',
+    minBath:'Any', amenities:[], buildingTypes:[], minSqft:'',
   })
 
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }))
@@ -167,7 +167,6 @@ export default function Intake() {
       chauffeur:      form.chauffeur,
       phone:          form.phone,
       min_bath:       form.minBath !== 'Any' ? form.minBath : null,
-      no_fee:         form.noFee,
       amenities:      form.amenities,
       building_types: form.buildingTypes,
       min_sqft:       form.minSqft ? parseInt(form.minSqft) : null,
@@ -239,20 +238,6 @@ export default function Intake() {
                 </div>
                 <div className="field"><label>Min Square Footage <span style={{ fontWeight:400, color:'var(--slate)', fontSize:'0.78rem' }}>(optional)</span></label>
                   <input placeholder="e.g. 500" value={form.minSqft} onChange={e => set('minSqft', e.target.value.replace(/\D/g,''))} />
-                </div>
-              </div>
-
-              {/* No-fee toggle */}
-              <div
-                onClick={() => set('noFee', !form.noFee)}
-                style={{ display:'flex', alignItems:'center', gap:'0.85rem', border:`2px solid ${form.noFee ? 'var(--teal)' : 'var(--surface-mid)'}`, borderRadius:10, padding:'0.75rem 1rem', cursor:'pointer', background: form.noFee ? 'var(--teal-pale)' : '#fff', transition:'all 0.15s', marginBottom:'1rem' }}
-              >
-                <div style={{ width:20, height:20, borderRadius:5, border:`2px solid ${form.noFee ? 'var(--teal)' : 'var(--surface-mid)'}`, background: form.noFee ? 'var(--teal)' : '#fff', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, transition:'all 0.15s' }}>
-                  {form.noFee && <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>}
-                </div>
-                <div>
-                  <div style={{ fontWeight:600, fontSize:'0.88rem', color:'var(--navy)' }}>No-fee listings only</div>
-                  <div style={{ fontSize:'0.78rem', color:'var(--slate)', marginTop:'0.1rem' }}>Only show apartments where no broker fee is charged</div>
                 </div>
               </div>
 
