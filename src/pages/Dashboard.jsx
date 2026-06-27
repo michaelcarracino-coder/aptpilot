@@ -699,7 +699,6 @@ export default function Dashboard() {
                 ['Move-In',       search?.move_in || 'ASAP'],
                 ['Neighborhoods', (search?.neighborhoods || []).slice(0,3).join(', ') || '—'],
                 ['Building Type', (search?.building_types || []).join(', ') || 'Any'],
-                ['Amenities',     (search?.amenities || []).length > 0 ? `${(search.amenities || []).length} selected` : 'None'],
                 ['Plan',          search?.tier === 'pro' ? 'Pro ($499)' : search?.tier === 'standard' ? 'Standard ($299)' : 'Core ($399)'],
                 ['Chauffeur',     search?.chauffeur ? 'Yes' : 'No'],
               ].map(([k, v]) => (
@@ -708,6 +707,30 @@ export default function Dashboard() {
                   <span style={{ fontWeight:600 }}>{v}</span>
                 </div>
               ))}
+              {/* Must-Haves */}
+              <div className="crit-row" style={{ flexDirection:'column', alignItems:'flex-start', gap:'0.4rem' }}>
+                <span style={{ color:'var(--slate)' }}>Must-Haves</span>
+                {(search?.amenities || []).length > 0
+                  ? <div style={{ display:'flex', flexWrap:'wrap', gap:'0.3rem' }}>
+                      {(search.amenities || []).map(a => (
+                        <span key={a} style={{ background:'var(--teal-pale)', color:'var(--teal)', fontSize:'0.72rem', fontWeight:600, padding:'0.18rem 0.55rem', borderRadius:100 }}>{a}</span>
+                      ))}
+                    </div>
+                  : <span style={{ fontWeight:600 }}>None</span>
+                }
+              </div>
+              {/* Wish List */}
+              <div className="crit-row" style={{ flexDirection:'column', alignItems:'flex-start', gap:'0.4rem', borderBottom:'none' }}>
+                <span style={{ color:'var(--slate)' }}>Wish List</span>
+                {(search?.amenities_wishlist || []).length > 0
+                  ? <div style={{ display:'flex', flexWrap:'wrap', gap:'0.3rem' }}>
+                      {(search.amenities_wishlist || []).map(a => (
+                        <span key={a} style={{ background:'#F5F3FF', color:'#7C3AED', fontSize:'0.72rem', fontWeight:600, padding:'0.18rem 0.55rem', borderRadius:100 }}>{a}</span>
+                      ))}
+                    </div>
+                  : <span style={{ fontWeight:600 }}>None</span>
+                }
+              </div>
             </div>
           </div>
         </div>
