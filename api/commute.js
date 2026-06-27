@@ -10,9 +10,12 @@ function haversineKm(lat1, lon1, lat2, lon2) {
 }
 
 async function geocode(address) {
-  const q = encodeURIComponent(`${address}, New York City`)
+  // Strip unit/apt numbers — geocoders can't resolve individual apartments
+  const clean = address.replace(/,?\s*(apt|apartment|unit|suite|ste|floor|fl|#)\s*[\w-]*/gi, '').trim()
+  const q = encodeURIComponent(`${clean}, New York City, NY`)
   const url = `https://nominatim.openstreetmap.org/search?q=${q}&format=json&limit=1&countrycodes=us`
-  const res = await fetch(url, { headers: { 'User-Agent': 'AptPilot/1.0 (contact@aptpilot.com)' } })
+  const res = await fetch(url, { headers: { 'User-Agent': 'AptPilot/1.0 (michael.carracino@compass.com)' } })
+  if (!res.ok) throw new Error(`Nominatim returned ${res.status}`)
   const data = await res.json()
   if (!data?.length) return null
   return { lat: parseFloat(data[0].lat), lon: parseFloat(data[0].lon), display: data[0].display_name }
@@ -31,8 +34,8 @@ export default async function handler(req, res) {
 
   try {
     const [fromGeo, toGeo] = await Promise.all([geocode(from), geocode(to)])
-    if (!fromGeo) return res.status(422).json({ error: `Could not geocode: ${from}` })
-    if (!toGeo)   return res.status(422).json({ error: `Could not geocode: ${to}` })
+    if (!fromGeo) return res.status(422).json({ error: `Address not found: "${from}" — try adding the borough (e.g. "245 W 14th St, Manhattan")` })
+    if (!toGeo)   return res.status(422).json({ error: `Work address not found: "${to}" — try a more specific address` })
 
     const km = haversineKm(fromGeo.lat, fromGeo.lon, toGeo.lat, toGeo.lon)
     const miles = km * 0.621371

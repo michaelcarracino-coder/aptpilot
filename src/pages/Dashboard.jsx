@@ -324,12 +324,7 @@ export default function Dashboard() {
     setSavingWorkAddr(false)
     setWorkAddrInput('')
     setCommuteResults({})
-    // Trigger commutes for all current listings with the new address
-    listings.forEach(l => {
-      const a = `${l.address}${l.unit ? `, ${l.unit}` : ''}`
-      fetchCommute(l.id, a, addr)
-    })
-    // Reload page so profile.work_address updates and prompt disappears
+    // Reload so profile.work_address is picked up and commutes auto-fetch
     window.location.reload()
   }
 
@@ -357,8 +352,7 @@ export default function Dashboard() {
       const { data: prof } = await supabase.from('profiles').select('work_address').eq('id', user.id).single()
       if (prof?.work_address && loaded.length > 0) {
         loaded.forEach(l => {
-          const addr = `${l.address}${l.unit ? `, ${l.unit}` : ''}`
-          fetchCommute(l.id, addr, prof.work_address)
+          fetchCommute(l.id, l.address, prof.work_address)
         })
       }
     }
@@ -825,25 +819,23 @@ export default function Dashboard() {
                       </div>
                     )}
                     {/* Commute row */}
-                    {(() => {
-                      const addr = `${l.address}${l.unit ? `, ${l.unit}` : ''}`
-                      const cr = commuteResults[l.id]
-                      const cl = commuteLoading[l.id]
-                      if (cl) return <div style={{ marginTop:'0.5rem', fontSize:'0.75rem', color:'var(--slate)' }}>Calculating commutes…</div>
-                      if (cr?.modes) return (
-                        <div style={{ marginTop:'0.5rem', display:'flex', flexWrap:'wrap', gap:'0.35rem', alignItems:'center' }}>
-                          <span style={{ fontSize:'0.72rem', color:'var(--slate)', marginRight:'0.1rem' }}>Commute:</span>
-                          {cr.modes.map(m => (
-                            <a key={m.id} href={m.url} target="_blank" rel="noopener noreferrer" className="commute-mode">
-                              {m.emoji} <span>~{m.minutes}m</span>
-                            </a>
-                          ))}
-                          <span style={{ fontSize:'0.7rem', color:'var(--slate)' }}>{cr.distanceMiles} mi</span>
-                        </div>
-                      )
-                      if (cr?.error) return <div style={{ marginTop:'0.5rem', fontSize:'0.73rem', color:'#EF4444' }}>Commute unavailable</div>
-                      return null
-                    })()}
+                    {commuteLoading[l.id] && (
+                      <div style={{ marginTop:'0.5rem', fontSize:'0.75rem', color:'var(--slate)' }}>Calculating commutes…</div>
+                    )}
+                    {commuteResults[l.id]?.modes && (
+                      <div style={{ marginTop:'0.5rem', display:'flex', flexWrap:'wrap', gap:'0.35rem', alignItems:'center' }}>
+                        <span style={{ fontSize:'0.72rem', color:'var(--slate)', marginRight:'0.1rem' }}>Commute:</span>
+                        {commuteResults[l.id].modes.map(m => (
+                          <a key={m.id} href={m.url} target="_blank" rel="noopener noreferrer" className="commute-mode">
+                            {m.emoji} <span>~{m.minutes}m</span>
+                          </a>
+                        ))}
+                        <span style={{ fontSize:'0.7rem', color:'var(--slate)' }}>{commuteResults[l.id].distanceMiles} mi</span>
+                      </div>
+                    )}
+                    {commuteResults[l.id]?.error && (
+                      <div style={{ marginTop:'0.5rem', fontSize:'0.73rem', color:'#EF4444' }}>{commuteResults[l.id].error}</div>
+                    )}
                   </div>
                   <div style={{ textAlign:'right', flexShrink:0 }}>
                     <div className="tour-price">{l.price ? `$${l.price.toLocaleString()}` : '—'}<small>/month</small></div>
