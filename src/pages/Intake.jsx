@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { supabase } from '../lib/supabase'
@@ -86,6 +86,11 @@ const css = `
 .tier-feat { font-size:0.8rem; color:#475569; display:flex; gap:0.4rem; }
 .tier-feat::before { content:"✓"; color:var(--teal); font-weight:700; }
 .chauffeur-row { border:2px solid var(--surface-mid); border-radius:12px; padding:1rem 1.25rem; display:flex;align-items:center;gap:1rem;cursor:pointer;transition:all 0.18s; }
+.info-bubble-wrap { position:relative; display:inline-flex; align-items:center; }
+.info-icon { display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:50%;background:var(--surface-mid);color:var(--slate);font-size:0.65rem;font-weight:700;cursor:pointer;margin-left:0.35rem;flex-shrink:0;transition:background 0.15s; }
+.info-icon:hover { background:var(--teal);color:#fff; }
+.info-bubble { position:absolute;top:calc(100% + 8px);left:0;z-index:50;background:var(--navy);color:#fff;font-size:0.78rem;line-height:1.55;padding:0.65rem 0.85rem;border-radius:10px;width:240px;box-shadow:0 8px 24px rgba(0,0,0,0.18);pointer-events:none; }
+.info-bubble::before { content:'';position:absolute;top:-5px;left:10px;width:10px;height:10px;background:var(--navy);transform:rotate(45deg); }
 .chauffeur-row:hover,.chauffeur-row.on { border-color:var(--teal); background:var(--teal-pale); }
 .check-box { width:22px;height:22px;border-radius:6px;border:2px solid var(--surface-mid);display:flex;align-items:center;justify-content:center;font-size:0.8rem;color:#fff;flex-shrink:0;transition:all 0.15s; }
 .chauffeur-row.on .check-box { background:var(--teal);border-color:var(--teal); }
@@ -93,6 +98,72 @@ const css = `
 .order-row { display:flex;justify-content:space-between;padding:0.55rem 0;border-bottom:1px solid var(--surface-mid);font-size:0.88rem; }
 .order-row:last-child { border:none;font-weight:700;font-size:1rem;padding-top:0.75rem; }
 `
+
+function InfoBubble({ text }) {
+  const [open, setOpen] = useState(false)
+  return (
+    <span className="info-bubble-wrap">
+      <span className="info-icon" onClick={e => { e.stopPropagation(); setOpen(o => !o) }} onBlur={() => setOpen(false)} tabIndex={0}>i</span>
+      {open && <span className="info-bubble">{text}</span>}
+    </span>
+  )
+}
+
+function AmenitiesSection({ form, toggle }) {
+  return (
+    <>
+      <div className="section-card">
+        <div className="section-label">
+          <span className="section-label-icon">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          </span>
+          Must-Haves
+          <InfoBubble text="We will only send you apartments that have all of these features. Listings missing any must-have will be excluded from your search." />
+        </div>
+        <div className="chip-grid">
+          {AMENITIES.map(a => (
+            <button
+              key={a}
+              className={`chip ${form.amenities.includes(a) ? 'on' : ''}`}
+              onClick={() => {
+                toggle('amenities', a)
+                // Remove from wishlist if being added to must-haves
+                if (!form.amenities.includes(a) && form.amenitiesWishlist.includes(a)) {
+                  toggle('amenitiesWishlist', a)
+                }
+              }}
+            >{a}</button>
+          ))}
+        </div>
+      </div>
+
+      <div className="section-card">
+        <div className="section-label">
+          <span className="section-label-icon">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+          </span>
+          Wish List
+          <InfoBubble text="We'll still search for apartments without these features, but we'll prioritize and highlight listings that have them." />
+        </div>
+        <div className="chip-grid">
+          {AMENITIES.map(a => {
+            const isMustHave = form.amenities.includes(a)
+            return (
+              <button
+                key={a}
+                className={`chip ${form.amenitiesWishlist.includes(a) ? 'on' : ''} ${isMustHave ? 'chip-disabled' : ''}`}
+                disabled={isMustHave}
+                title={isMustHave ? 'Already a must-have' : ''}
+                onClick={() => toggle('amenitiesWishlist', a)}
+                style={isMustHave ? { opacity:0.35, cursor:'not-allowed' } : {}}
+              >{a}</button>
+            )
+          })}
+        </div>
+      </div>
+    </>
+  )
+}
 
 export default function Intake() {
   const { user } = useAuth()
@@ -138,7 +209,7 @@ export default function Intake() {
     neighborhoods:[], tourTimes:[], notes:'',
     tier:'core', chauffeur:false,
     phone:'', workAddress:'',
-    minBath:'Any', amenities:[], buildingTypes:[], minSqft:'',
+    minBath:'Any', amenities:[], amenitiesWishlist:[], buildingTypes:[], minSqft:'',
   })
 
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }))
@@ -167,7 +238,8 @@ export default function Intake() {
       chauffeur:      form.chauffeur,
       phone:          form.phone,
       min_bath:       form.minBath !== 'Any' ? form.minBath : null,
-      amenities:      form.amenities,
+      amenities:           form.amenities,
+      amenities_wishlist:  form.amenitiesWishlist,
       building_types: form.buildingTypes,
       min_sqft:       form.minSqft ? parseInt(form.minSqft) : null,
     })
@@ -269,14 +341,7 @@ export default function Intake() {
               </div>
             </div>
 
-            <div className="section-card">
-              <div className="section-label"><span className="section-label-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></span>Amenities <span style={{ fontWeight:400, color:'var(--slate)', fontSize:'0.8rem', marginLeft:'0.25rem' }}>(select all that matter to you)</span></div>
-              <div className="chip-grid">
-                {AMENITIES.map(a => (
-                  <button key={a} className={`chip ${form.amenities.includes(a) ? 'on' : ''}`} onClick={() => toggle('amenities', a)}>{a}</button>
-                ))}
-              </div>
-            </div>
+            <AmenitiesSection form={form} toggle={toggle} />
           </div>
         )}
 
