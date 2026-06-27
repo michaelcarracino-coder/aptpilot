@@ -694,8 +694,13 @@ export default function Dashboard() {
               {[
                 ['Budget',        search ? `$${search.min_budget || '?'} – $${search.max_budget || '?'}/mo` : '—'],
                 ['Bedrooms',      search ? `${search.min_bed} – ${search.max_bed} bed` : '—'],
+                ['Bathrooms',     search?.min_bath ? `${search.min_bath}+ bath` : 'Any'],
+                ['Min Sqft',      search?.min_sqft ? `${search.min_sqft.toLocaleString()} sf` : 'Any'],
+                ['No-Fee Only',   search?.no_fee ? 'Yes' : 'No'],
                 ['Move-In',       search?.move_in || 'ASAP'],
-                ['Neighborhoods', (search?.neighborhoods || []).slice(0,2).join(', ') || '—'],
+                ['Neighborhoods', (search?.neighborhoods || []).slice(0,3).join(', ') || '—'],
+                ['Building Type', (search?.building_types || []).join(', ') || 'Any'],
+                ['Amenities',     (search?.amenities || []).length > 0 ? `${(search.amenities || []).length} selected` : 'None'],
                 ['Plan',          search?.tier === 'pro' ? 'Pro ($499)' : search?.tier === 'standard' ? 'Standard ($299)' : 'Core ($399)'],
                 ['Chauffeur',     search?.chauffeur ? 'Yes' : 'No'],
               ].map(([k, v]) => (

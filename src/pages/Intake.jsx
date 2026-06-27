@@ -5,6 +5,14 @@ import { supabase } from '../lib/supabase'
 
 const NEIGHBORHOODS = ['Upper East Side','Upper West Side','Midtown','Chelsea','West Village','SoHo','Tribeca','Lower East Side','Williamsburg','Astoria','Park Slope','Hoboken','Jersey City','Long Island City','Bushwick']
 const TIMES = ['8:00 AM','9:00 AM','10:00 AM','11:00 AM','12:00 PM','1:00 PM','2:00 PM','3:00 PM','4:00 PM','5:00 PM','6:00 PM','7:00 PM']
+const AMENITIES = [
+  'Doorman','Virtual Doorman','Concierge','Elevator',
+  'In-Unit Washer/Dryer','Laundry in Building','Dishwasher','Central A/C',
+  'Gym / Fitness Center','Roof Deck','Terrace / Balcony','Outdoor Space',
+  'Storage','Bike Room','Parking / Garage','Pool',
+  'Pets OK — Dogs','Pets OK — Cats','Furnished','Flexible Lease',
+]
+const BUILDING_TYPES = ['Rental Building','Condo','Co-op','Townhouse']
 
 const TENANT_DOCS = [
   { id:'t1', label:'ID or Passport', sub:'Photo or scan — government issued' },
@@ -130,6 +138,7 @@ export default function Intake() {
     neighborhoods:[], tourTimes:[], notes:'',
     tier:'core', chauffeur:false,
     phone:'', workAddress:'',
+    minBath:'Any', noFee:false, amenities:[], buildingTypes:[], minSqft:'',
   })
 
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }))
@@ -151,12 +160,17 @@ export default function Intake() {
       max_bed:       form.maxBed,
       min_budget:    form.minBudget ? parseInt(form.minBudget.replace(/\D/g,'')) : null,
       max_budget:    form.maxBudget ? parseInt(form.maxBudget.replace(/\D/g,'')) : null,
-      neighborhoods: form.neighborhoods,
-      tour_times:    form.tourTimes,
-      notes:         form.notes,
-      tier:          form.tier,
-      chauffeur:     form.chauffeur,
-      phone:         form.phone,
+      neighborhoods:  form.neighborhoods,
+      tour_times:     form.tourTimes,
+      notes:          form.notes,
+      tier:           form.tier,
+      chauffeur:      form.chauffeur,
+      phone:          form.phone,
+      min_bath:       form.minBath !== 'Any' ? form.minBath : null,
+      no_fee:         form.noFee,
+      amenities:      form.amenities,
+      building_types: form.buildingTypes,
+      min_sqft:       form.minSqft ? parseInt(form.minSqft) : null,
     })
     setSaving(false)
     if (!error) {
@@ -218,18 +232,63 @@ export default function Intake() {
                     {['Studio','1','2','3','4+'].map(v => <option key={v}>{v}</option>)}
                   </select>
                 </div>
+                <div className="field"><label>Min Bathrooms</label>
+                  <select value={form.minBath} onChange={e => set('minBath', e.target.value)}>
+                    {['Any','1','1.5','2','2.5','3+'].map(v => <option key={v}>{v}</option>)}
+                  </select>
+                </div>
+                <div className="field"><label>Min Square Footage <span style={{ fontWeight:400, color:'var(--slate)', fontSize:'0.78rem' }}>(optional)</span></label>
+                  <input placeholder="e.g. 500" value={form.minSqft} onChange={e => set('minSqft', e.target.value.replace(/\D/g,''))} />
+                </div>
               </div>
-              <div className="field"><label>Must-Haves</label><textarea placeholder="e.g. In-unit laundry, doorman, no-fee, pet friendly..." value={form.notes} onChange={e => set('notes', e.target.value)} /></div>
-              <div className="field" style={{ marginTop:'0.5rem' }}>
+
+              {/* No-fee toggle */}
+              <div
+                onClick={() => set('noFee', !form.noFee)}
+                style={{ display:'flex', alignItems:'center', gap:'0.85rem', border:`2px solid ${form.noFee ? 'var(--teal)' : 'var(--surface-mid)'}`, borderRadius:10, padding:'0.75rem 1rem', cursor:'pointer', background: form.noFee ? 'var(--teal-pale)' : '#fff', transition:'all 0.15s', marginBottom:'1rem' }}
+              >
+                <div style={{ width:20, height:20, borderRadius:5, border:`2px solid ${form.noFee ? 'var(--teal)' : 'var(--surface-mid)'}`, background: form.noFee ? 'var(--teal)' : '#fff', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, transition:'all 0.15s' }}>
+                  {form.noFee && <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>}
+                </div>
+                <div>
+                  <div style={{ fontWeight:600, fontSize:'0.88rem', color:'var(--navy)' }}>No-fee listings only</div>
+                  <div style={{ fontSize:'0.78rem', color:'var(--slate)', marginTop:'0.1rem' }}>Only show apartments where no broker fee is charged</div>
+                </div>
+              </div>
+
+              <div className="field">
                 <label>Work Address <span style={{ fontWeight:400, color:'var(--slate)', fontSize:'0.78rem' }}>— used to calculate commute times for each listing</span></label>
                 <input placeholder="e.g. 30 Rockefeller Plaza, New York, NY" value={form.workAddress} onChange={e => set('workAddress', e.target.value)} />
               </div>
+              <div className="field" style={{ marginTop:'0.75rem' }}>
+                <label>Additional Notes <span style={{ fontWeight:400, color:'var(--slate)', fontSize:'0.78rem' }}>(anything we should know)</span></label>
+                <textarea placeholder="e.g. Must be close to subway, prefer top floor, open to flex rooms..." value={form.notes} onChange={e => set('notes', e.target.value)} />
+              </div>
             </div>
+
             <div className="section-card">
               <div className="section-label"><span className="section-label-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></span>Preferred Neighborhoods</div>
               <div className="chip-grid">
                 {NEIGHBORHOODS.map(n => (
                   <button key={n} className={`chip ${form.neighborhoods.includes(n) ? 'on' : ''}`} onClick={() => toggle('neighborhoods', n)}>{n}</button>
+                ))}
+              </div>
+            </div>
+
+            <div className="section-card">
+              <div className="section-label"><span className="section-label-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span>Building Type <span style={{ fontWeight:400, color:'var(--slate)', fontSize:'0.8rem', marginLeft:'0.25rem' }}>(select all that apply)</span></div>
+              <div className="chip-grid">
+                {BUILDING_TYPES.map(b => (
+                  <button key={b} className={`chip ${form.buildingTypes.includes(b) ? 'on' : ''}`} onClick={() => toggle('buildingTypes', b)}>{b}</button>
+                ))}
+              </div>
+            </div>
+
+            <div className="section-card">
+              <div className="section-label"><span className="section-label-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></span>Amenities <span style={{ fontWeight:400, color:'var(--slate)', fontSize:'0.8rem', marginLeft:'0.25rem' }}>(select all that matter to you)</span></div>
+              <div className="chip-grid">
+                {AMENITIES.map(a => (
+                  <button key={a} className={`chip ${form.amenities.includes(a) ? 'on' : ''}`} onClick={() => toggle('amenities', a)}>{a}</button>
                 ))}
               </div>
             </div>
