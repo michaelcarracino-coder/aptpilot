@@ -169,6 +169,7 @@ export default function Dashboard() {
   const [savingWorkAddr, setSavingWorkAddr] = useState(false)
 
   useEffect(() => { if (user) { loadData(); loadReferrals(); loadDocCount(); loadGroup(); loadGroupMembers(); loadMessages() } }, [user])
+  useEffect(() => { if (listings.length > 0 && groupMembers.length > 0) fetchAllCommutes(listings, groupMembers) }, [listings, groupMembers])
   useEffect(() => { if (justPaid) setShowGroupModal(true) }, [justPaid])
 
   async function loadMessages() {
@@ -298,10 +299,10 @@ export default function Dashboard() {
     }
   }
 
-  async function fetchCommute(listingId, listingAddress, dest) {
-    const workAddr = dest || profile?.work_address
+  async function fetchCommute(listingId, listingAddress, userId, workAddr) {
     if (!workAddr) return
-    setCommuteLoading(prev => ({ ...prev, [listingId]: true }))
+    const key = `${listingId}_${userId}`
+    setCommuteLoading(prev => ({ ...prev, [key]: true }))
     try {
       const res = await fetch('/api/commute', {
         method: 'POST',
@@ -309,11 +310,24 @@ export default function Dashboard() {
         body: JSON.stringify({ from: listingAddress, to: workAddr }),
       })
       const data = await res.json()
-      setCommuteResults(prev => ({ ...prev, [listingId]: data }))
+      setCommuteResults(prev => ({ ...prev, [key]: data }))
     } catch {
-      setCommuteResults(prev => ({ ...prev, [listingId]: { error: 'Could not calculate' } }))
+      setCommuteResults(prev => ({ ...prev, [key]: { error: 'Could not calculate' } }))
     }
-    setCommuteLoading(prev => ({ ...prev, [listingId]: false }))
+    setCommuteLoading(prev => ({ ...prev, [key]: false }))
+  }
+
+  async function fetchAllCommutes(loadedListings, members) {
+    if (!loadedListings?.length || !members?.length) return
+    // Fetch work_address for all members
+    const userIds = members.map(m => m.userId)
+    const { data: profs } = await supabase.from('profiles').select('id, work_address').in('id', userIds)
+    const workMap = Object.fromEntries((profs || []).filter(p => p.work_address).map(p => [p.id, p.work_address]))
+    loadedListings.forEach(l => {
+      members.forEach(m => {
+        if (workMap[m.userId]) fetchCommute(l.id, l.address, m.userId, workMap[m.userId])
+      })
+    })
   }
 
   async function saveWorkAddress() {
@@ -324,7 +338,6 @@ export default function Dashboard() {
     setSavingWorkAddr(false)
     setWorkAddrInput('')
     setCommuteResults({})
-    // Reload so profile.work_address is picked up and commutes auto-fetch
     window.location.reload()
   }
 
@@ -348,13 +361,7 @@ export default function Dashboard() {
       const loaded = listingData || []
       setListings(loaded)
       subscribeToListings(searchData.id)
-      // Auto-calculate commutes if work address is set
-      const { data: prof } = await supabase.from('profiles').select('work_address').eq('id', user.id).single()
-      if (prof?.work_address && loaded.length > 0) {
-        loaded.forEach(l => {
-          fetchCommute(l.id, l.address, prof.work_address)
-        })
-      }
+      // Commutes are fetched after group members load via fetchAllCommutes
     }
     setLoading(false)
   }
@@ -818,24 +825,31 @@ export default function Dashboard() {
                         ✓ Apply request sent — we'll be in touch
                       </div>
                     )}
-                    {/* Commute row */}
-                    {commuteLoading[l.id] && (
-                      <div style={{ marginTop:'0.5rem', fontSize:'0.75rem', color:'var(--slate)' }}>Calculating commutes…</div>
-                    )}
-                    {commuteResults[l.id]?.modes && (
-                      <div style={{ marginTop:'0.5rem', display:'flex', flexWrap:'wrap', gap:'0.35rem', alignItems:'center' }}>
-                        <span style={{ fontSize:'0.72rem', color:'var(--slate)', marginRight:'0.1rem' }}>Commute:</span>
-                        {commuteResults[l.id].modes.map(m => (
-                          <a key={m.id} href={m.url} target="_blank" rel="noopener noreferrer" className="commute-mode">
-                            {m.emoji} <span>~{m.minutes}m</span>
-                          </a>
-                        ))}
-                        <span style={{ fontSize:'0.7rem', color:'var(--slate)' }}>{commuteResults[l.id].distanceMiles} mi</span>
-                      </div>
-                    )}
-                    {commuteResults[l.id]?.error && (
-                      <div style={{ marginTop:'0.5rem', fontSize:'0.73rem', color:'#EF4444' }}>{commuteResults[l.id].error}</div>
-                    )}
+                    {/* Commute rows — one per group member with a work address */}
+                    {groupMembers.map(m => {
+                      const key = `${l.id}_${m.userId}`
+                      const firstName = m.name?.split(' ')[0] || m.name
+                      const cr = commuteResults[key]
+                      const cl = commuteLoading[key]
+                      if (!cr && !cl) return null
+                      return (
+                        <div key={m.userId} style={{ marginTop:'0.4rem' }}>
+                          {cl && <div style={{ fontSize:'0.73rem', color:'var(--slate)' }}>{firstName}'s commute…</div>}
+                          {cr?.modes && (
+                            <div style={{ display:'flex', flexWrap:'wrap', gap:'0.3rem', alignItems:'center' }}>
+                              <span style={{ fontSize:'0.72rem', color:'var(--slate)', fontWeight:600, marginRight:'0.1rem' }}>{firstName}'s commute:</span>
+                              {cr.modes.map(mode => (
+                                <a key={mode.id} href={mode.url} target="_blank" rel="noopener noreferrer" className="commute-mode">
+                                  {mode.emoji} <span>~{mode.minutes}m</span>
+                                </a>
+                              ))}
+                              <span style={{ fontSize:'0.7rem', color:'var(--slate)' }}>{cr.distanceMiles} mi</span>
+                            </div>
+                          )}
+                          {cr?.error && <div style={{ fontSize:'0.73rem', color:'#EF4444' }}>{cr.error}</div>}
+                        </div>
+                      )
+                    })}
                   </div>
                   <div style={{ textAlign:'right', flexShrink:0 }}>
                     <div className="tour-price">{l.price ? `$${l.price.toLocaleString()}` : '—'}<small>/month</small></div>
@@ -843,7 +857,7 @@ export default function Dashboard() {
                 </div>
               ))
             )}
-            {/* Prompt to set work address if missing */}
+            {/* Prompt if logged-in user has no work address set */}
             {listings.length > 0 && !profile?.work_address && (
               <div style={{ marginTop:'0.75rem', background:'#F8FAFB', borderRadius:10, padding:'0.85rem 1rem', border:'1.5px dashed var(--surface-mid)' }}>
                 <div style={{ fontSize:'0.82rem', color:'var(--navy)', fontWeight:600, marginBottom:'0.4rem' }}>🗺 Add your work address to see commute times</div>
