@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import SEO from '../components/SEO'
 import PaywallGate from '../components/PaywallGate'
 
@@ -63,11 +64,124 @@ const css = `
 .tl-content strong { font-size: 0.9rem; color: var(--navy); display: block; margin-bottom: 2px; }
 .tl-content span { font-size: 0.85rem; color: var(--slate); line-height: 1.6; }
 
+.calc-card { background: #fff; border: 1.5px solid #e5eaef; border-radius: 16px; padding: 2rem; margin: 2rem 0 2.5rem; box-shadow: 0 4px 24px rgba(10,191,191,0.07); }
+.calc-card h3 { font-family: 'Playfair Display', serif; font-size: 1.35rem; color: var(--navy); margin-bottom: 0.25rem; }
+.calc-card .calc-sub { font-size: 0.85rem; color: var(--slate); margin-bottom: 1.5rem; }
+.calc-mode { display: flex; gap: 0.5rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
+.calc-mode-btn { font-size: 0.82rem; font-weight: 600; font-family: inherit; padding: 0.4rem 1rem; border-radius: 100px; border: 1.5px solid #e5eaef; cursor: pointer; transition: all 0.15s; background: #fff; color: var(--slate); }
+.calc-mode-btn.active { background: var(--navy); color: #fff; border-color: var(--navy); }
+.calc-mode-btn.guarantor.active { background: #7C3AED; border-color: #7C3AED; }
+.calc-people { display: flex; flex-direction: column; gap: 0.65rem; margin-bottom: 1.25rem; }
+.calc-person { display: flex; align-items: center; gap: 0.65rem; }
+.calc-person-label { font-size: 0.8rem; font-weight: 600; color: var(--slate); min-width: 64px; }
+.calc-person-input { flex: 1; padding: 0.55rem 0.85rem; border: 1.5px solid #e5eaef; border-radius: 8px; font-size: 0.92rem; font-family: inherit; color: var(--navy); outline: none; transition: border-color 0.15s; }
+.calc-person-input:focus { border-color: var(--teal); }
+.calc-remove { background: none; border: none; cursor: pointer; color: #CBD5E1; font-size: 1.1rem; padding: 0 0.25rem; line-height: 1; transition: color 0.15s; }
+.calc-remove:hover { color: #EF4444; }
+.calc-add { background: none; border: 1.5px dashed #CBD5E1; border-radius: 8px; padding: 0.45rem 1rem; font-size: 0.82rem; font-weight: 600; color: var(--slate); cursor: pointer; font-family: inherit; transition: all 0.15s; margin-bottom: 1.5rem; }
+.calc-add:hover { border-color: var(--teal); color: var(--teal); }
+.calc-result { background: linear-gradient(135deg, #0C1628, #0a2a3a); border-radius: 12px; padding: 1.5rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
+.calc-result-main { color: #fff; }
+.calc-result-label { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: rgba(255,255,255,0.5); margin-bottom: 0.3rem; }
+.calc-result-rent { font-family: 'Playfair Display', serif; font-size: 2.4rem; color: var(--teal); line-height: 1; }
+.calc-result-rent span { font-size: 1rem; font-family: 'Inter', sans-serif; color: rgba(255,255,255,0.6); margin-left: 4px; }
+.calc-result-meta { font-size: 0.82rem; color: rgba(255,255,255,0.55); margin-top: 0.3rem; }
+.calc-result-breakdown { text-align: right; }
+.calc-result-breakdown .cb-line { font-size: 0.82rem; color: rgba(255,255,255,0.55); margin-bottom: 2px; }
+.calc-result-breakdown .cb-total { font-size: 0.92rem; font-weight: 700; color: rgba(255,255,255,0.85); }
+.calc-empty { font-size: 0.88rem; color: var(--slate); font-style: italic; }
+
 .apt-cta { background: linear-gradient(135deg, #0C1628 0%, #0a2a3a 100%); border-radius: 16px; padding: 2.5rem; text-align: center; margin-top: 4rem; }
 .apt-cta h3 { font-family: 'Playfair Display', serif; font-size: 1.7rem; color: #fff; margin-bottom: 0.6rem; }
 .apt-cta p { font-size: 0.94rem; color: rgba(255,255,255,0.7); margin-bottom: 1.5rem; }
 .apt-cta a { display: inline-block; background: var(--teal); color: #0C1628; font-weight: 700; font-size: 0.95rem; padding: 0.75rem 2rem; border-radius: 100px; text-decoration: none; }
 `
+
+function IncomeCalculator() {
+  const [mode, setMode] = useState('tenant') // 'tenant' | 'guarantor'
+  const [people, setPeople] = useState([{ id: 1, name: '', income: '' }])
+
+  const multiplier = mode === 'guarantor' ? 80 : 40
+  const totalIncome = people.reduce((sum, p) => sum + (parseFloat(p.income.replace(/,/g, '')) || 0), 0)
+  const maxRent = totalIncome > 0 ? Math.floor(totalIncome / multiplier) : null
+
+  function addPerson() {
+    setPeople(p => [...p, { id: Date.now(), name: '', income: '' }])
+  }
+  function removePerson(id) {
+    setPeople(p => p.filter(x => x.id !== id))
+  }
+  function updatePerson(id, field, value) {
+    setPeople(p => p.map(x => x.id === id ? { ...x, [field]: value } : x))
+  }
+  function fmt(n) {
+    return n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 })
+  }
+
+  return (
+    <div className="calc-card">
+      <h3>How much can I qualify for?</h3>
+      <p className="calc-sub">Enter your gross annual base salary — guaranteed compensation only, not performance bonuses.</p>
+
+      <div className="calc-mode">
+        <button className={`calc-mode-btn${mode === 'tenant' ? ' active' : ''}`} onClick={() => setMode('tenant')}>
+          Tenant — 40x rule
+        </button>
+        <button className={`calc-mode-btn guarantor${mode === 'guarantor' ? ' active' : ''}`} onClick={() => setMode('guarantor')}>
+          Guarantor — 80x rule
+        </button>
+      </div>
+
+      <div className="calc-people">
+        {people.map((p, i) => (
+          <div className="calc-person" key={p.id}>
+            <span className="calc-person-label">{people.length > 1 ? `Person ${i + 1}` : 'My salary'}</span>
+            <input
+              className="calc-person-input"
+              type="text"
+              inputMode="numeric"
+              placeholder="e.g. 120,000"
+              value={p.income}
+              onChange={e => updatePerson(p.id, 'income', e.target.value)}
+            />
+            {people.length > 1 && (
+              <button className="calc-remove" onClick={() => removePerson(p.id)} title="Remove">×</button>
+            )}
+          </div>
+        ))}
+      </div>
+
+      <button className="calc-add" onClick={addPerson}>+ Add another person (group / roommates)</button>
+
+      {maxRent !== null ? (
+        <div className="calc-result">
+          <div className="calc-result-main">
+            <div className="calc-result-label">Max monthly rent you qualify for</div>
+            <div className="calc-result-rent">{fmt(maxRent)}<span>/mo</span></div>
+            <div className="calc-result-meta">
+              Using the {multiplier}x rule · {fmt(totalIncome)}/yr combined income
+            </div>
+          </div>
+          {people.length > 1 && (
+            <div className="calc-result-breakdown">
+              {people.map((p, i) => {
+                const inc = parseFloat(p.income.replace(/,/g, '')) || 0
+                return inc > 0 ? (
+                  <div className="cb-line" key={p.id}>Person {i + 1}: {fmt(inc)}/yr</div>
+                ) : null
+              })}
+              <div className="cb-total">Combined: {fmt(totalIncome)}/yr</div>
+            </div>
+          )}
+        </div>
+      ) : (
+        <div className="calc-result" style={{ justifyContent: 'center' }}>
+          <p className="calc-empty" style={{ color: 'rgba(255,255,255,0.4)', margin: 0 }}>Enter your salary above to see your max rent</p>
+        </div>
+      )}
+    </div>
+  )
+}
 
 export default function Qualify() {
   return (
@@ -90,6 +204,7 @@ export default function Qualify() {
           <p>On this page</p>
           <ul>
             <li><a href="#income">Income requirements (the 40x rule)</a></li>
+            <li><a href="#calculator">Qualification calculator</a></li>
             <li><a href="#credit">Credit score standards</a></li>
             <li><a href="#employment">Employment & self-employment</a></li>
             <li><a href="#documents">Documents you'll need</a></li>
@@ -107,6 +222,8 @@ export default function Qualify() {
           <p>
             The most universally applied rule in NYC rentals is the <strong>40x rent rule</strong>: your gross annual income must be at least 40 times the monthly rent. This is a hard cutoff at most buildings, not a suggestion.
           </p>
+
+          <div id="calculator"><IncomeCalculator /></div>
 
           <div className="stat-grid">
             <div className="stat-card">

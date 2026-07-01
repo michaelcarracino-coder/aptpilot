@@ -148,9 +148,9 @@ export default function AdminListings() {
     if (!error && inserted) {
       setForm({ address:'', unit:'', bedrooms:'', bathrooms:'', sqft:'', price:'', agent_name:'', agent_email:'', agent_phone:'', listing_url:'', notes:'' })
       setScrapeError('')
-      // Auto-send outreach if agent contact info is present
+      // Auto-send outreach fire-and-forget if agent contact info is present
       if (inserted.agent_email || inserted.agent_phone) {
-        await fetch('/api/outreach-agent', {
+        fetch('/api/outreach-agent', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -160,7 +160,7 @@ export default function AdminListings() {
             tourTimes: selectedSearch?.tour_times || [],
             searchId: selectedSearch?.id,
           }),
-        })
+        }).catch(err => console.error('Auto-outreach failed:', err))
       }
       selectSearch(selectedSearch)
     }
@@ -252,7 +252,7 @@ export default function AdminListings() {
                 <div className="search-card-info">{s.profiles?.email || s.user_id}</div>
                 <div className="search-card-meta">
                   ${s.min_budget || '?'}–${s.max_budget || '?'}/mo · {s.min_bed}–{s.max_bed} bed · {(s.neighborhoods || []).slice(0,2).join(', ')}
-                  {s.move_in ? ` · Move-in: ${s.move_in}` : ''}
+                  {s.move_in ? ` · Move-in: ${s.move_in_direction === 'on_or_after' ? 'on or after' : 'on or before'} ${(([y,m,d]) => `${m}/${d}/${y.slice(2)}`)(s.move_in.split('-'))}` : ''}
                 </div>
               </div>
               <span className="search-card-badge">{s.tier?.toUpperCase()}</span>

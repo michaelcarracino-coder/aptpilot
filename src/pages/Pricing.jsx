@@ -7,21 +7,9 @@ const PLANS = [
     name: 'Standard',
     price: 299,
     tag: null,
+    desc: null,
     features: [
       'Full listing search across all NYC sources',
-      'Personalized tour agenda',
-      'Automated agent scheduling',
-      'Real-time listing alerts',
-      'Dedicated support',
-    ],
-  },
-  {
-    id: 'core',
-    name: 'Core',
-    price: 399,
-    tag: 'Most Popular',
-    features: [
-      'Everything in Standard',
       'Application document organizer',
       'Negotiation support',
       'Application progress tracking',
@@ -29,27 +17,43 @@ const PLANS = [
     ],
   },
   {
+    id: 'core',
+    name: 'Core',
+    price: 399,
+    tag: 'Most Popular',
+    desc: null,
+    features: [
+      'Everything in Standard — no restrictions',
+      'Unlimited searches, use it forever',
+      'Search again next year, next move, anytime',
+      'Multiple concurrent searches',
+      'Priority support for every search',
+    ],
+  },
+  {
     id: 'pro',
     name: 'Pro',
     price: 499,
-    tag: 'Best Value',
+    tag: 'White Glove',
+    desc: 'A real NYC broker in your corner — from first search to signed lease.',
     features: [
       'Everything in Core',
-      '1-on-1 NYC licensed broker',
-      '24/7 broker access',
-      'Last-minute tour priority',
-      'Full lease review & advice',
+      'Dedicated NYC licensed broker assigned to you',
+      'Custom tour itinerary planned around your schedule',
+      'Broker-built apartment shortlist & agenda',
+      '24/7 broker access via call, text & email',
+      'Full lease review & negotiation support',
     ],
   },
 ]
 
 const FAQS = [
   { q: 'What does AptPilot actually do?', a: 'We search every listing source in NYC, contact agents on your behalf, schedule tours at your available times, and keep your application documents organized and ready — all for a single flat fee.' },
-  { q: 'Is this a subscription?', a: 'No. It\'s a one-time payment per search. You pay once, we find your apartment.' },
+  { q: 'Is this a subscription?', a: 'No. Core and Standard are one-time payments per search. Pro is also a one-time payment, but it gives you unlimited searches forever — use it for your next move, the year after, or whenever you need it again.' },
   { q: 'How is this different from a broker?', a: 'A broker typically charges one month\'s rent (up to $4,000+). We charge a flat fee that covers the entire search from listing to lease, no recurring cost.' },
   { q: 'What if I don\'t find an apartment?', a: 'We\'ll work with you until you do. If we can\'t find a qualifying match within your criteria, reach out and we\'ll discuss a solution.' },
   { q: 'What\'s the chauffeur add-on?', a: 'On your tour day, we book a car to take you between every showing — so you\'re not sweating on the subway between 5 tours. Billed per day booked.' },
-  { q: 'Which plan should I pick?', a: 'Core is the most popular — it includes our application document organizer which keeps everything ready and removes last-minute scrambling. Go Pro if you want a dedicated NYC broker by your side.' },
+  { q: 'Which plan should I pick?', a: 'Standard covers a single search with all our core tools. Core is best if you want to use AptPilot indefinitely — multiple searches, future moves, no repaying. Go Pro if you want a real NYC broker assigned to you, a custom tour agenda, and 24/7 direct access.' },
 ]
 
 export default function Pricing() {
@@ -70,7 +74,8 @@ export default function Pricing() {
         .pricing-hero p { color:var(--slate); font-size:1.05rem; max-width:540px; margin:0 auto; line-height:1.65; }
         .pricing-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:1.5rem; max-width:960px; margin:0 auto; padding:3.5rem 1.5rem; }
         @media(max-width:720px){ .pricing-grid{grid-template-columns:1fr;} }
-        .plan-card { border-radius:var(--radius-lg); background:#fff; box-shadow:var(--shadow); padding:2rem 1.75rem; position:relative; border:2px solid transparent; transition:all 0.2s; }
+        .plan-card { border-radius:var(--radius-lg); background:#fff; box-shadow:var(--shadow); padding:2rem 1.75rem; position:relative; border:2px solid transparent; transition:all 0.2s; display:flex; flex-direction:column; }
+        .plan-feats { flex:1; }
         .plan-card:hover { border-color:var(--teal); box-shadow:var(--shadow-teal); transform:translateY(-3px); }
         .plan-card.featured { border-color:var(--teal); box-shadow:var(--shadow-teal); }
         .plan-tag { position:absolute; top:-13px; left:50%; transform:translateX(-50%); background:var(--teal); color:var(--navy); font-size:0.7rem; font-weight:800; padding:0.25rem 0.85rem; border-radius:100px; text-transform:uppercase; letter-spacing:0.06em; white-space:nowrap; }
@@ -110,11 +115,12 @@ export default function Pricing() {
       {/* Plans */}
       <div className="pricing-grid">
         {PLANS.map(plan => (
-          <div key={plan.id} className={`plan-card${plan.id === 'core' ? ' featured' : ''}`}>
+          <div key={plan.id} className={`plan-card${plan.id === 'core' || plan.id === 'pro' ? ' featured' : ''}`}
+            style={plan.id === 'pro' ? { borderColor:'var(--navy)', boxShadow:'0 8px 40px rgba(12,22,40,0.18)' } : {}}>
             {plan.tag && <div className="plan-tag">{plan.tag}</div>}
             <div className="plan-name">{plan.name}</div>
             <div className="plan-price">${plan.price}<span> one-time</span></div>
-            <div className="plan-desc">Everything you need to find and secure your next NYC apartment.</div>
+            <div className="plan-desc">{plan.desc || (plan.id === 'core' ? 'Pay once. Search forever — this year, next year, every move.' : 'Everything you need to find and secure your next NYC apartment.')}</div>
             <div className="plan-feats">
               {plan.features.map(f => (
                 <div className="plan-feat" key={f}>
@@ -123,7 +129,7 @@ export default function Pricing() {
                 </div>
               ))}
             </div>
-            <button className={`btn${plan.id === 'core' ? ' btn-primary' : ' btn-outline'}`} onClick={handleSelect} style={{ width:'100%', justifyContent:'center' }}>
+            <button className={`btn${plan.id === 'standard' ? ' btn-outline' : ' btn-primary'}`} onClick={handleSelect} style={{ width:'100%', justifyContent:'center' }}>
               Get Started →
             </button>
           </div>
@@ -146,7 +152,7 @@ export default function Pricing() {
               ['Cost',              "One month's rent ($3,000–$6,000)", 'Flat $299–$499'],
               ['Listing search',    'Limited to broker\'s network',      'Every source in NYC'],
               ['Tour scheduling',   'Manual, broker availability',       'Automated, your schedule'],
-              ['Applications',      'You fill them out',                 'Auto-filled for you'],
+              ['Organization',      'Scattered docs, missed deadlines',  'Built to keep you ready & organized'],
               ['Transparency',      'You follow the broker',             'Real-time dashboard'],
               ['Response time',     'Business hours only',               '24/7 for Pro'],
               ['Conflict of interest', 'Gets paid more on pricier apts', 'Flat fee — no bias'],

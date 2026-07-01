@@ -121,6 +121,14 @@ export default async function handler(req, res) {
         }
 
         if (search) {
+          // Trigger scraper (fire and forget)
+          // Env vars needed: SCRAPER_URL, SCRAPER_API_KEY
+          fetch(`${process.env.SCRAPER_URL}/scrape`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'x-api-key': process.env.SCRAPER_API_KEY },
+            body: JSON.stringify({ searchId: search.id, userId, criteria: search }),
+          }).catch(e => console.error('Scraper trigger failed:', e));
+
           await fetch(`https://aptpilot.vercel.app/api/notify`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },

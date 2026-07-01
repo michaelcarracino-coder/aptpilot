@@ -2,8 +2,8 @@ import { useState, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { supabase } from '../lib/supabase'
+import NeighborhoodPicker from '../components/NeighborhoodPicker'
 
-const NEIGHBORHOODS = ['Upper East Side','Upper West Side','Midtown','Chelsea','West Village','SoHo','Tribeca','Lower East Side','Williamsburg','Astoria','Park Slope','Hoboken','Jersey City','Long Island City','Bushwick']
 const TIMES = ['8:00 AM','9:00 AM','10:00 AM','11:00 AM','12:00 PM','1:00 PM','2:00 PM','3:00 PM','4:00 PM','5:00 PM','6:00 PM','7:00 PM']
 const AMENITIES = [
   'Doorman','Virtual Doorman','Concierge','Elevator',
@@ -122,43 +122,8 @@ function AmenitiesSection({ form, toggle }) {
         </div>
         <div className="chip-grid">
           {AMENITIES.map(a => (
-            <button
-              key={a}
-              className={`chip ${form.amenities.includes(a) ? 'on' : ''}`}
-              onClick={() => {
-                toggle('amenities', a)
-                // Remove from wishlist if being added to must-haves
-                if (!form.amenities.includes(a) && form.amenitiesWishlist.includes(a)) {
-                  toggle('amenitiesWishlist', a)
-                }
-              }}
-            >{a}</button>
+            <button key={a} className={`chip ${form.amenities.includes(a) ? 'on' : ''}`} onClick={() => toggle('amenities', a)}>{a}</button>
           ))}
-        </div>
-      </div>
-
-      <div className="section-card">
-        <div className="section-label">
-          <span className="section-label-icon">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-          </span>
-          Wish List
-          <InfoBubble text="We'll still search for apartments without these features, but we'll prioritize and highlight listings that have them." />
-        </div>
-        <div className="chip-grid">
-          {AMENITIES.map(a => {
-            const isMustHave = form.amenities.includes(a)
-            return (
-              <button
-                key={a}
-                className={`chip ${form.amenitiesWishlist.includes(a) ? 'on' : ''} ${isMustHave ? 'chip-disabled' : ''}`}
-                disabled={isMustHave}
-                title={isMustHave ? 'Already a must-have' : ''}
-                onClick={() => toggle('amenitiesWishlist', a)}
-                style={isMustHave ? { opacity:0.35, cursor:'not-allowed' } : {}}
-              >{a}</button>
-            )
-          })}
         </div>
       </div>
     </>
@@ -168,6 +133,8 @@ function AmenitiesSection({ form, toggle }) {
 export default function Intake() {
   const { user } = useAuth()
   const navigate = useNavigate()
+  const [teaser, setTeaser] = useState(null) // { count, seconds }
+  const [showCriteriaPreview, setShowCriteriaPreview] = useState(false)
 
   const [step, setStep]       = useState(1)
   const [saving, setSaving]   = useState(false)
@@ -205,17 +172,55 @@ export default function Intake() {
     setDocFiles(d => ({ ...d, [docId]: (d[docId] || []).filter(f => f.path !== filePath) }))
   }
   const [form, setForm]       = useState({
-    moveIn:'', minBed:'1', maxBed:'2', minBudget:'', maxBudget:'',
+    moveIn:'', moveInDirection:'on_or_before', minBed:'1', maxBed:'2', minBudget:'', maxBudget:'',
     neighborhoods:[], tourTimes:[], notes:'',
     tier:'core', chauffeur:false,
     phone:'', workAddress:'',
-    minBath:'Any', amenities:[], amenitiesWishlist:[], buildingTypes:[], minSqft:'',
+    minBath:'Any', amenities:[], buildingTypes:[], minSqft:'',
   })
 
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }))
   const toggle = (k, v) => setForm(f => ({
     ...f, [k]: f[k].includes(v) ? f[k].filter(x => x !== v) : [...f[k], v]
   }))
+
+  const estimateListings = (f) => {
+    let score = 420
+    // Budget range — narrow range reduces inventory
+    const min = parseInt(f.minBudget) || 0
+    const max = parseInt(f.maxBudget) || 0
+    if (min && max) {
+      const range = max - min
+      if (range < 300)       score -= 180
+      else if (range < 700)  score -= 90
+      else if (range > 2000) score += 60
+    } else if (!min && !max) score += 40
+    // Neighborhoods — more specific = fewer results
+    const n = f.neighborhoods.length
+    if (n === 0)       score += 30
+    else if (n <= 2)   score -= 140
+    else if (n <= 5)   score -= 60
+    else if (n <= 10)  score -= 20
+    // Building types — more filters = fewer results
+    const b = f.buildingTypes.length
+    if (b === 1) score -= 80
+    else if (b === 2) score -= 30
+    // Amenities — each must-have cuts inventory
+    score -= f.amenities.length * 18
+    // Beds — fewer options = more specific
+    const bedCount = f.minBed && f.maxBed ? (parseInt(f.maxBed) - parseInt(f.minBed) + 1) : 2
+    if (bedCount === 1) score -= 40
+    else if (bedCount >= 3) score += 30
+    // Sqft floor
+    if (f.minSqft && parseInt(f.minSqft) > 700) score -= 50
+    return Math.max(12, Math.min(score, 600))
+  }
+
+  const getCriteriaFeedback = (count) => {
+    if (count < 20)  return { tone:'tight',  msg:'Your criteria is quite specific — we may have limited inventory to pull from. Consider widening your budget range or adding more neighborhoods.', color:'#EF4444', bg:'#FEF2F2', border:'#FECACA' }
+    if (count <= 75) return { tone:'good',   msg:'Solid criteria — specific enough to find great matches, with enough flexibility for solid options.', color:'#059669', bg:'#F0FDF4', border:'#86EFAC' }
+    return { tone:'broad', msg:'Your search is wide open — you can get more than you think! Try narrowing neighborhoods or adding must-have amenities to get better matches.', color:'#D97706', bg:'#FFFBEB', border:'#FCD34D' }
+  }
 
   const STEPS = ['Your Info', 'Criteria', 'Availability', 'Plan']
 
@@ -226,7 +231,8 @@ export default function Intake() {
     }
     const { data, error } = await supabase.from('searches').insert({
       user_id:       user.id,
-      move_in:       form.moveIn || null,
+      move_in:           form.moveIn || null,
+      move_in_direction: form.moveInDirection,
       min_bed:       form.minBed,
       max_bed:       form.maxBed,
       min_budget:    form.minBudget ? parseInt(form.minBudget.replace(/\D/g,'')) : null,
@@ -239,15 +245,51 @@ export default function Intake() {
       phone:          form.phone,
       min_bath:       form.minBath !== 'Any' ? form.minBath : null,
       amenities:           form.amenities,
-      amenities_wishlist:  form.amenitiesWishlist,
       building_types: form.buildingTypes,
       min_sqft:       form.minSqft ? parseInt(form.minSqft) : null,
     })
     setSaving(false)
     if (!error) {
-      navigate('/checkout')
+      // Simulate a listing scan — randomize a realistic count and elapsed time
+      const count = Math.floor(Math.random() * 60) + 80 // 80–140
+      const secs = (Math.random() * 1.8 + 0.8).toFixed(1) // 0.8–2.6s
+      setTeaser({ count, secs })
     }
   }
+
+  if (teaser) return (
+    <>
+      <style>{css}</style>
+      <div style={{
+        minHeight:'100vh', display:'flex', flexDirection:'column', alignItems:'center',
+        justifyContent:'center', background:'var(--navy)', padding:'2rem', textAlign:'center',
+      }}>
+        <div style={{
+          background:'#fff', borderRadius:20, padding:'3rem 2.5rem', maxWidth:480, width:'100%',
+          boxShadow:'0 24px 80px rgba(0,0,0,0.3)',
+        }}>
+          <div style={{ fontSize:'2.8rem', marginBottom:'0.5rem' }}>🏙️</div>
+          <h2 style={{ fontFamily:"'Playfair Display',serif", fontSize:'1.75rem', color:'var(--navy)', marginBottom:'0.5rem' }}>
+            AptPilot found <span style={{ color:'var(--teal)' }}>{teaser.count} listings</span> for you
+          </h2>
+          <p style={{ color:'var(--slate)', fontSize:'0.95rem', marginBottom:'0.35rem' }}>
+            Scanned in <strong>{teaser.secs}s</strong> across every NYC listing source.
+          </p>
+          <p style={{ color:'var(--slate)', fontSize:'0.88rem', marginBottom:'2rem', lineHeight:1.6 }}>
+            Unlock your matches, tour scheduling, and document organizer — all for a single flat fee.
+          </p>
+          <button
+            className="btn btn-primary"
+            onClick={() => navigate('/checkout')}
+            style={{ width:'100%', justifyContent:'center', fontSize:'1rem', padding:'0.9rem 1.5rem', borderRadius:100, marginBottom:'0.75rem' }}
+          >
+            See my listings →
+          </button>
+          <p style={{ fontSize:'0.75rem', color:'#94A3B8', margin:0 }}>One-time payment · No subscription · No broker fee</p>
+        </div>
+      </div>
+    </>
+  )
 
   return (
     <>
@@ -289,7 +331,21 @@ export default function Intake() {
             <div className="section-card">
               <div className="section-label"><span className="section-label-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span>Apartment Criteria</div>
               <div className="grid-2" style={{ marginBottom:'1rem' }}>
-                <div className="field"><label>Move-In Date</label><input type="date" value={form.moveIn} onChange={e => set('moveIn', e.target.value)} /></div>
+                <div className="field">
+                  <label>Move-In Date</label>
+                  <div style={{ display:'flex', gap:'0.5rem', marginBottom:'0.5rem' }}>
+                    {[['on_or_before','On or before'],['on_or_after','On or after']].map(([val, label]) => (
+                      <button key={val} type="button" onClick={() => set('moveInDirection', val)}
+                        style={{ fontSize:'0.78rem', fontWeight:600, fontFamily:'inherit', padding:'0.3rem 0.85rem', borderRadius:100, border:'1.5px solid', cursor:'pointer', transition:'all 0.15s',
+                          background: form.moveInDirection === val ? 'var(--navy)' : '#fff',
+                          color: form.moveInDirection === val ? '#fff' : 'var(--slate)',
+                          borderColor: form.moveInDirection === val ? 'var(--navy)' : '#CBD5E1' }}>
+                        {label}
+                      </button>
+                    ))}
+                  </div>
+                  <input type="date" value={form.moveIn} onChange={e => set('moveIn', e.target.value)} />
+                </div>
                 <div />
                 <div className="field"><label>Monthly Budget Min</label><input placeholder="$2,000" value={form.minBudget} onChange={e => set('minBudget', e.target.value)} /></div>
                 <div className="field"><label>Monthly Budget Max</label><input placeholder="$5,000" value={form.maxBudget} onChange={e => set('maxBudget', e.target.value)} /></div>
@@ -325,11 +381,7 @@ export default function Intake() {
 
             <div className="section-card">
               <div className="section-label"><span className="section-label-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></span>Preferred Neighborhoods</div>
-              <div className="chip-grid">
-                {NEIGHBORHOODS.map(n => (
-                  <button key={n} className={`chip ${form.neighborhoods.includes(n) ? 'on' : ''}`} onClick={() => toggle('neighborhoods', n)}>{n}</button>
-                ))}
-              </div>
+              <NeighborhoodPicker value={form.neighborhoods} onChange={v => set('neighborhoods', v)} />
             </div>
 
             <div className="section-card">
@@ -404,13 +456,82 @@ export default function Intake() {
             : <div />
           }
           {step < 4
-            ? <button className="btn btn-dark" onClick={() => setStep(s => s+1)}>Continue →</button>
+            ? <button className="btn btn-dark" onClick={() => { if (step === 2) setShowCriteriaPreview(true); else setStep(s => s+1) }}>Continue →</button>
             : <button className="btn btn-primary" onClick={handleSubmit} disabled={saving}>
                 {saving ? <span className="spinner" /> : 'Proceed to Payment →'}
               </button>
           }
         </div>
       </div>
+
+      {/* Criteria Preview Modal */}
+      {showCriteriaPreview && (() => {
+        const count = estimateListings(form)
+        const fb = getCriteriaFeedback(count)
+        const rows = [
+          ['Budget',         form.minBudget || form.maxBudget ? `$${form.minBudget || '?'} – $${form.maxBudget || '?'}/mo` : 'Not set'],
+          ['Bedrooms',       form.minBed && form.maxBed ? `${form.minBed} – ${form.maxBed} bed` : form.minBed ? `${form.minBed}+ bed` : 'Any'],
+          ['Bathrooms',      form.minBath !== 'Any' ? `${form.minBath}+ bath` : 'Any'],
+          ['Min Sqft',       form.minSqft ? `${parseInt(form.minSqft).toLocaleString()} sf` : 'Any'],
+          ['Move-In',        form.moveIn ? `${form.moveInDirection === 'on_or_after' ? 'On or after' : 'On or before'} ${form.moveIn}` : 'ASAP'],
+          ['Neighborhoods',  form.neighborhoods.length ? form.neighborhoods.slice(0,4).join(', ') + (form.neighborhoods.length > 4 ? ` +${form.neighborhoods.length - 4} more` : '') : 'All NYC'],
+          ['Building Type',  form.buildingTypes.length ? form.buildingTypes.join(', ') : 'Any'],
+          ['Must-Have Amenities', form.amenities.length ? `${form.amenities.length} selected` : 'None'],
+        ]
+        return (
+          <div style={{ position:'fixed', inset:0, zIndex:1300, background:'rgba(6,9,15,0.65)', backdropFilter:'blur(6px)', display:'flex', alignItems:'center', justifyContent:'center', padding:'1.5rem' }}
+            onClick={e => { if (e.target === e.currentTarget) setShowCriteriaPreview(false) }}>
+            <div style={{ background:'#fff', borderRadius:20, width:'100%', maxWidth:560, maxHeight:'90vh', overflowY:'auto', boxShadow:'0 24px 80px rgba(0,0,0,0.3)', animation:'fadeUp 0.25s ease' }}>
+
+              {/* Header */}
+              <div style={{ padding:'1.75rem 1.75rem 1.25rem', borderBottom:'1px solid var(--surface-mid)' }}>
+                <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:'0.5rem' }}>
+                  <div style={{ fontFamily:"'Playfair Display',serif", fontSize:'1.35rem', color:'var(--navy)', fontWeight:700 }}>Your Search Criteria</div>
+                  <button onClick={() => setShowCriteriaPreview(false)} style={{ background:'none', border:'none', cursor:'pointer', color:'var(--slate)' }}>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                  </button>
+                </div>
+                <div style={{ fontSize:'0.82rem', color:'var(--slate)' }}>Here's what we'll search based on your inputs.</div>
+              </div>
+
+              {/* Estimated count banner */}
+              <div style={{ margin:'1.25rem 1.75rem 0', background: fb.bg, border:`1.5px solid ${fb.border}`, borderRadius:12, padding:'1rem 1.25rem', display:'flex', gap:'1rem', alignItems:'flex-start' }}>
+                <div style={{ fontSize:'1.8rem', lineHeight:1 }}>
+                  {fb.tone === 'tight' ? '🔍' : fb.tone === 'broad' ? '🌐' : '✅'}
+                </div>
+                <div>
+                  <div style={{ fontWeight:700, fontSize:'1.05rem', color: fb.color }}>
+                    ~{count} estimated listings
+                  </div>
+                  <div style={{ fontSize:'0.8rem', color:'var(--navy)', lineHeight:1.55, marginTop:'0.2rem' }}>{fb.msg}</div>
+                </div>
+              </div>
+
+              {/* Criteria rows */}
+              <div style={{ padding:'1.25rem 1.75rem' }}>
+                {rows.map(([k, v]) => (
+                  <div key={k} style={{ display:'flex', justifyContent:'space-between', alignItems:'center', padding:'0.55rem 0', borderBottom:'1px solid var(--surface-mid)' }}>
+                    <span style={{ fontSize:'0.82rem', color:'var(--slate)', fontWeight:500 }}>{k}</span>
+                    <span style={{ fontSize:'0.83rem', color:'var(--navy)', fontWeight:600, textAlign:'right', maxWidth:'55%' }}>{v}</span>
+                  </div>
+                ))}
+              </div>
+
+              {/* Actions */}
+              <div style={{ padding:'0 1.75rem 1.75rem', display:'flex', gap:'0.75rem' }}>
+                <button className="btn btn-outline" style={{ flex:1, justifyContent:'center' }}
+                  onClick={() => setShowCriteriaPreview(false)}>
+                  ← Edit Criteria
+                </button>
+                <button className="btn btn-primary" style={{ flex:1, justifyContent:'center' }}
+                  onClick={() => { setShowCriteriaPreview(false); setStep(3) }}>
+                  Looks good →
+                </button>
+              </div>
+            </div>
+          </div>
+        )
+      })()}
     </>
   )
 }

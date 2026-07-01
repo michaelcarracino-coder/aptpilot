@@ -2,9 +2,20 @@ import { useState, useEffect, useRef } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { supabase } from '../lib/supabase'
 import { useSearchParams, Link } from 'react-router-dom'
+import NeighborhoodPicker, { BOROUGH_NEIGHBORHOODS } from '../components/NeighborhoodPicker'
+
+function fmtDate(d) {
+  if (!d) return null
+  const [y, m, day] = d.split('-')
+  return `${m}/${day}/${y.slice(2)}`
+}
+
+const AMENITIES = ['Doorman','Virtual Doorman','Concierge','Elevator','In-Unit Washer/Dryer','Laundry in Building','Dishwasher','Central A/C','Gym / Fitness Center','Roof Deck','Terrace / Balcony','Outdoor Space','Storage','Bike Room','Parking / Garage','Pool','Pets OK — Dogs','Pets OK — Cats','Furnished','Flexible Lease']
 
 const css = `
-.dash { max-width:1100px; margin:0 auto; padding:2.5rem 2rem; animation:fadeUp 0.4s ease both; }
+.dash { max-width:1400px; margin:0 auto; padding:2.5rem 1rem; animation:fadeUp 0.4s ease both; }
+.dash-main { display:grid; grid-template-columns:1fr 1fr; gap:1.5rem; align-items:start; }
+@media(max-width:900px){ .dash-main{grid-template-columns:1fr;} }
 .dash-header { display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:2rem;flex-wrap:wrap;gap:1rem; }
 .dash-header h1 { font-family:'Playfair Display',serif; font-size:2rem; color:var(--navy); }
 .dash-header p { color:var(--slate); font-size:0.88rem; margin-top:0.25rem; }
@@ -43,8 +54,7 @@ const css = `
 .empty-state { text-align:center;padding:2.5rem;color:var(--slate);font-size:0.9rem;background:#fff;border-radius:var(--radius);box-shadow:var(--shadow); }
 .success-banner { background:#ECFDF5;border:1px solid #A7F3D0;border-radius:12px;padding:1rem 1.5rem;margin-bottom:1.5rem;display:flex;align-items:center;gap:0.75rem;color:#065F46;font-size:0.88rem;font-weight:500; }
 .onboard-card { background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);padding:1.5rem;margin-bottom:1.75rem; }
-.onboard-criteria-row { display:grid;grid-template-columns:1fr 280px;gap:1.25rem;align-items:start;margin-bottom:1.75rem; }
-@media(max-width:800px){ .onboard-criteria-row{grid-template-columns:1fr;} }
+.onboard-criteria-row { display:grid;grid-template-columns:1fr;gap:1.25rem;align-items:start;margin-bottom:1.75rem; }
 .onboard-title { font-family:'Playfair Display',serif;font-size:1.1rem;color:var(--navy);margin-bottom:1.1rem; }
 .onboard-steps { display:flex;flex-direction:column;gap:0; }
 .onboard-step { display:flex;gap:1rem;align-items:flex-start;padding:0.7rem 0;position:relative; }
@@ -76,13 +86,19 @@ const css = `
 .apply-btn:hover { background:#F5F3FF; }
 .apply-btn.sent { border-color:#059669;color:#059669;cursor:default; }
 .edit-modal-overlay { position:fixed;inset:0;background:rgba(6,9,15,0.5);backdrop-filter:blur(5px);z-index:1000;display:flex;align-items:center;justify-content:center;padding:1.5rem; }
-.edit-modal { background:#fff;border-radius:18px;max-width:440px;width:100%;padding:1.75rem;box-shadow:0 24px 80px rgba(0,0,0,0.2);animation:fadeUp 0.22s ease; }
+.edit-modal { background:#fff;border-radius:18px;max-width:940px;width:100%;box-shadow:0 24px 80px rgba(0,0,0,0.2);animation:fadeUp 0.22s ease;display:grid;grid-template-columns:1fr 300px; }
+.edit-modal-form { padding:1.75rem;overflow-y:auto;max-height:88vh; }
+.edit-modal-preview { background:var(--surface);border-left:1px solid var(--surface-mid);padding:1.75rem;overflow-y:auto;max-height:88vh; }
 .edit-modal h3 { font-family:'Playfair Display',serif;font-size:1.2rem;color:var(--navy);margin-bottom:1.1rem; }
 .em-field { display:flex;flex-direction:column;gap:0.3rem;margin-bottom:0.85rem; }
 .em-field label { font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:var(--slate); }
-.em-field input { padding:0.5rem 0.8rem;border:1.5px solid var(--surface-mid);border-radius:8px;font-size:0.88rem;font-family:inherit;color:var(--navy);outline:none;transition:border-color 0.15s; }
-.em-field input:focus { border-color:var(--teal); }
+.em-field input, .em-field select { padding:0.5rem 0.8rem;border:1.5px solid var(--surface-mid);border-radius:8px;font-size:0.88rem;font-family:inherit;color:var(--navy);outline:none;transition:border-color 0.15s;background:#fff; }
+.em-field input:focus, .em-field select:focus { border-color:var(--teal); }
 .em-row { display:grid;grid-template-columns:1fr 1fr;gap:0.75rem; }
+.em-amenity-grid { display:flex;flex-wrap:wrap;gap:0.35rem;margin-top:0.4rem; }
+.em-amenity-chip { font-size:0.72rem;font-weight:600;padding:0.22rem 0.6rem;border-radius:100px;cursor:pointer;border:1.5px solid transparent;transition:all 0.15s;user-select:none; }
+.em-amenity-chip:hover .bt-tooltip { opacity:1 !important; }
+@media(max-width:700px){ .edit-modal{grid-template-columns:1fr;} .edit-modal-preview{display:none;} }
 .referral-card h3 { font-family:'Playfair Display',serif;font-size:1rem;margin-bottom:0.35rem; }
 .referral-code-box { background:rgba(10,191,191,0.12);border:1.5px solid rgba(10,191,191,0.3);border-radius:8px;padding:0.6rem 0.85rem;font-family:'Inter',monospace;font-size:0.88rem;font-weight:700;color:var(--teal);letter-spacing:0.08em;margin:0.75rem 0;display:flex;justify-content:space-between;align-items:center;cursor:pointer;transition:background 0.15s; }
 .referral-code-box:hover { background:rgba(10,191,191,0.2); }
@@ -150,6 +166,7 @@ export default function Dashboard() {
   const [groupMembers, setGroupMembers] = useState([])
   const [showGroupModal, setShowGroupModal] = useState(false)
   const [showEditCriteria, setShowEditCriteria] = useState(false)
+  const [showListingsModal, setShowListingsModal] = useState(false)
   const [criteriaForm, setCriteriaForm] = useState({})
   const [savingCriteria, setSavingCriteria] = useState(false)
   const [messages, setMessages] = useState([])
@@ -208,15 +225,27 @@ export default function Dashboard() {
   async function saveCriteria() {
     if (!search?.id) return
     setSavingCriteria(true)
-    await supabase.from('searches').update({
-      min_budget:    criteriaForm.min_budget ? Number(criteriaForm.min_budget) : search.min_budget,
-      max_budget:    criteriaForm.max_budget ? Number(criteriaForm.max_budget) : search.max_budget,
-      min_bed:       criteriaForm.min_bed    ? Number(criteriaForm.min_bed)    : search.min_bed,
-      max_bed:       criteriaForm.max_bed    ? Number(criteriaForm.max_bed)    : search.max_bed,
-      move_in:       criteriaForm.move_in    || search.move_in,
-      neighborhoods: criteriaForm.neighborhoods || search.neighborhoods,
-    }).eq('id', search.id)
-    await loadData()
+    const updates = {
+      min_budget:        criteriaForm.min_budget !== '' ? Number(criteriaForm.min_budget) : search.min_budget,
+      max_budget:        criteriaForm.max_budget !== '' ? Number(criteriaForm.max_budget) : search.max_budget,
+      min_bed:           (criteriaForm.beds || []).join(',') || null,
+      max_bed:           null,
+      min_bath:          criteriaForm.min_bath === 'Any' ? null : (criteriaForm.min_bath ? String(criteriaForm.min_bath) : search.min_bath),
+      min_sqft:          criteriaForm.min_sqft !== '' ? Number(criteriaForm.min_sqft) : search.min_sqft,
+      move_in:           criteriaForm.move_in    || search.move_in,
+      move_in_direction: criteriaForm.move_in_direction || search.move_in_direction || 'on_or_before',
+      neighborhoods:     criteriaForm.neighborhoods ?? search.neighborhoods,
+      building_types:    criteriaForm.building_types ?? search.building_types,
+      amenities:         criteriaForm.amenities ?? search.amenities,
+    }
+    console.log('saveCriteria updates:', updates)
+    const { data: saved, error } = await supabase.from('searches').update(updates).eq('id', search.id).select().single()
+    console.log('saveCriteria result:', saved, error)
+    if (error) {
+      showToast('Failed to save — ' + error.message)
+    } else {
+      setSearch(saved)
+    }
     setSavingCriteria(false)
     setShowEditCriteria(false)
   }
@@ -428,11 +457,10 @@ export default function Dashboard() {
   const needsGuarantor   = !!myMember?.guarantor
 
   const rfFactors = [
-    { key: 'criteria',   label: 'Search criteria set',       done: !!search,          pts: 20, action: null },
-    { key: 'docs_any',   label: 'Documents started',         done: docCount > 0,      pts: 15, action: '/documents', actionLabel: 'Upload docs →' },
-    { key: 'tenant',     label: 'Tenant docs complete',      done: tenantComplete,    pts: 30, action: '/documents', actionLabel: tenantPartial ? 'Finish uploading →' : 'Upload docs →' },
-    { key: 'profile',    label: 'Profile name on file',      done: !!(profile?.full_name), pts: 15, action: null },
-    { key: 'guarantor',  label: needsGuarantor ? 'Guarantor docs complete' : 'Guarantor (not required)', done: needsGuarantor ? guarantorComplete : true, pts: 20, action: needsGuarantor && !guarantorComplete ? '/documents' : null, actionLabel: 'Upload guarantor docs →' },
+    { key: 'criteria',   label: 'Set search criteria',       done: !!search,          pts: 20, action: null },
+    { key: 'docs',       label: 'Documents uploaded',        done: tenantComplete,    pts: 35, action: '/documents', actionLabel: docCount > 0 ? 'Finish uploading →' : 'Upload docs →' },
+    { key: 'guarantor',  label: needsGuarantor ? 'Guarantor docs complete' : 'Guarantor (not required)', done: needsGuarantor ? guarantorComplete : true, pts: 25, action: needsGuarantor && !guarantorComplete ? '/documents' : null, actionLabel: 'Upload guarantor docs →' },
+    { key: 'credit',     label: 'Credit score awareness',    done: !!profile?.credit_confirmed, pts: 20, action: 'https://www.annualcreditreport.com', actionLabel: 'Check credit →', external: true },
   ]
   const readinessScore = rfFactors.reduce((sum, f) => sum + (f.done ? f.pts : 0), 0)
   const readinessWord  = readinessScore >= 90 ? 'Ready' : readinessScore >= 60 ? 'Almost' : readinessScore >= 30 ? 'Started' : 'Early'
@@ -513,40 +541,188 @@ export default function Dashboard() {
       {showEditCriteria && (
         <div className="edit-modal-overlay" onClick={e => e.target === e.currentTarget && setShowEditCriteria(false)}>
           <div className="edit-modal">
-            <h3>Edit Search Criteria</h3>
-            <div className="em-row">
-              <div className="em-field">
-                <label>Min Budget</label>
-                <input type="number" placeholder={search?.min_budget} defaultValue={search?.min_budget} onChange={e => setCriteriaForm(f => ({ ...f, min_budget: e.target.value }))} />
+            {/* LEFT: edit form */}
+            <div className="edit-modal-form">
+              <h3>Edit Search Criteria</h3>
+              <div className="em-row">
+                <div className="em-field">
+                  <label>Min Budget</label>
+                  <input type="number" value={criteriaForm.min_budget} onChange={e => setCriteriaForm(f => ({ ...f, min_budget: e.target.value }))} />
+                </div>
+                <div className="em-field">
+                  <label>Max Budget</label>
+                  <input type="number" value={criteriaForm.max_budget} onChange={e => setCriteriaForm(f => ({ ...f, max_budget: e.target.value }))} />
+                </div>
               </div>
               <div className="em-field">
-                <label>Max Budget</label>
-                <input type="number" placeholder={search?.max_budget} defaultValue={search?.max_budget} onChange={e => setCriteriaForm(f => ({ ...f, max_budget: e.target.value }))} />
+                <label>Bedrooms</label>
+                <div className="em-amenity-grid">
+                  {['Studio','1','2','3','4','5','6+'].map(opt => {
+                    const selected = (criteriaForm.beds || []).includes(opt)
+                    return (
+                      <span key={opt} className="em-amenity-chip"
+                        onClick={() => setCriteriaForm(f => {
+                          const cur = f.beds || []
+                          return { ...f, beds: selected ? cur.filter(x => x !== opt) : [...cur, opt] }
+                        })}
+                        style={{ background: selected ? 'var(--navy)' : '#fff', color: selected ? '#fff' : 'var(--slate)', border: `1.5px solid ${selected ? 'var(--navy)' : 'var(--surface-mid)'}` }}>
+                        {opt}
+                      </span>
+                    )
+                  })}
+                </div>
               </div>
-            </div>
-            <div className="em-row">
+              <div className="em-row">
+                <div className="em-field">
+                  <label>Min Bathrooms</label>
+                  <select value={criteriaForm.min_bath} onChange={e => setCriteriaForm(f => ({ ...f, min_bath: e.target.value }))}>
+                    {['Any','1','1.5','2','2.5','3'].map(v => <option key={v} value={v}>{v === 'Any' ? 'Any' : `${v}+`}</option>)}
+                  </select>
+                </div>
+                <div className="em-field">
+                  <label>Min Sqft</label>
+                  <input type="number" value={criteriaForm.min_sqft} onChange={e => setCriteriaForm(f => ({ ...f, min_sqft: e.target.value }))} />
+                </div>
+              </div>
               <div className="em-field">
-                <label>Min Beds</label>
-                <input type="number" placeholder={search?.min_bed} defaultValue={search?.min_bed} onChange={e => setCriteriaForm(f => ({ ...f, min_bed: e.target.value }))} />
+                <label>Move-In Date</label>
+                <div style={{ display:'flex', gap:'0.4rem', marginBottom:'0.5rem' }}>
+                  {[['on_or_before','On or before'],['on_or_after','On or after']].map(([val, label]) => (
+                    <button key={val} type="button" onClick={() => setCriteriaForm(f => ({ ...f, move_in_direction: val }))}
+                      style={{ fontSize:'0.75rem', fontWeight:600, fontFamily:'inherit', padding:'0.28rem 0.75rem', borderRadius:100, border:'1.5px solid', cursor:'pointer', transition:'all 0.15s',
+                        background: criteriaForm.move_in_direction === val ? 'var(--navy)' : '#fff',
+                        color: criteriaForm.move_in_direction === val ? '#fff' : 'var(--slate)',
+                        borderColor: criteriaForm.move_in_direction === val ? 'var(--navy)' : 'var(--surface-mid)' }}>
+                      {label}
+                    </button>
+                  ))}
+                </div>
+                <input type="date" value={criteriaForm.move_in} onChange={e => setCriteriaForm(f => ({ ...f, move_in: e.target.value }))} />
               </div>
               <div className="em-field">
-                <label>Max Beds</label>
-                <input type="number" placeholder={search?.max_bed} defaultValue={search?.max_bed} onChange={e => setCriteriaForm(f => ({ ...f, max_bed: e.target.value }))} />
+                <label>Neighborhoods</label>
+                <NeighborhoodPicker value={criteriaForm.neighborhoods || []} onChange={v => setCriteriaForm(f => ({ ...f, neighborhoods: v }))} />
+              </div>
+              <div className="em-field">
+                <label>Building Types</label>
+                <div className="em-amenity-grid">
+                  {['Rental Building','Condo','Co-op','Townhouse'].map(bt => {
+                    const sel = (criteriaForm.building_types || []).includes(bt)
+                    const showTip = bt === 'Condo' || bt === 'Co-op'
+                    return (
+                      <span key={bt} className="em-amenity-chip" onClick={() => setCriteriaForm(f => ({ ...f, building_types: sel ? f.building_types.filter(x => x !== bt) : [...(f.building_types || []), bt] }))}
+                        style={{ background: sel ? 'var(--navy)' : '#fff', color: sel ? '#fff' : 'var(--slate)', border: `1.5px solid ${sel ? 'var(--navy)' : 'var(--surface-mid)'}`, position:'relative' }}>
+                        {bt}
+                        {showTip && (
+                          <>
+                            <span style={{ marginLeft:'0.25rem', fontSize:'0.65rem', opacity:0.6 }}>ⓘ</span>
+                            <span style={{
+                              position:'absolute', bottom:'calc(100% + 8px)', left:'50%', transform:'translateX(-50%)',
+                              background:'#1E293B', color:'#fff', fontSize:'0.72rem', fontWeight:500, lineHeight:1.4,
+                              padding:'0.45rem 0.7rem', borderRadius:7, width:220, pointerEvents:'none',
+                              opacity:0, transition:'opacity 0.15s',
+                              whiteSpace:'normal', textAlign:'center', zIndex:9999,
+                            }} className="bt-tooltip">
+                              Condos and co-ops oftentimes have longer application processes, board fees, & move in/out fees
+                            </span>
+                          </>
+                        )}
+                      </span>
+                    )
+                  })}
+                </div>
+              </div>
+              <div className="em-field">
+                <label>Must-Haves <span style={{ fontWeight:400, textTransform:'none', letterSpacing:0, color:'var(--slate)', fontSize:'0.7rem' }}>— only show listings with these</span></label>
+                <div className="em-amenity-grid">
+                  {AMENITIES.map(a => {
+                    const sel = (criteriaForm.amenities || []).includes(a)
+                    return (
+                      <span key={a} className="em-amenity-chip" onClick={() => setCriteriaForm(f => ({ ...f, amenities: sel ? f.amenities.filter(x => x !== a) : [...(f.amenities || []), a] }))}
+                        style={{ background: sel ? 'var(--teal-pale)' : '#fff', color: sel ? 'var(--teal)' : 'var(--slate)', border: `1.5px solid ${sel ? 'var(--teal)' : 'var(--surface-mid)'}`, cursor: 'pointer' }}>
+                        {a}
+                      </span>
+                    )
+                  })}
+                </div>
+              </div>
+              <div style={{ display:'flex', gap:'0.75rem', marginTop:'0.5rem' }}>
+                <button className="btn btn-primary" style={{ flex:1, justifyContent:'center' }} onClick={saveCriteria} disabled={savingCriteria}>
+                  {savingCriteria ? <span className="spinner" /> : 'Save Changes'}
+                </button>
+                <button className="btn btn-outline" onClick={() => setShowEditCriteria(false)}>Cancel</button>
               </div>
             </div>
-            <div className="em-field">
-              <label>Move-In Date</label>
-              <input type="date" defaultValue={search?.move_in} onChange={e => setCriteriaForm(f => ({ ...f, move_in: e.target.value }))} />
-            </div>
-            <div className="em-field">
-              <label>Neighborhoods (comma separated)</label>
-              <input placeholder="Williamsburg, Astoria..." defaultValue={(search?.neighborhoods || []).join(', ')} onChange={e => setCriteriaForm(f => ({ ...f, neighborhoods: e.target.value.split(',').map(s => s.trim()).filter(Boolean) }))} />
-            </div>
-            <div style={{ display:'flex', gap:'0.75rem', marginTop:'0.25rem' }}>
-              <button className="btn btn-primary" style={{ flex:1, justifyContent:'center' }} onClick={saveCriteria} disabled={savingCriteria}>
-                {savingCriteria ? <span className="spinner" /> : 'Save Changes'}
-              </button>
-              <button className="btn btn-outline" onClick={() => setShowEditCriteria(false)}>Cancel</button>
+            {/* RIGHT: live preview */}
+            <div className="edit-modal-preview">
+              <div style={{ fontSize:'0.72rem', fontWeight:700, textTransform:'uppercase', letterSpacing:'0.07em', color:'var(--slate)', marginBottom:'0.75rem' }}>Live Preview</div>
+              <div className="criteria-card" style={{ boxShadow:'none', border:'1px solid var(--surface-mid)' }}>
+                {[
+                  ['Budget',        `$${criteriaForm.min_budget || '?'} – $${criteriaForm.max_budget || '?'}/mo`],
+                  ['Bedrooms',      (criteriaForm.beds || []).join(', ') || 'Any'],
+                  ['Bathrooms',     criteriaForm.min_bath && criteriaForm.min_bath !== 'Any' ? `${criteriaForm.min_bath}+ bath` : 'Any'],
+                  ['Min Sqft',      criteriaForm.min_sqft ? `${Number(criteriaForm.min_sqft).toLocaleString()} sf` : 'Any'],
+                  ['Move-In',       criteriaForm.move_in ? `${criteriaForm.move_in_direction === 'on_or_after' ? 'On or after' : 'On or before'} ${fmtDate(criteriaForm.move_in)}` : 'ASAP'],
+                  ['Building Type', (criteriaForm.building_types || []).join(', ') || 'Any'],
+                ].map(([k, v]) => (
+                  <div className="crit-row" key={k}>
+                    <span style={{ color:'var(--slate)' }}>{k}</span>
+                    <span style={{ fontWeight:600, textAlign:'right', maxWidth:'55%' }}>{v}</span>
+                  </div>
+                ))}
+                {/* Neighborhoods preview */}
+                {(() => {
+                  const selected = criteriaForm.neighborhoods || []
+                  const boroughColors = {
+                    Manhattan: { bg:'#EFF6FF', color:'#2563EB', border:'#2563EB55' },
+                    Brooklyn:  { bg:'#F0FDF4', color:'#16A34A', border:'#16A34A55' },
+                    Queens:    { bg:'#FFF7ED', color:'#EA580C', border:'#EA580C55' },
+                    Bronx:     { bg:'#FDF4FF', color:'#9333EA', border:'#9333EA55' },
+                    NJ:        { bg:'#FFF1F2', color:'#E11D48', border:'#E11D4855' },
+                  }
+                  const activeBoroughs = Object.keys(BOROUGH_NEIGHBORHOODS).filter(b =>
+                    BOROUGH_NEIGHBORHOODS[b].some(n => selected.includes(n))
+                  )
+                  return (
+                    <div className="crit-row" style={{ alignItems:'flex-start', gap:'0.5rem' }}>
+                      <span style={{ color:'var(--slate)', flexShrink:0 }}>Neighborhoods</span>
+                      {activeBoroughs.length > 0
+                        ? <div style={{ display:'flex', flexWrap:'wrap', gap:'0.3rem', justifyContent:'flex-end' }}>
+                            {activeBoroughs.map(b => {
+                              const c = boroughColors[b]
+                              const count = BOROUGH_NEIGHBORHOODS[b].filter(n => selected.includes(n)).length
+                              const total = BOROUGH_NEIGHBORHOODS[b].length
+                              return (
+                                <span key={b} style={{
+                                  fontSize:'0.72rem', fontWeight:700, padding:'0.18rem 0.55rem',
+                                  borderRadius:100, background:c.bg, color:c.color,
+                                  border:`1.5px solid ${c.border}`, display:'inline-flex', alignItems:'center', gap:'0.25rem',
+                                }}>
+                                  {b}
+                                  {count < total && (
+                                    <span style={{ background:c.color, color:'#fff', fontSize:'0.62rem', fontWeight:800, borderRadius:100, padding:'0 0.35rem', lineHeight:'1.5' }}>
+                                      {count}
+                                    </span>
+                                  )}
+                                </span>
+                              )
+                            })}
+                          </div>
+                        : <span style={{ fontWeight:600 }}>Any</span>
+                      }
+                    </div>
+                  )
+                })()}
+                <div className="crit-row" style={{ flexDirection:'column', alignItems:'flex-start', gap:'0.4rem', borderBottom:'none' }}>
+                  <span style={{ color:'var(--slate)' }}>Must-Haves</span>
+                  {(criteriaForm.amenities || []).length > 0
+                    ? <div style={{ display:'flex', flexWrap:'wrap', gap:'0.3rem' }}>
+                        {criteriaForm.amenities.map(a => <span key={a} style={{ background:'var(--teal-pale)', color:'var(--teal)', fontSize:'0.72rem', fontWeight:600, padding:'0.18rem 0.55rem', borderRadius:100 }}>{a}</span>)}
+                      </div>
+                    : <span style={{ fontWeight:600 }}>None</span>
+                  }
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -616,8 +792,27 @@ export default function Dashboard() {
           </div>
         </div>
 
+        {/* ── Two-column layout ── */}
+        <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'1.5rem', alignItems:'stretch' }}>
+
+        {/* LEFT: Profile + Readiness + Criteria */}
+        <div>
+
+        {/* My Profile */}
+        <div style={{ background:'#fff', borderRadius:'var(--radius)', boxShadow:'var(--shadow)', padding:'0.85rem 1.25rem', marginBottom:'1.25rem', display:'flex', alignItems:'center', gap:'1rem', flexWrap:'wrap' }}>
+          <div style={{ width:40, height:40, borderRadius:'50%', background:'var(--navy)', color:'#fff', display:'flex', alignItems:'center', justifyContent:'center', fontWeight:700, fontSize:'0.95rem', flexShrink:0 }}>
+            {(profile?.full_name || user?.user_metadata?.full_name || '?').split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase()}
+          </div>
+          <div style={{ flex:1, minWidth:0 }}>
+            <div style={{ fontWeight:700, fontSize:'0.9rem', color:'var(--navy)' }}>{profile?.full_name || user?.user_metadata?.full_name || 'Your Name'}</div>
+            <div style={{ fontSize:'0.78rem', color:'var(--slate)', marginTop:'0.1rem' }}>{user?.email}</div>
+          </div>
+          {profile?.phone && <div style={{ fontSize:'0.78rem', color:'var(--slate)' }}>{profile.phone}</div>}
+          <a href="/settings" style={{ fontSize:'0.75rem', fontWeight:600, color:'var(--teal)', textDecoration:'none', whiteSpace:'nowrap' }}>Edit profile →</a>
+        </div>
+
         {/* Readiness Score */}
-        <div className="readiness-card">
+        <div className="readiness-card" id="readiness">
           <div className="readiness-ring-wrap">
             <svg width="110" height="110" viewBox="0 0 110 110">
               <circle cx="55" cy="55" r={RING_R} fill="none" stroke="#F1F5F9" strokeWidth="8" />
@@ -648,7 +843,9 @@ export default function Dashboard() {
                     {f.label}
                   </span>
                   {!f.done && f.action && (
-                    <Link to={f.action} className="rf-action">{f.actionLabel}</Link>
+                    f.external
+                      ? <a href={f.action} target="_blank" rel="noopener noreferrer" className="rf-action">{f.actionLabel}</a>
+                      : <Link to={f.action} className="rf-action">{f.actionLabel}</Link>
                   )}
                   {f.done && (
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#059669" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
@@ -659,7 +856,7 @@ export default function Dashboard() {
           </div>
         </div>
 
-        <div className="onboard-criteria-row">
+        <div className="onboard-criteria-row" id="criteria">
           {showOnboard && (
             <div className="onboard-card" style={{ marginBottom:0 }}>
               <div className="onboard-title">What's happening with your search</div>
@@ -688,30 +885,74 @@ export default function Dashboard() {
           <div>
             <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'0.75rem' }}>
               <div className="sect-title" style={{ margin:0 }}>Your Criteria</div>
-              <button onClick={() => { setCriteriaForm({}); setShowEditCriteria(true) }} style={{ fontSize:'0.75rem', fontWeight:600, color:'var(--teal)', background:'none', border:'none', cursor:'pointer', fontFamily:'inherit', padding:0 }}>Edit →</button>
+              <button onClick={() => { setCriteriaForm({ min_budget: search?.min_budget || '', max_budget: search?.max_budget || '', beds: search?.min_bed ? search.min_bed.split(',').filter(Boolean) : [], min_bath: search?.min_bath || 'Any', min_sqft: search?.min_sqft || '', move_in: search?.move_in || '', move_in_direction: search?.move_in_direction || 'on_or_before', neighborhoods: search?.neighborhoods || [], building_types: search?.building_types || [], amenities: search?.amenities || [] }); setShowEditCriteria(true) }} style={{ fontSize:'0.75rem', fontWeight:600, color:'var(--teal)', background:'none', border:'none', cursor:'pointer', fontFamily:'inherit', padding:0 }}>Edit →</button>
             </div>
             <div className="criteria-card">
+              <div style={{ background:'#F0FFF4', border:'1px solid #86EFAC', borderRadius:8, padding:'0.35rem 0.75rem', display:'flex', alignItems:'center', gap:'0.4rem', marginBottom:'0.75rem' }}>
+                <span style={{ fontSize:'0.8rem' }}>💡</span>
+                <p style={{ margin:0, fontSize:'0.73rem', color:'#166534', lineHeight:1.4 }}>The more flexible your criteria, the more inventory we can find you.</p>
+              </div>
               {[
                 ['Budget',        search ? `$${search.min_budget || '?'} – $${search.max_budget || '?'}/mo` : '—'],
-                ['Bedrooms',      search ? `${search.min_bed} – ${search.max_bed} bed` : '—'],
+                ['Bedrooms',      search?.min_bed ? (() => { const order = ['Studio','1','2','3','4','5','6+']; return search.min_bed.split(',').filter(Boolean).sort((a,b) => order.indexOf(a) - order.indexOf(b)).join(', ') })() : 'Any'],
                 ['Bathrooms',     search?.min_bath ? `${search.min_bath}+ bath` : 'Any'],
                 ['Min Sqft',      search?.min_sqft ? `${search.min_sqft.toLocaleString()} sf` : 'Any'],
-                ['Move-In',       search?.move_in || 'ASAP'],
-                ['Neighborhoods', (search?.neighborhoods || []).slice(0,3).join(', ') || '—'],
+                ['Move-In',       search?.move_in ? `${search.move_in_direction === 'on_or_after' ? 'On or after' : 'On or before'} ${fmtDate(search.move_in)}` : 'ASAP'],
                 ['Building Type', (search?.building_types || []).join(', ') || 'Any'],
-                ['Plan',          search?.tier === 'pro' ? 'Pro ($499)' : search?.tier === 'standard' ? 'Standard ($299)' : 'Core ($399)'],
-                ['Chauffeur',     search?.chauffeur ? 'Yes' : 'No'],
               ].map(([k, v]) => (
                 <div className="crit-row" key={k}>
                   <span style={{ color:'var(--slate)' }}>{k}</span>
                   <span style={{ fontWeight:600 }}>{v}</span>
                 </div>
               ))}
+              {/* Neighborhoods */}
+              {(() => {
+                const selected = search?.neighborhoods || []
+                const boroughColors = {
+                  Manhattan: { bg:'#EFF6FF', color:'#2563EB', border:'#2563EB55' },
+                  Brooklyn:  { bg:'#F0FDF4', color:'#16A34A', border:'#16A34A55' },
+                  Queens:    { bg:'#FFF7ED', color:'#EA580C', border:'#EA580C55' },
+                  Bronx:     { bg:'#FDF4FF', color:'#9333EA', border:'#9333EA55' },
+                  NJ:        { bg:'#FFF1F2', color:'#E11D48', border:'#E11D4855' },
+                }
+                const activeBoroughs = Object.keys(BOROUGH_NEIGHBORHOODS).filter(b =>
+                  BOROUGH_NEIGHBORHOODS[b].some(n => selected.includes(n))
+                )
+                return (
+                  <div className="crit-row" style={{ alignItems:'flex-start', gap:'0.5rem' }}>
+                    <span style={{ color:'var(--slate)', flexShrink:0 }}>Neighborhoods</span>
+                    {activeBoroughs.length > 0
+                      ? <div style={{ display:'flex', flexWrap:'wrap', gap:'0.3rem', justifyContent:'flex-end' }}>
+                          {activeBoroughs.map(b => {
+                            const c = boroughColors[b]
+                            const count = BOROUGH_NEIGHBORHOODS[b].filter(n => selected.includes(n)).length
+                            const total = BOROUGH_NEIGHBORHOODS[b].length
+                            return (
+                              <span key={b} style={{
+                                fontSize:'0.72rem', fontWeight:700, padding:'0.18rem 0.55rem',
+                                borderRadius:100, background:c.bg, color:c.color,
+                                border:`1.5px solid ${c.border}`, display:'inline-flex', alignItems:'center', gap:'0.25rem',
+                              }}>
+                                {b}
+                                {count < total && (
+                                  <span style={{ background:c.color, color:'#fff', fontSize:'0.62rem', fontWeight:800, borderRadius:100, padding:'0 0.35rem', lineHeight:'1.5' }}>
+                                    {count}
+                                  </span>
+                                )}
+                              </span>
+                            )
+                          })}
+                        </div>
+                      : <span style={{ fontWeight:600 }}>Any</span>
+                    }
+                  </div>
+                )
+              })()}
               {/* Must-Haves */}
-              <div className="crit-row" style={{ flexDirection:'column', alignItems:'flex-start', gap:'0.4rem' }}>
-                <span style={{ color:'var(--slate)' }}>Must-Haves</span>
+              <div className="crit-row" style={{ alignItems:'flex-start', gap:'0.5rem' }}>
+                <span style={{ color:'var(--slate)', flexShrink:0 }}>Must-Haves</span>
                 {(search?.amenities || []).length > 0
-                  ? <div style={{ display:'flex', flexWrap:'wrap', gap:'0.3rem' }}>
+                  ? <div style={{ display:'flex', flexWrap:'wrap', gap:'0.3rem', justifyContent:'flex-end' }}>
                       {(search.amenities || []).map(a => (
                         <span key={a} style={{ background:'var(--teal-pale)', color:'var(--teal)', fontSize:'0.72rem', fontWeight:600, padding:'0.18rem 0.55rem', borderRadius:100 }}>{a}</span>
                       ))}
@@ -719,90 +960,297 @@ export default function Dashboard() {
                   : <span style={{ fontWeight:600 }}>None</span>
                 }
               </div>
-              {/* Wish List */}
-              <div className="crit-row" style={{ flexDirection:'column', alignItems:'flex-start', gap:'0.4rem', borderBottom:'none' }}>
-                <span style={{ color:'var(--slate)' }}>Wish List</span>
-                {(search?.amenities_wishlist || []).length > 0
-                  ? <div style={{ display:'flex', flexWrap:'wrap', gap:'0.3rem' }}>
-                      {(search.amenities_wishlist || []).map(a => (
-                        <span key={a} style={{ background:'#F5F3FF', color:'#7C3AED', fontSize:'0.72rem', fontWeight:600, padding:'0.18rem 0.55rem', borderRadius:100 }}>{a}</span>
-                      ))}
-                    </div>
-                  : <span style={{ fontWeight:600 }}>None</span>
-                }
+              {/* Chauffeur */}
+              <div className="crit-row" style={{ borderBottom:'none' }}>
+                <span style={{ color:'var(--slate)' }}>Chauffeur</span>
+                <span style={{ fontWeight:600 }}>{search?.chauffeur ? 'Yes' : 'No'}</span>
               </div>
             </div>
           </div>
         </div>
-
-        {groupMembers.length > 0 && (
-          <div className="group-members-card">
-            <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:'0.5rem' }}>
-              <div className="onboard-title" style={{ margin:0 }}>{groupMembers.length > 1 ? 'Group Members' : 'My Profile'}</div>
-              <button className="btn btn-outline" style={{ fontSize:'0.78rem', padding:'0.3rem 0.8rem' }} onClick={() => { setInviteSent(false); setInviteEmails(['']); setShowGroupModal(true) }}>
-                + Invite
-              </button>
+        {/* Your Apartments */}
+        <div style={{ marginTop:'1.75rem' }}>
+          <div className="sect-title">Your Apartments</div>
+          {loading ? (
+            <div className="empty-state">Loading your listings...</div>
+          ) : listings.length === 0 ? (
+            <div className="empty-state">
+              <div style={{ marginBottom:'0.75rem' }}><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--slate)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>
+              <strong>We're on it.</strong>
+              <p style={{ marginTop:'0.4rem', color:'var(--slate)' }}>Our team is searching listings that match your criteria right now. Your apartments will appear here within a few hours.</p>
             </div>
-            {groupMembers.map(m => {
-              const initials = m.name.split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase()
-              const docRoles = m.docRole === 'both' ? ['tenant','guarantor'] : m.docRole ? [m.docRole] : []
+          ) : (
+            listings.map(l => (
+              <div className={`tour-card${newIds.has(l.id) ? ' new-listing' : ''}`} key={l.id}>
+                <div className="tour-icon">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                </div>
+                <div style={{ flex:1 }}>
+                  <div className="tour-addr">{l.address}{l.unit ? `, ${l.unit}` : ''}</div>
+                  <div className="tour-meta">
+                    {l.bedrooms && <span>{l.bedrooms} bd</span>}
+                    {l.bathrooms && <span>{l.bathrooms} ba</span>}
+                    {l.sqft && <span>{l.sqft} sf</span>}
+                    {l.agent_name && <span>{l.agent_name}</span>}
+                  </div>
+                  <div style={{ marginTop:'0.35rem' }}>
+                    <span className={`status-pill s-${l.status}`}>
+                      {l.status === 'pending'          ? 'Finding tour time'  :
+                       l.status === 'outreach_sent'    ? 'Agent contacted'    :
+                       l.status === 'confirmed'        ? 'Tour confirmed'     :
+                       l.status === 'declined'         ? 'Not available'      :
+                       l.status === 'apply_requested'  ? 'Apply requested'    : l.status}
+                    </span>
+                    {l.listing_url && (
+                      <a href={l.listing_url} target="_blank" rel="noopener noreferrer"
+                         style={{ marginLeft:'0.5rem', fontSize:'0.75rem', color:'var(--teal)' }}>
+                        View listing →
+                      </a>
+                    )}
+                  </div>
+                  {l.notes && l.status === 'confirmed' && (
+                    <div style={{ marginTop:'0.4rem', fontSize:'0.78rem', color:'var(--slate)', background:'#F8FAFB', borderRadius:6, padding:'0.35rem 0.6rem' }}>
+                      📅 {l.notes}
+                    </div>
+                  )}
+                  {(l.status === 'confirmed' || l.status === 'outreach_sent') && l.status !== 'apply_requested' && (
+                    <button className={`apply-btn${l.status === 'apply_requested' ? ' sent' : ''}`}
+                      onClick={async () => {
+                        await supabase.from('listings').update({ status: 'apply_requested' }).eq('id', l.id)
+                        setListings(prev => prev.map(x => x.id === l.id ? { ...x, status: 'apply_requested' } : x))
+                        showToast(`Apply request sent for ${l.address}`)
+                      }}>
+                      ✦ I want to apply for this one
+                    </button>
+                  )}
+                  {l.status === 'apply_requested' && (
+                    <div style={{ marginTop:'0.4rem', fontSize:'0.78rem', color:'#7C3AED', fontWeight:600 }}>
+                      ✓ Apply request sent — we'll be in touch
+                    </div>
+                  )}
+                  {groupMembers.map(m => {
+                    const key = `${l.id}_${m.userId}`
+                    const firstName = m.name?.split(' ')[0] || m.name
+                    const cr = commuteResults[key]
+                    const cl = commuteLoading[key]
+                    if (!cr && !cl) return null
+                    return (
+                      <div key={m.userId} style={{ marginTop:'0.4rem' }}>
+                        {cl && <div style={{ fontSize:'0.73rem', color:'var(--slate)' }}>{firstName}'s commute…</div>}
+                        {cr?.modes && (
+                          <div style={{ display:'flex', flexWrap:'wrap', gap:'0.3rem', alignItems:'center' }}>
+                            <span style={{ fontSize:'0.72rem', color:'var(--slate)', fontWeight:600, marginRight:'0.1rem' }}>{firstName}'s commute:</span>
+                            {cr.modes.map(mode => (
+                              <a key={mode.id} href={mode.url} target="_blank" rel="noopener noreferrer" className="commute-mode">
+                                {mode.emoji} <span>~{mode.minutes}m</span>
+                              </a>
+                            ))}
+                            <span style={{ fontSize:'0.7rem', color:'var(--slate)' }}>{cr.distanceMiles} mi</span>
+                          </div>
+                        )}
+                        {cr?.error && <div style={{ fontSize:'0.73rem', color:'#EF4444' }}>{cr.error}</div>}
+                      </div>
+                    )
+                  })}
+                </div>
+                <div style={{ textAlign:'right', flexShrink:0 }}>
+                  <div className="tour-price">{l.price ? `$${l.price.toLocaleString()}` : '—'}<small>/month</small></div>
+                </div>
+              </div>
+            ))
+          )}
+          {listings.length > 0 && !profile?.work_address && (
+            <div style={{ marginTop:'0.75rem', background:'#F8FAFB', borderRadius:10, padding:'0.85rem 1rem', border:'1.5px dashed var(--surface-mid)' }}>
+              <div style={{ fontSize:'0.82rem', color:'var(--navy)', fontWeight:600, marginBottom:'0.4rem' }}>🗺 Add your work address to see commute times</div>
+              <div style={{ display:'flex', gap:'0.5rem' }}>
+                <input placeholder="e.g. 30 Rockefeller Plaza, New York" value={workAddrInput}
+                  onChange={e => setWorkAddrInput(e.target.value)} onKeyDown={e => e.key === 'Enter' && saveWorkAddress()}
+                  style={{ flex:1, border:'1.5px solid var(--surface-mid)', borderRadius:8, padding:'0.45rem 0.7rem', fontSize:'0.82rem', fontFamily:'inherit', color:'var(--navy)', outline:'none' }} />
+                <button onClick={saveWorkAddress} disabled={savingWorkAddr || !workAddrInput.trim()}
+                  style={{ background:'var(--teal)', color:'#0C1628', border:'none', borderRadius:8, padding:'0.45rem 0.9rem', fontSize:'0.8rem', fontWeight:700, cursor:'pointer', fontFamily:'inherit', opacity: savingWorkAddr ? 0.6 : 1 }}>
+                  {savingWorkAddr ? '…' : 'Save'}
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
 
-              function statusTag(info) {
-                if (!info) return null
-                if (info.status === 'complete') return <span className="member-tag tag-complete">Docs Complete</span>
-                if (info.status === 'partial') return <span className="member-tag tag-partial">Partial ({info.uploaded}/{info.total})</span>
-                return <span className="member-tag tag-incomplete">Docs Incomplete</span>
-              }
+        </div>{/* end left column */}
 
-              return (
-                <div className="group-member-row" key={m.userId}>
-                  <div className="member-avatar">{initials || '?'}</div>
-                  <div style={{ flex:1, minWidth:0 }}>
-                    <div className="member-name">{m.name}{m.userId === user.id ? ' (you)' : ''}</div>
-                    <div className="member-email">{m.email}</div>
-                    <div className="member-tags">
-                      {m.groupRole === 'owner' && <span className="member-tag tag-owner">Owner</span>}
-                      {docRoles.includes('tenant') && <span className="member-tag tag-tenant">Tenant</span>}
-                      {docRoles.includes('guarantor') && <span className="member-tag tag-guarantor">Guarantor</span>}
-                      {!m.docRole && <span className="member-tag tag-incomplete">No docs yet</span>}
-                      {statusTag(m.tenant)}
-                      {m.docRole === 'both' && statusTag(m.guarantor)}
+        {/* RIGHT column */}
+        <div style={{ display:'flex', flexDirection:'column', gap:'1.25rem' }}>
+
+          {/* KPI row */}
+          <div className="kpi-row" id="commutes" style={{ marginBottom:0 }}>
+            {[
+              { label:'Listings Found',         val: listings.length || '—',       sub: listings.length > 0 ? 'matching your criteria' : 'search in progress', clickable: true },
+              { label:'Tours Confirmed',         val: confirmedTours.length || '—', sub: confirmedTours.length > 0 ? 'ready to visit' : 'awaiting responses' },
+              { label:'Outreach Sent',           val: sentOutreach.length || '—',   sub: 'agents contacted' },
+              { label:'Applications Submitted',  val: '—',                          sub: 'tracked by AptPilot' },
+            ].map(k => (
+              <div className="kpi" key={k.label}
+                onClick={k.clickable ? () => setShowListingsModal(true) : undefined}
+                style={k.clickable ? { cursor:'pointer' } : {}}>
+                <div className="kpi-label">{k.label}</div>
+                <div className="kpi-val">{k.val}</div>
+                <div className="kpi-sub">{k.sub}{k.clickable ? <span style={{ color:'var(--teal)', marginLeft:'0.3rem' }}>↗</span> : null}</div>
+              </div>
+            ))}
+          </div>
+
+          {/* Tour Agenda */}
+          <div style={{ flex:1, display:'flex', flexDirection:'column' }}>
+            <div className="sect-title">Tour Agenda</div>
+            <div style={{ background:'#fff', borderRadius:'var(--radius)', boxShadow:'var(--shadow)', flex:1, overflow:'hidden', display:'flex', flexDirection:'column' }}>
+              {/* Header row */}
+              <div style={{ display:'grid', gridTemplateColumns:'2fr 1.2fr 1fr 1fr', gap:0, background:'var(--surface)', borderBottom:'1.5px solid var(--surface-mid)', padding:'0.55rem 1.25rem' }}>
+                {['Address', 'Date / Time', 'Price', 'Status'].map(h => (
+                  <div key={h} style={{ fontSize:'0.68rem', fontWeight:700, color:'var(--slate)', textTransform:'uppercase', letterSpacing:'0.06em' }}>{h}</div>
+                ))}
+              </div>
+              {/* Rows */}
+              <div style={{ flex:1, overflowY:'auto' }}>
+                {(() => {
+                  const rows = confirmedTours.length > 0 ? confirmedTours.map(l => ({
+                    id: l.id, address: `${l.address}${l.unit ? `, ${l.unit}` : ''}`, date: l.notes || '—', price: l.price ? `$${l.price.toLocaleString()}/mo` : '—', status: 'Confirmed'
+                  })) : [
+                    { id:1, address:'245 E 54th St, Apt 12C', date:'Jul 2 · 10:00am', price:'$3,200/mo', status:'Confirmed' },
+                    { id:2, address:'80 Riverside Blvd, Apt 4A', date:'Jul 2 · 11:30am', price:'$3,850/mo', status:'Confirmed' },
+                    { id:3, address:'350 W 42nd St, Apt 8B', date:'Jul 2 · 1:00pm', price:'$2,950/mo', status:'Confirmed' },
+                    { id:4, address:'15 Hudson Yards, Apt 22F', date:'Jul 2 · 2:30pm', price:'$4,400/mo', status:'Confirmed' },
+                    { id:5, address:'200 Amsterdam Ave, Apt 6D', date:'Jul 3 · 10:00am', price:'$3,100/mo', status:'Pending' },
+                    { id:6, address:'425 W 53rd St, Apt 3C', date:'Jul 3 · 11:30am', price:'$2,800/mo', status:'Pending' },
+                  ]
+                  return rows.map((r, i) => (
+                    <div key={r.id} style={{ display:'grid', gridTemplateColumns:'2fr 1.2fr 1fr 1fr', gap:0, padding:'0.65rem 1.25rem', borderBottom:'1px solid var(--surface-mid)', background: i % 2 === 1 ? 'var(--surface)' : '#fff', alignItems:'center' }}>
+                      <div style={{ fontWeight:600, fontSize:'0.83rem', color:'var(--navy)' }}>{r.address}</div>
+                      <div style={{ fontSize:'0.78rem', color:'var(--slate)' }}>{r.date}</div>
+                      <div style={{ fontSize:'0.78rem', color:'var(--teal)', fontWeight:600 }}>{r.price}</div>
+                      <div>
+                        <span style={{ background: r.status === 'Confirmed' ? '#D1FAE5' : '#FEF9C3', color: r.status === 'Confirmed' ? '#065F46' : '#854D0E', fontSize:'0.7rem', fontWeight:700, padding:'0.2rem 0.55rem', borderRadius:100 }}>{r.status}</span>
+                      </div>
+                    </div>
+                  ))
+                })()}
+              </div>
+            </div>
+          </div>
+
+          {/* 2×2 grid */}
+          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'1rem' }}>
+
+            {/* Status Tracker */}
+            <div>
+              <div className="sect-title">Status Tracker</div>
+              <div className="tracker-card" style={{ height:160, overflowY:'auto' }}>
+                {listings.length === 0 ? (
+                  <p style={{ color:'var(--slate)', fontSize:'0.82rem', padding:'0.5rem 0' }}>Listings will appear here once found.</p>
+                ) : listings.map(l => (
+                  <div className="tracker-row" key={l.id}>
+                    <div className="t-dot" style={{ background: STATUS_COLORS[l.status] || '#94A3B8' }} />
+                    <div>
+                      <div style={{ fontWeight:600, fontSize:'0.82rem', color:'var(--navy)' }}>{l.address}{l.unit ? `, ${l.unit}` : ''}</div>
+                      <div style={{ fontSize:'0.74rem', color:'var(--slate)', marginTop:'0.1rem' }}>
+                        {l.status === 'pending'          ? 'Searching for availability'    :
+                         l.status === 'outreach_sent'    ? 'Tour request sent'             :
+                         l.status === 'confirmed'        ? 'Tour confirmed'                :
+                         l.status === 'declined'         ? 'Not available'                 :
+                         l.status === 'apply_requested'  ? 'Apply request sent'            : l.status}
+                      </div>
                     </div>
                   </div>
-                </div>
-              )
-            })}
-          </div>
-        )}
-
-        <div className="kpi-row">
-          {[
-            { label:'Listings Found',   val: listings.length || '—',        sub: listings.length > 0 ? 'matching your criteria' : 'search in progress' },
-            { label:'Tours Confirmed',  val: confirmedTours.length || '—',  sub: confirmedTours.length > 0 ? 'ready to visit' : 'awaiting responses' },
-            { label:'Outreach Sent',    val: sentOutreach.length || '—',    sub: 'agents contacted' },
-            { label:'You Saved',        val: search ? '$' + Math.round((search.max_budget || 4000) * 1.08).toLocaleString() : '—', sub: 'vs. broker fee' },
-          ].map(k => (
-            <div className="kpi" key={k.label}>
-              <div className="kpi-label">{k.label}</div>
-              <div className="kpi-val">{k.val}</div>
-              <div className="kpi-sub">{k.sub}</div>
-            </div>
-          ))}
-        </div>
-
-        <div className="two-col">
-          <div>
-            <div className="sect-title">Your Apartments</div>
-            {loading ? (
-              <div className="empty-state">Loading your listings...</div>
-            ) : listings.length === 0 ? (
-              <div className="empty-state">
-                <div style={{ marginBottom:'0.75rem' }}><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--slate)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>
-                <strong>We're on it.</strong>
-                <p style={{ marginTop:'0.4rem', color:'var(--slate)' }}>Our team is searching listings that match your criteria right now. Your apartments will appear here within a few hours.</p>
+                ))}
               </div>
-            ) : (
-              listings.map(l => (
+            </div>
+
+            {/* Share AptPilot */}
+            <div>
+              <div className="sect-title">Share AptPilot</div>
+              {profile?.referral_code ? (
+                <div className="referral-card" style={{ height:160, overflow:'hidden', display:'flex', flexDirection:'column', justifyContent:'space-between' }}>
+                  <div>
+                    <div style={{ fontWeight:700, fontSize:'0.88rem', color:'#fff', marginBottom:'0.3rem' }}>Refer a friend</div>
+                    <p style={{ color:'rgba(255,255,255,0.6)', fontSize:'0.74rem', lineHeight:1.45, margin:0 }}>Help someone skip the broker fee. Share your personal link.</p>
+                  </div>
+                  <button
+                    onClick={() => { navigator.clipboard.writeText(`https://aptpilot.vercel.app/signup?ref=${profile.referral_code}`); setCopied(true); setTimeout(() => setCopied(false), 2000) }}
+                    style={{ background:'var(--teal)', color:'var(--navy)', border:'none', borderRadius:8, padding:'0.5rem 1rem', fontWeight:700, fontSize:'0.78rem', cursor:'pointer', fontFamily:'inherit', width:'100%', transition:'opacity 0.15s' }}
+                    onMouseEnter={e => e.currentTarget.style.opacity='0.85'}
+                    onMouseLeave={e => e.currentTarget.style.opacity='1'}
+                  >
+                    {copied ? '✓ Link Copied!' : 'Copy My Link'}
+                  </button>
+                </div>
+              ) : (
+                <div style={{ background:'#fff', borderRadius:'var(--radius)', boxShadow:'var(--shadow)', padding:'1rem', height:160 }} />
+              )}
+            </div>
+
+            {/* My Documents */}
+            <div>
+              <div className="sect-title">My Documents</div>
+              <Link to="/documents" style={{ textDecoration:'none' }}>
+                <div style={{ background:'#fff', borderRadius:'var(--radius)', boxShadow:'var(--shadow)', padding:'1.25rem', display:'flex', flexDirection:'column', gap:'0.6rem', border:'1.5px solid transparent', transition:'border-color 0.15s', cursor:'pointer', height:160, overflow:'hidden' }}
+                  onMouseEnter={e => e.currentTarget.style.borderColor='var(--teal)'}
+                  onMouseLeave={e => e.currentTarget.style.borderColor='transparent'}>
+                  <div style={{ width:32, height:32, borderRadius:8, background:'var(--teal-pale)', display:'flex', alignItems:'center', justifyContent:'center' }}>
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                  </div>
+                  <div style={{ fontWeight:700, fontSize:'0.83rem', color:'var(--navy)' }}>View & Download Files</div>
+                  <div style={{ fontSize:'0.74rem', color:'var(--slate)' }}>Individual files + PDF package</div>
+                </div>
+              </Link>
+            </div>
+
+            {/* Add a Chauffeur */}
+            <div>
+              <div className="sect-title">Add a Chauffeur</div>
+              <div style={{ background:'var(--navy)', borderRadius:'var(--radius)', padding:'1.25rem', height:160, overflow:'hidden', display:'flex', flexDirection:'column', justifyContent:'space-between' }}>
+                <div>
+                  <div style={{ fontWeight:700, fontSize:'0.88rem', color:'#fff', marginBottom:'0.3rem' }}>Ride between tours</div>
+                  <p style={{ color:'rgba(255,255,255,0.6)', fontSize:'0.74rem', lineHeight:1.45, margin:0 }}>We book a car to take you between every showing on tour day.</p>
+                </div>
+                <button
+                  onClick={() => { /* chauffeur upsell */ }}
+                  style={{ background:'var(--teal)', color:'var(--navy)', border:'none', borderRadius:8, padding:'0.5rem 1rem', fontWeight:700, fontSize:'0.78rem', cursor:'pointer', fontFamily:'inherit', width:'100%', transition:'opacity 0.15s' }}
+                  onMouseEnter={e => e.currentTarget.style.opacity='0.85'}
+                  onMouseLeave={e => e.currentTarget.style.opacity='1'}
+                >
+                  Add Chauffeur →
+                </button>
+              </div>
+            </div>
+
+          </div>{/* end 2×2 grid */}
+
+        </div>{/* end right column */}
+        </div>{/* end two-column layout */}
+      </div>{/* end .dash */}
+
+      {/* Listings Found Modal */}
+      {showListingsModal && (
+        <div style={{ position:'fixed', inset:0, zIndex:1200, background:'rgba(6,9,15,0.6)', backdropFilter:'blur(6px)', display:'flex', alignItems:'center', justifyContent:'center', padding:'2rem' }}
+          onClick={e => { if (e.target === e.currentTarget) setShowListingsModal(false) }}>
+          <div style={{ background:'var(--surface)', borderRadius:20, width:'100%', maxWidth:860, maxHeight:'85vh', display:'flex', flexDirection:'column', boxShadow:'0 24px 80px rgba(0,0,0,0.3)', overflow:'hidden' }}>
+            {/* Modal header */}
+            <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'1.5rem 1.75rem', background:'#fff', borderBottom:'1px solid var(--surface-mid)', flexShrink:0 }}>
+              <div>
+                <div style={{ fontFamily:"'Playfair Display',serif", fontSize:'1.3rem', color:'var(--navy)', fontWeight:700 }}>Listings Found</div>
+                <div style={{ fontSize:'0.78rem', color:'var(--slate)', marginTop:'0.15rem' }}>{listings.length} apartment{listings.length !== 1 ? 's' : ''} matching your criteria</div>
+              </div>
+              <button onClick={() => setShowListingsModal(false)} style={{ background:'none', border:'none', cursor:'pointer', color:'var(--slate)', padding:'0.25rem' }}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              </button>
+            </div>
+            {/* Modal body — scrollable listing cards */}
+            <div style={{ overflowY:'auto', padding:'1.25rem 1.75rem', flex:1 }}>
+              {listings.length === 0 ? (
+                <div className="empty-state">
+                  <div style={{ marginBottom:'0.75rem' }}><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--slate)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>
+                  <strong>We're on it.</strong>
+                  <p style={{ marginTop:'0.4rem', color:'var(--slate)' }}>Our team is searching listings that match your criteria. Check back soon.</p>
+                </div>
+              ) : listings.map(l => (
                 <div className={`tour-card${newIds.has(l.id) ? ' new-listing' : ''}`} key={l.id}>
                   <div className="tour-icon">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
@@ -817,11 +1265,11 @@ export default function Dashboard() {
                     </div>
                     <div style={{ marginTop:'0.35rem' }}>
                       <span className={`status-pill s-${l.status}`}>
-                        {l.status === 'pending'          ? 'Finding tour time'  :
-                         l.status === 'outreach_sent'    ? 'Agent contacted'    :
-                         l.status === 'confirmed'        ? 'Tour confirmed'     :
-                         l.status === 'declined'         ? 'Not available'      :
-                         l.status === 'apply_requested'  ? 'Apply requested'    : l.status}
+                        {l.status === 'pending'         ? 'Finding tour time'  :
+                         l.status === 'outreach_sent'   ? 'Agent contacted'    :
+                         l.status === 'confirmed'       ? 'Tour confirmed'     :
+                         l.status === 'declined'        ? 'Not available'      :
+                         l.status === 'apply_requested' ? 'Apply requested'    : l.status}
                       </span>
                       {l.listing_url && (
                         <a href={l.listing_url} target="_blank" rel="noopener noreferrer"
@@ -835,167 +1283,16 @@ export default function Dashboard() {
                         📅 {l.notes}
                       </div>
                     )}
-                    {(l.status === 'confirmed' || l.status === 'outreach_sent') && l.status !== 'apply_requested' && (
-                      <button
-                        className={`apply-btn${l.status === 'apply_requested' ? ' sent' : ''}`}
-                        onClick={async () => {
-                          await supabase.from('listings').update({ status: 'apply_requested' }).eq('id', l.id)
-                          setListings(prev => prev.map(x => x.id === l.id ? { ...x, status: 'apply_requested' } : x))
-                          showToast(`Apply request sent for ${l.address}`)
-                        }}
-                      >
-                        ✦ I want to apply for this one
-                      </button>
-                    )}
-                    {l.status === 'apply_requested' && (
-                      <div style={{ marginTop:'0.4rem', fontSize:'0.78rem', color:'#7C3AED', fontWeight:600 }}>
-                        ✓ Apply request sent — we'll be in touch
-                      </div>
-                    )}
-                    {/* Commute rows — one per group member with a work address */}
-                    {groupMembers.map(m => {
-                      const key = `${l.id}_${m.userId}`
-                      const firstName = m.name?.split(' ')[0] || m.name
-                      const cr = commuteResults[key]
-                      const cl = commuteLoading[key]
-                      if (!cr && !cl) return null
-                      return (
-                        <div key={m.userId} style={{ marginTop:'0.4rem' }}>
-                          {cl && <div style={{ fontSize:'0.73rem', color:'var(--slate)' }}>{firstName}'s commute…</div>}
-                          {cr?.modes && (
-                            <div style={{ display:'flex', flexWrap:'wrap', gap:'0.3rem', alignItems:'center' }}>
-                              <span style={{ fontSize:'0.72rem', color:'var(--slate)', fontWeight:600, marginRight:'0.1rem' }}>{firstName}'s commute:</span>
-                              {cr.modes.map(mode => (
-                                <a key={mode.id} href={mode.url} target="_blank" rel="noopener noreferrer" className="commute-mode">
-                                  {mode.emoji} <span>~{mode.minutes}m</span>
-                                </a>
-                              ))}
-                              <span style={{ fontSize:'0.7rem', color:'var(--slate)' }}>{cr.distanceMiles} mi</span>
-                            </div>
-                          )}
-                          {cr?.error && <div style={{ fontSize:'0.73rem', color:'#EF4444' }}>{cr.error}</div>}
-                        </div>
-                      )
-                    })}
                   </div>
                   <div style={{ textAlign:'right', flexShrink:0 }}>
                     <div className="tour-price">{l.price ? `$${l.price.toLocaleString()}` : '—'}<small>/month</small></div>
                   </div>
                 </div>
-              ))
-            )}
-            {/* Prompt if logged-in user has no work address set */}
-            {listings.length > 0 && !profile?.work_address && (
-              <div style={{ marginTop:'0.75rem', background:'#F8FAFB', borderRadius:10, padding:'0.85rem 1rem', border:'1.5px dashed var(--surface-mid)' }}>
-                <div style={{ fontSize:'0.82rem', color:'var(--navy)', fontWeight:600, marginBottom:'0.4rem' }}>🗺 Add your work address to see commute times</div>
-                <div style={{ display:'flex', gap:'0.5rem' }}>
-                  <input
-                    placeholder="e.g. 30 Rockefeller Plaza, New York"
-                    value={workAddrInput}
-                    onChange={e => setWorkAddrInput(e.target.value)}
-                    onKeyDown={e => e.key === 'Enter' && saveWorkAddress()}
-                    style={{ flex:1, border:'1.5px solid var(--surface-mid)', borderRadius:8, padding:'0.45rem 0.7rem', fontSize:'0.82rem', fontFamily:'inherit', color:'var(--navy)', outline:'none' }}
-                  />
-                  <button onClick={saveWorkAddress} disabled={savingWorkAddr || !workAddrInput.trim()} style={{ background:'var(--teal)', color:'#0C1628', border:'none', borderRadius:8, padding:'0.45rem 0.9rem', fontSize:'0.8rem', fontWeight:700, cursor:'pointer', fontFamily:'inherit', opacity: savingWorkAddr ? 0.6 : 1 }}>
-                    {savingWorkAddr ? '…' : 'Save'}
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
-
-          <div style={{ display:'flex', flexDirection:'column', gap:'1.25rem' }}>
-            <div>
-              <div className="sect-title">Status Tracker</div>
-              <div className="tracker-card">
-                {listings.length === 0 ? (
-                  <p style={{ color:'var(--slate)', fontSize:'0.85rem', padding:'0.5rem 0' }}>Listings will appear here once found.</p>
-                ) : listings.map(l => (
-                  <div className="tracker-row" key={l.id}>
-                    <div className="t-dot" style={{ background: STATUS_COLORS[l.status] || '#94A3B8' }} />
-                    <div>
-                      <div style={{ fontWeight:600, fontSize:'0.85rem', color:'var(--navy)' }}>{l.address}{l.unit ? `, ${l.unit}` : ''}</div>
-                      <div style={{ fontSize:'0.77rem', color:'var(--slate)', marginTop:'0.15rem' }}>
-                        {l.status === 'pending'       ? 'Searching for tour availability' :
-                         l.status === 'outreach_sent' ? 'Tour request sent to agent'      :
-                         l.status === 'confirmed'        ? 'Tour confirmed'                  :
-                         l.status === 'declined'         ? 'Listing not available'           :
-                         l.status === 'apply_requested'  ? 'Apply request sent to team'      : l.status}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
+              ))}
             </div>
-
-            <div>
-              <div className="sect-title">My Documents</div>
-              <Link to="/documents" style={{ textDecoration:'none' }}>
-                <div style={{ background:'#fff', borderRadius:'var(--radius)', boxShadow:'var(--shadow)', padding:'1rem 1.25rem', display:'flex', alignItems:'center', gap:'0.85rem', border:'1.5px solid transparent', transition:'border-color 0.15s', cursor:'pointer' }}
-                  onMouseEnter={e => e.currentTarget.style.borderColor='var(--teal)'}
-                  onMouseLeave={e => e.currentTarget.style.borderColor='transparent'}
-                >
-                  <div style={{ width:36, height:36, borderRadius:9, background:'var(--teal-pale)', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
-                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-                  </div>
-                  <div style={{ flex:1 }}>
-                    <div style={{ fontWeight:700, fontSize:'0.88rem', color:'var(--navy)' }}>View & Download Files</div>
-                    <div style={{ fontSize:'0.78rem', color:'var(--slate)', marginTop:'0.1rem' }}>Individual files + collated PDF package</div>
-                  </div>
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--slate)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
-                </div>
-              </Link>
-            </div>
-
-            {profile?.referral_code && (
-              <div>
-                <div className="sect-title">Refer a Friend</div>
-                <div className="referral-card">
-                  <h3>Share AptPilot</h3>
-                  <p style={{ color:'rgba(255,255,255,0.6)', fontSize:'0.8rem', lineHeight:1.55 }}>Share your link. Every friend you refer helps us grow — and we appreciate it.</p>
-                  <div className="referral-code-box" onClick={() => {
-                    navigator.clipboard.writeText(`https://aptpilot.vercel.app/signup?ref=${profile.referral_code}`)
-                    setCopied(true); setTimeout(() => setCopied(false), 2000)
-                  }}>
-                    <span>aptpilot.vercel.app/signup?ref={profile.referral_code}</span>
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-                  </div>
-                  {copied && <p style={{ color:'var(--teal)', fontSize:'0.78rem', marginBottom:'0.5rem' }}>Copied to clipboard!</p>}
-                  <p style={{ color:'rgba(255,255,255,0.5)', fontSize:'0.76rem' }}>{referrals} {referrals === 1 ? 'person' : 'people'} referred</p>
-                </div>
-              </div>
-            )}
-
-            <div>
-              <div className="sect-title">Messages</div>
-              <div className="msg-card">
-                <div className="msg-thread" ref={msgThreadRef}>
-                  {messages.length === 0
-                    ? <p style={{ color:'var(--slate)', fontSize:'0.82rem', textAlign:'center', margin:'auto' }}>No messages yet — send us a note and we'll get back to you.</p>
-                    : messages.map(m => (
-                      <div key={m.id} className={`msg-bubble ${m.from_admin ? 'theirs' : 'mine'}`}>
-                        {m.body}
-                        <div className="msg-time">{new Date(m.created_at).toLocaleString('en-US', { month:'short', day:'numeric', hour:'numeric', minute:'2-digit' })}</div>
-                      </div>
-                    ))
-                  }
-                </div>
-                <div className="msg-input-row">
-                  <input
-                    className="msg-input"
-                    placeholder="Message AptPilot..."
-                    value={msgInput}
-                    onChange={e => setMsgInput(e.target.value)}
-                    onKeyDown={e => e.key === 'Enter' && !e.shiftKey && sendMessage()}
-                  />
-                  <button className="msg-send-btn" onClick={sendMessage} disabled={sendingMsg || !msgInput.trim()}>Send</button>
-                </div>
-              </div>
-            </div>
-
           </div>
         </div>
-      </div>
+      )}
     </>
   )
 }
