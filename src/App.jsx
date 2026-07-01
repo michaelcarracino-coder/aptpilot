@@ -15,6 +15,7 @@ const BlogPost         = lazy(() => import('./pages/BlogPost'))
 const AdminBlog        = lazy(() => import('./pages/AdminBlog'))
 const AdminListings    = lazy(() => import('./pages/AdminListings'))
 const AdminTestimonials = lazy(() => import('./pages/AdminTestimonials'))
+const AdminDashboard   = lazy(() => import('./pages/AdminDashboard'))
 const ForgotPassword   = lazy(() => import('./pages/ForgotPassword'))
 const ResetPassword    = lazy(() => import('./pages/ResetPassword'))
 const Pricing          = lazy(() => import('./pages/Pricing'))
@@ -57,6 +58,7 @@ function AppRoutes() {
         <Route path="/"          element={<Landing />} />
         <Route path="/blog"      element={<Blog />} />
         <Route path="/blog/:slug" element={<BlogPost />} />
+        <Route path="/admin/dashboard" element={<AdminDashboard />} />
         <Route path="/admin/blog" element={<AdminBlog />} />
         <Route path="/admin/listings" element={<AdminListings />} />
         <Route path="/admin/testimonials" element={<AdminTestimonials />} />
