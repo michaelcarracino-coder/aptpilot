@@ -121,13 +121,12 @@ export default async function handler(req, res) {
         }
 
         if (search) {
-          // Trigger scraper (fire and forget)
-          // Env vars needed: SCRAPER_URL, SCRAPER_API_KEY
-          fetch(`${process.env.SCRAPER_URL}/scrape`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'x-api-key': process.env.SCRAPER_API_KEY },
-            body: JSON.stringify({ searchId: search.id, userId, criteria: search }),
-          }).catch(e => console.error('Scraper trigger failed:', e));
+          // Enqueue a scrape job — cron-scrape-jobs.js picks it up and retries up to 3x
+          await supabase.from('scrape_jobs').insert({
+            search_id: search.id,
+            user_id: userId,
+            status: 'pending',
+          });
 
           await fetch(`https://aptpilot.vercel.app/api/notify`, {
             method: 'POST',
