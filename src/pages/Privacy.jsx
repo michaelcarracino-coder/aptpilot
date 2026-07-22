@@ -114,7 +114,7 @@ const css = `
   margin-bottom: 1.25rem;
 }
 .legal-hero h1 {
-  font-family: 'Playfair Display', serif;
+  font-family: 'Inter', sans-serif;
   font-size: clamp(2.2rem, 5vw, 3.2rem);
   color: #fff; margin-bottom: 0.75rem; line-height: 1.15;
 }
@@ -133,7 +133,7 @@ const css = `
 }
 .legal-section:last-of-type { border-bottom: none; }
 .legal-num {
-  font-family: 'Playfair Display', serif;
+  font-family: 'Inter', sans-serif;
   font-size: 2rem; font-weight: 700;
   color: rgba(10,191,191,0.22); line-height: 1;
   flex-shrink: 0; width: 2.5rem; padding-top: 0.1rem;
@@ -141,7 +141,7 @@ const css = `
 }
 .legal-content { flex: 1; }
 .legal-content h2 {
-  font-family: 'Playfair Display', serif;
+  font-family: 'Inter', sans-serif;
   font-size: 1.15rem; color: var(--navy);
   margin-bottom: 0.75rem;
 }

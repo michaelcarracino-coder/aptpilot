@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,500;1,600&family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -35,10 +35,11 @@
   --shadow-teal: 0 8px 32px rgba(10,191,191,0.22);
 
   /* Shape */
-  --radius:    14px;
-  --radius-sm: 8px;
-  --radius-lg: 20px;
-  --radius-xl: 28px;
+  --radius:    8px;
+  --radius-sm: 6px;
+  --radius-lg: 10px;
+  --radius-xl: 12px;
+  --mono: 'JetBrains Mono', 'SF Mono', Menlo, monospace;
 }
 
 html { scroll-behavior: smooth; }
@@ -56,55 +57,46 @@ a { text-decoration: none; color: inherit; }
 button { cursor: pointer; font-family: inherit; }
 input, select, textarea { font-family: inherit; }
 
-.serif { font-family: 'Playfair Display', Georgia, serif; }
+.serif { font-family: 'Inter', sans-serif; font-weight: 700; letter-spacing: -0.03em; }
+.mono { font-family: var(--mono); }
 
 /* ─── BUTTONS ─── */
 .btn {
   display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
-  padding: 0.8rem 1.8rem; border-radius: 100px;
-  font-size: 0.9rem; font-weight: 600; border: none;
-  transition: all 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
-  white-space: nowrap; letter-spacing: 0.01em;
+  padding: 0.7rem 1.4rem; border-radius: var(--radius-sm);
+  font-size: 0.9rem; font-weight: 600; border: 1px solid transparent;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+  white-space: nowrap; letter-spacing: -0.01em;
 }
 .btn-primary {
-  background: var(--teal); color: #fff;
-  box-shadow: 0 4px 16px rgba(10,191,191,0.30);
+  background: var(--teal); color: var(--ink);
+  border-color: var(--teal);
 }
-.btn-primary:hover {
-  background: var(--teal-dark);
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-teal);
-}
+.btn-primary:hover { background: #0DD6D6; border-color: #0DD6D6; }
 .btn-gold {
-  background: linear-gradient(135deg, #C9A96E, #E2C896);
-  color: var(--navy); font-weight: 700;
-  box-shadow: 0 4px 20px rgba(201,169,110,0.28);
+  background: var(--gold); color: var(--navy); font-weight: 700;
+  border-color: var(--gold);
 }
-.btn-gold:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 28px rgba(201,169,110,0.38);
-}
-.btn-dark { background: var(--navy); color: #fff; box-shadow: var(--shadow); }
-.btn-dark:hover { background: var(--navy-mid); transform: translateY(-2px); box-shadow: var(--shadow-lg); }
+.btn-gold:hover { background: var(--gold-light); border-color: var(--gold-light); }
+.btn-dark { background: var(--navy); color: #fff; border-color: var(--navy); }
+.btn-dark:hover { background: var(--navy-mid); }
 .btn-outline {
-  background: transparent; color: var(--text-muted);
-  border: 1.5px solid var(--surface-mid);
+  background: transparent; color: var(--text);
+  border: 1px solid var(--surface-mid);
 }
-.btn-outline:hover { border-color: var(--navy); color: var(--navy); }
+.btn-outline:hover { border-color: var(--navy); }
 .btn-ghost {
-  background: rgba(255,255,255,0.07);
-  color: rgba(255,255,255,0.75);
-  border: 1.5px solid rgba(255,255,255,0.14);
-  backdrop-filter: blur(8px);
+  background: transparent;
+  color: rgba(255,255,255,0.8);
+  border: 1px solid rgba(255,255,255,0.22);
 }
 .btn-ghost:hover {
   color: #fff;
-  background: rgba(255,255,255,0.13);
-  border-color: rgba(255,255,255,0.3);
-  transform: translateY(-1px);
+  background: rgba(255,255,255,0.07);
+  border-color: rgba(255,255,255,0.4);
 }
-.btn-lg { padding: 1rem 2.4rem; font-size: 0.97rem; }
-.btn-sm { padding: 0.5rem 1.1rem; font-size: 0.82rem; }
+.btn-lg { padding: 0.85rem 1.9rem; font-size: 0.95rem; }
+.btn-sm { padding: 0.45rem 1rem; font-size: 0.82rem; }
 
 /* ─── CARDS ─── */
 .card {
@@ -155,30 +147,30 @@ input, select, textarea { font-family: inherit; }
   box-shadow: 0 4px 32px rgba(0,0,0,0.2);
 }
 .nav-logo {
-  font-family: 'Playfair Display', serif;
-  font-size: 1.45rem; font-weight: 700;
+  font-family: 'Inter', sans-serif;
+  font-size: 1.08rem; font-weight: 700; letter-spacing: -0.02em;
   color: #fff; cursor: pointer;
-  display: flex; align-items: center; gap: 0.5rem;
+  display: flex; align-items: center; gap: 0.6rem;
   user-select: none;
 }
 .nav-logo-mark {
-  width: 30px; height: 30px;
-  background: linear-gradient(135deg, var(--teal), #00E5CC);
-  border-radius: 8px;
+  width: 26px; height: 26px;
+  background: transparent;
+  border: 1.5px solid var(--teal);
+  border-radius: 6px;
   display: flex; align-items: center; justify-content: center;
-  font-size: 0.95rem; font-weight: 900;
-  color: var(--navy); font-family: 'Inter', sans-serif;
-  box-shadow: 0 2px 10px rgba(10,191,191,0.4);
+  font-size: 0.78rem; font-weight: 600;
+  color: var(--teal); font-family: var(--mono);
   flex-shrink: 0;
 }
 .nav-logo span { color: var(--teal); }
-.nav-links { display: flex; align-items: center; gap: 0.35rem; }
+.nav-links { display: flex; align-items: center; gap: 0.25rem; }
 .nav-link {
-  padding: 0.45rem 1rem; border-radius: 100px; font-size: 0.86rem;
-  font-weight: 500; color: rgba(255,255,255,0.65); background: transparent; border: none;
-  transition: all 0.18s; white-space: nowrap;
+  padding: 0.45rem 0.85rem; border-radius: var(--radius-sm); font-size: 0.86rem;
+  font-weight: 500; color: rgba(255,255,255,0.62); background: transparent; border: none;
+  transition: color 0.15s; white-space: nowrap;
 }
-.nav-link:hover { color: #fff; background: rgba(255,255,255,0.09); }
+.nav-link:hover { color: #fff; }
 .nav-link.active { color: #fff; }
 
 /* ─── PAGE OFFSET for fixed nav ─── */
@@ -240,16 +232,10 @@ input, select, textarea { font-family: inherit; }
 
 .fade-up { animation: fadeUp 0.5s ease both; }
 
-.reveal {
-  opacity: 0;
-  transform: translateY(28px);
-  transition: opacity 0.65s cubic-bezier(0.22, 1, 0.36, 1),
-              transform 0.65s cubic-bezier(0.22, 1, 0.36, 1);
-}
-.reveal.visible {
-  opacity: 1;
-  transform: translateY(0);
-}
+/* .reveal is intentionally a no-op: scroll-triggered hiding can leave content
+   invisible when the observer misses (anchor jumps, throttled frames). Content
+   renders visible; entrance motion is limited to .fade-up on above-fold elements. */
+.reveal, .reveal.visible { opacity: 1; transform: none; }
 
 .spinner {
   width: 18px; height: 18px; border-radius: 50%;
@@ -277,7 +263,7 @@ input, select, textarea { font-family: inherit; }
   animation: fadeUp 0.45s ease both;
 }
 .auth-card h1 {
-  font-family: 'Playfair Display', serif;
+  font-family: 'Inter', sans-serif;
   font-size: 2rem; color: var(--navy);
   margin-bottom: 0.4rem; line-height: 1.2;
 }

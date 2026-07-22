@@ -39,7 +39,7 @@ export default function PaywallGate({ children, alwaysLock = false, title = "Cre
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           fontSize: '1.4rem',
         }}>🔓</div>
-        <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: '1.35rem', color: 'var(--navy)', marginBottom: '0.5rem', lineHeight: 1.25 }}>{title}</h3>
+        <h3 style={{ fontFamily: "'Inter', sans-serif", fontSize: '1.35rem', color: 'var(--navy)', marginBottom: '0.5rem', lineHeight: 1.25 }}>{title}</h3>
         <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', lineHeight: 1.65, marginBottom: '1.5rem', maxWidth: 380, margin: '0 auto 1.5rem' }}>{subtitle}</p>
         <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center', flexWrap: 'wrap' }}>
           <button className="btn btn-primary" onClick={() => navigate('/signup')}>Create Free Account</button>

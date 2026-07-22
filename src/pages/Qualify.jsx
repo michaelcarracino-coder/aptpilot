@@ -5,7 +5,7 @@ import PaywallGate from '../components/PaywallGate'
 const css = `
 .qualify-page { max-width: 860px; margin: 0 auto; padding: 5rem 1.5rem 6rem; }
 .qualify-hero { margin-bottom: 3.5rem; }
-.qualify-hero h1 { font-family: 'Playfair Display', serif; font-size: 2.8rem; color: var(--navy); line-height: 1.15; margin-bottom: 0.75rem; }
+.qualify-hero h1 { font-family: 'Inter', sans-serif; font-size: 2.8rem; color: var(--navy); line-height: 1.15; margin-bottom: 0.75rem; }
 .qualify-hero .lead { font-size: 1.05rem; color: var(--slate); line-height: 1.75; max-width: 640px; }
 .qualify-toc { background: #f8fafb; border: 1px solid #e5eaef; border-radius: 12px; padding: 1.25rem 1.5rem; margin-bottom: 3rem; }
 .qualify-toc p { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--slate); font-weight: 600; margin-bottom: 0.6rem; }
@@ -14,7 +14,7 @@ const css = `
 .qualify-toc li a:hover { text-decoration: underline; }
 
 .q-section { margin-bottom: 3.5rem; scroll-margin-top: 88px; }
-.q-section h2 { font-family: 'Playfair Display', serif; font-size: 1.75rem; color: var(--navy); margin-bottom: 1rem; padding-bottom: 0.6rem; border-bottom: 2px solid var(--teal); display: inline-block; }
+.q-section h2 { font-family: 'Inter', sans-serif; font-size: 1.75rem; color: var(--navy); margin-bottom: 1rem; padding-bottom: 0.6rem; border-bottom: 2px solid var(--teal); display: inline-block; }
 .q-section p { font-size: 0.94rem; color: var(--slate); line-height: 1.8; margin-bottom: 0.9rem; }
 .q-section ul, .q-section ol { padding-left: 1.4rem; margin: 0.5rem 0 0.9rem; }
 .q-section li { font-size: 0.94rem; color: var(--slate); line-height: 1.8; margin-bottom: 0.3rem; }
@@ -23,7 +23,7 @@ const css = `
 
 .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin: 1.5rem 0; }
 .stat-card { background: #fff; border: 1px solid #e5eaef; border-radius: 12px; padding: 1.25rem; text-align: center; }
-.stat-card .num { font-family: 'Playfair Display', serif; font-size: 2rem; color: var(--teal); font-weight: 700; line-height: 1; margin-bottom: 4px; }
+.stat-card .num { font-family: 'Inter', sans-serif; font-size: 2rem; color: var(--teal); font-weight: 700; line-height: 1; margin-bottom: 4px; }
 .stat-card .lbl { font-size: 0.82rem; color: var(--slate); line-height: 1.4; }
 
 .callout { border-left: 4px solid var(--teal); background: #f0fafa; border-radius: 0 10px 10px 0; padding: 1rem 1.25rem; margin: 1.25rem 0; }
@@ -65,7 +65,7 @@ const css = `
 .tl-content span { font-size: 0.85rem; color: var(--slate); line-height: 1.6; }
 
 .calc-card { background: #fff; border: 1.5px solid #e5eaef; border-radius: 16px; padding: 2rem; margin: 2rem 0 2.5rem; box-shadow: 0 4px 24px rgba(10,191,191,0.07); }
-.calc-card h3 { font-family: 'Playfair Display', serif; font-size: 1.35rem; color: var(--navy); margin-bottom: 0.25rem; }
+.calc-card h3 { font-family: 'Inter', sans-serif; font-size: 1.35rem; color: var(--navy); margin-bottom: 0.25rem; }
 .calc-card .calc-sub { font-size: 0.85rem; color: var(--slate); margin-bottom: 1.5rem; }
 .calc-mode { display: flex; gap: 0.5rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
 .calc-mode-btn { font-size: 0.82rem; font-weight: 600; font-family: inherit; padding: 0.4rem 1rem; border-radius: 100px; border: 1.5px solid #e5eaef; cursor: pointer; transition: all 0.15s; background: #fff; color: var(--slate); }
@@ -83,7 +83,7 @@ const css = `
 .calc-result { background: linear-gradient(135deg, #0C1628, #0a2a3a); border-radius: 12px; padding: 1.5rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
 .calc-result-main { color: #fff; }
 .calc-result-label { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: rgba(255,255,255,0.5); margin-bottom: 0.3rem; }
-.calc-result-rent { font-family: 'Playfair Display', serif; font-size: 2.4rem; color: var(--teal); line-height: 1; }
+.calc-result-rent { font-family: 'Inter', sans-serif; font-size: 2.4rem; color: var(--teal); line-height: 1; }
 .calc-result-rent span { font-size: 1rem; font-family: 'Inter', sans-serif; color: rgba(255,255,255,0.6); margin-left: 4px; }
 .calc-result-meta { font-size: 0.82rem; color: rgba(255,255,255,0.55); margin-top: 0.3rem; }
 .calc-result-breakdown { text-align: right; }
@@ -92,7 +92,7 @@ const css = `
 .calc-empty { font-size: 0.88rem; color: var(--slate); font-style: italic; }
 
 .apt-cta { background: linear-gradient(135deg, #0C1628 0%, #0a2a3a 100%); border-radius: 16px; padding: 2.5rem; text-align: center; margin-top: 4rem; }
-.apt-cta h3 { font-family: 'Playfair Display', serif; font-size: 1.7rem; color: #fff; margin-bottom: 0.6rem; }
+.apt-cta h3 { font-family: 'Inter', sans-serif; font-size: 1.7rem; color: #fff; margin-bottom: 0.6rem; }
 .apt-cta p { font-size: 0.94rem; color: rgba(255,255,255,0.7); margin-bottom: 1.5rem; }
 .apt-cta a { display: inline-block; background: var(--teal); color: #0C1628; font-weight: 700; font-size: 0.95rem; padding: 0.75rem 2rem; border-radius: 100px; text-decoration: none; }
 `

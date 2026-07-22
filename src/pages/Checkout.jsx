@@ -74,7 +74,7 @@ export default function Checkout() {
           )}
           <div style={{ borderTop:'1px solid var(--surface-mid)', paddingTop:'0.6rem', display:'flex', justifyContent:'space-between', fontWeight:700 }}>
             <span>Total Due Today</span>
-            <span style={{ color:'var(--teal)', fontFamily:"'Playfair Display',serif", fontSize:'1.2rem' }}>{dueToday}</span>
+            <span style={{ color:'var(--teal)', fontFamily:"'Inter', sans-serif", fontSize:'1.2rem' }}>{dueToday}</span>
           </div>
         </div>
 

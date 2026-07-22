@@ -8,7 +8,7 @@ const ADMIN_EMAIL = 'aptpilot1@gmail.com'
 
 const css = `
 .admin-listings { max-width: 1000px; margin: 0 auto; padding: 2rem 1.5rem 5rem; }
-.admin-listings h1 { font-family:'Playfair Display',serif; font-size:2rem; color:var(--navy); margin-bottom:0.25rem; }
+.admin-listings h1 { font-family:'Inter', sans-serif; font-size:2rem; color:var(--navy); margin-bottom:0.25rem; }
 .search-selector { background:white; border-radius:12px; padding:1.25rem; box-shadow:var(--shadow); margin-bottom:1.5rem; }
 .search-card {
   border:1.5px solid var(--surface-mid); border-radius:10px; padding:1rem 1.25rem;

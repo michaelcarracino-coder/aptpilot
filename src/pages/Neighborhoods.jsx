@@ -5,7 +5,7 @@ import PaywallGate from '../components/PaywallGate'
 const css = `
 .nbhd-page { max-width: 920px; margin: 0 auto; padding: 5rem 1.5rem 6rem; }
 .nbhd-hero { margin-bottom: 3.5rem; }
-.nbhd-hero h1 { font-family: 'Playfair Display', serif; font-size: 2.8rem; color: var(--navy); line-height: 1.15; margin-bottom: 0.75rem; }
+.nbhd-hero h1 { font-family: 'Inter', sans-serif; font-size: 2.8rem; color: var(--navy); line-height: 1.15; margin-bottom: 0.75rem; }
 .nbhd-hero .lead { font-size: 1.05rem; color: var(--slate); line-height: 1.75; max-width: 640px; }
 
 .nbhd-toc { background: #f8fafb; border: 1px solid #e5eaef; border-radius: 12px; padding: 1.25rem 1.5rem; margin-bottom: 3rem; }
@@ -16,12 +16,12 @@ const css = `
 .nbhd-toc li a:hover { text-decoration: underline; }
 
 .nbhd-section { margin-bottom: 4rem; scroll-margin-top: 88px; }
-.nbhd-section h2 { font-family: 'Playfair Display', serif; font-size: 1.75rem; color: var(--navy); margin-bottom: 0.4rem; padding-bottom: 0.6rem; border-bottom: 2px solid var(--teal); display: inline-block; }
+.nbhd-section h2 { font-family: 'Inter', sans-serif; font-size: 1.75rem; color: var(--navy); margin-bottom: 0.4rem; padding-bottom: 0.6rem; border-bottom: 2px solid var(--teal); display: inline-block; }
 .nbhd-section .section-intro { font-size: 0.94rem; color: var(--slate); line-height: 1.8; margin: 0.75rem 0 1.5rem; }
 
 .nbhd-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1rem; }
 .nbhd-card { background: #fff; border: 1px solid #e5eaef; border-radius: 12px; padding: 1.2rem 1.3rem; }
-.nbhd-card h3 { font-family: 'Playfair Display', serif; font-size: 1.1rem; color: var(--navy); margin-bottom: 0.25rem; }
+.nbhd-card h3 { font-family: 'Inter', sans-serif; font-size: 1.1rem; color: var(--navy); margin-bottom: 0.25rem; }
 .nbhd-card .vibe { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: var(--teal); margin-bottom: 0.65rem; }
 .nbhd-card p { font-size: 0.87rem; color: var(--slate); line-height: 1.7; margin: 0 0 0.75rem; }
 .nbhd-card .tidbit { font-size: 0.82rem; color: #2a5a5a; background: #f0fafa; border-left: 3px solid var(--teal); border-radius: 0 6px 6px 0; padding: 0.5rem 0.75rem; line-height: 1.55; }
@@ -32,7 +32,7 @@ const css = `
 .nbhd-map-label { height: 40px; display: flex; align-items: center; justify-content: center; font-size: 0.83rem; font-weight: 600; color: var(--teal); background: #f0fafa; border-top: 1px solid #cce8ee; transition: opacity 0.15s; }
 
 .apt-cta { background: linear-gradient(135deg, #0C1628 0%, #0a2a3a 100%); border-radius: 16px; padding: 2.5rem; text-align: center; margin-top: 4rem; }
-.apt-cta h3 { font-family: 'Playfair Display', serif; font-size: 1.7rem; color: #fff; margin-bottom: 0.6rem; }
+.apt-cta h3 { font-family: 'Inter', sans-serif; font-size: 1.7rem; color: #fff; margin-bottom: 0.6rem; }
 .apt-cta p { font-size: 0.94rem; color: rgba(255,255,255,0.7); margin-bottom: 1.5rem; }
 .apt-cta a { display: inline-block; background: var(--teal); color: #0C1628; font-weight: 700; font-size: 0.95rem; padding: 0.75rem 2rem; border-radius: 100px; text-decoration: none; }
 `

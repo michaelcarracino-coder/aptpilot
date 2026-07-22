@@ -31,12 +31,12 @@ export default function Login() {
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             fontWeight: 900, fontSize: '0.9rem', color: 'var(--navy)',
           }}>A</div>
-          <span style={{ fontFamily: "'Playfair Display', serif", fontSize: '1.2rem', fontWeight: 700, color: 'var(--navy)' }}>
+          <span style={{ fontFamily: "'Inter', sans-serif", fontSize: '1.2rem', fontWeight: 700, color: 'var(--navy)' }}>
             Apt<span style={{ color: 'var(--teal)' }}>Pilot</span>
           </span>
         </div>
 
-        <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: '2rem', color: 'var(--navy)', marginBottom: '0.4rem' }}>
+        <h1 style={{ fontFamily: "'Inter', sans-serif", fontSize: '2rem', color: 'var(--navy)', marginBottom: '0.4rem' }}>
           Welcome back
         </h1>
         <p className="sub">Sign in to your AptPilot account.</p>

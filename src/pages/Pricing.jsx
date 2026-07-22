@@ -70,24 +70,24 @@ export default function Pricing() {
     <div>
       <style>{`
         .pricing-hero { text-align:center; padding:5rem 1.5rem 3.5rem; background:var(--navy); }
-        .pricing-hero h1 { font-family:'Playfair Display',serif; font-size:clamp(2.2rem,5vw,3.5rem); color:#fff; margin-bottom:0.75rem; }
+        .pricing-hero h1 { font-family:'Inter', sans-serif; font-size:clamp(2.2rem,5vw,3.5rem); color:#fff; margin-bottom:0.75rem; }
         .pricing-hero p { color:var(--slate); font-size:1.05rem; max-width:540px; margin:0 auto; line-height:1.65; }
         .pricing-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:1.5rem; max-width:960px; margin:0 auto; padding:3.5rem 1.5rem; }
         @media(max-width:720px){ .pricing-grid{grid-template-columns:1fr;} }
         .plan-card { border-radius:var(--radius-lg); background:#fff; box-shadow:var(--shadow); padding:2rem 1.75rem; position:relative; border:2px solid transparent; transition:all 0.2s; display:flex; flex-direction:column; }
         .plan-feats { flex:1; }
-        .plan-card:hover { border-color:var(--teal); box-shadow:var(--shadow-teal); transform:translateY(-3px); }
+        .plan-card:hover { border-color:var(--teal); box-shadow:none; }
         .plan-card.featured { border-color:var(--teal); box-shadow:var(--shadow-teal); }
-        .plan-tag { position:absolute; top:-13px; left:50%; transform:translateX(-50%); background:var(--teal); color:var(--navy); font-size:0.7rem; font-weight:800; padding:0.25rem 0.85rem; border-radius:100px; text-transform:uppercase; letter-spacing:0.06em; white-space:nowrap; }
-        .plan-name { font-family:'Playfair Display',serif; font-size:1.5rem; color:var(--navy); margin-bottom:0.25rem; }
-        .plan-price { font-family:'Playfair Display',serif; font-size:3rem; color:var(--teal); line-height:1; margin-bottom:0.2rem; }
+        .plan-tag { position:absolute; top:-13px; left:50%; transform:translateX(-50%); background:var(--teal); color:var(--navy); font-size:0.7rem; font-weight:800; padding:0.25rem 0.85rem; border-radius:4px; text-transform:uppercase; letter-spacing:0.06em; font-family:var(--mono); white-space:nowrap; }
+        .plan-name { font-family:'Inter', sans-serif; font-size:1.5rem; color:var(--navy); margin-bottom:0.25rem; }
+        .plan-price { font-family:'Inter', sans-serif; font-size:3rem; color:var(--teal); line-height:1; margin-bottom:0.2rem; }
         .plan-price span { font-family:'Inter',sans-serif; font-size:0.9rem; color:var(--slate); font-weight:400; }
         .plan-desc { font-size:0.82rem; color:var(--slate); margin-bottom:1.5rem; }
         .plan-feats { display:flex; flex-direction:column; gap:0.6rem; margin-bottom:1.75rem; }
         .plan-feat { display:flex; gap:0.6rem; font-size:0.86rem; color:var(--navy); align-items:flex-start; }
         .feat-check { flex-shrink:0; margin-top:2px; }
         .compare-table { max-width:860px; margin:0 auto; padding:0 1.5rem 5rem; }
-        .compare-table h2 { font-family:'Playfair Display',serif; font-size:2rem; color:var(--navy); text-align:center; margin-bottom:2rem; }
+        .compare-table h2 { font-family:'Inter', sans-serif; font-size:2rem; color:var(--navy); text-align:center; margin-bottom:2rem; }
         .ctable { width:100%; border-collapse:collapse; font-size:0.88rem; }
         .ctable th { padding:0.75rem 1rem; text-align:center; font-weight:700; color:var(--slate); font-size:0.75rem; text-transform:uppercase; letter-spacing:0.05em; }
         .ctable th:first-child { text-align:left; }
@@ -96,12 +96,12 @@ export default function Pricing() {
         .ctable tr:hover td { background:var(--surface); }
         .faq-section { background:var(--surface); padding:4rem 1.5rem; }
         .faq-inner { max-width:700px; margin:0 auto; }
-        .faq-inner h2 { font-family:'Playfair Display',serif; font-size:2rem; color:var(--navy); margin-bottom:2rem; text-align:center; }
+        .faq-inner h2 { font-family:'Inter', sans-serif; font-size:2rem; color:var(--navy); margin-bottom:2rem; text-align:center; }
         .faq-item { border-bottom:1px solid var(--surface-mid); padding:1.25rem 0; }
         .faq-q { font-weight:700; color:var(--navy); font-size:0.95rem; cursor:pointer; display:flex; justify-content:space-between; align-items:center; gap:1rem; }
         .faq-a { color:var(--slate); font-size:0.88rem; line-height:1.7; margin-top:0.75rem; }
         .pricing-cta { text-align:center; padding:5rem 1.5rem; background:var(--navy); }
-        .pricing-cta h2 { font-family:'Playfair Display',serif; font-size:2.2rem; color:#fff; margin-bottom:0.75rem; }
+        .pricing-cta h2 { font-family:'Inter', sans-serif; font-size:2.2rem; color:#fff; margin-bottom:0.75rem; }
         .pricing-cta p { color:var(--slate); margin-bottom:2rem; }
       `}</style>
 
@@ -114,17 +114,17 @@ export default function Pricing() {
 
       {/* Alerts subscription */}
       <div style={{ maxWidth:960, margin:'0 auto', padding:'3rem 1.5rem 0' }}>
-        <div style={{ background:'var(--navy)', borderRadius:20, padding:'2rem 2.25rem', display:'flex', flexWrap:'wrap', alignItems:'center', gap:'1.5rem', border:'1.5px solid var(--teal)', boxShadow:'var(--shadow-teal)' }}>
+        <div style={{ background:'var(--navy)', borderRadius:20, padding:'2rem 2.25rem', display:'flex', flexWrap:'wrap', alignItems:'center', gap:'1.5rem', border:'1.5px solid var(--teal)', boxShadow:'none' }}>
           <div style={{ flex:'1 1 320px' }}>
-            <div style={{ display:'inline-block', background:'var(--teal)', color:'var(--navy)', fontSize:'0.68rem', fontWeight:800, padding:'0.25rem 0.75rem', borderRadius:100, textTransform:'uppercase', letterSpacing:'0.07em', marginBottom:'0.75rem' }}>New · 3-Day Free Trial</div>
-            <h2 style={{ fontFamily:"'Playfair Display',serif", color:'#fff', fontSize:'1.7rem', marginBottom:'0.4rem' }}>AptPilot Alerts</h2>
+            <div style={{ display:'inline-block', background:'var(--teal)', color:'var(--navy)', fontSize:'0.68rem', fontWeight:800, padding:'0.25rem 0.75rem', borderRadius:4, textTransform:'uppercase', letterSpacing:'0.07em', fontFamily:'var(--mono)', marginBottom:'0.75rem' }}>New · 3-Day Free Trial</div>
+            <h2 style={{ fontFamily:"'Inter', sans-serif", color:'#fff', fontSize:'1.7rem', marginBottom:'0.4rem' }}>AptPilot Alerts</h2>
             <p style={{ color:'rgba(255,255,255,0.6)', fontSize:'0.9rem', lineHeight:1.65, margin:0 }}>
               Good no-fee apartments in NYC lease within hours. We watch new listings around the clock and text + email you the instant one matches your criteria — so you tour first.
             </p>
           </div>
           <div style={{ textAlign:'center', flex:'0 0 auto' }}>
-            <div style={{ fontFamily:"'Playfair Display',serif", fontSize:'2.6rem', color:'var(--teal)', lineHeight:1 }}>$14.99<span style={{ fontFamily:"'Inter',sans-serif", fontSize:'0.85rem', color:'rgba(255,255,255,0.5)' }}>/mo</span></div>
-            <button className="btn btn-primary" onClick={handleSelect} style={{ marginTop:'0.85rem', justifyContent:'center', padding:'0.75rem 1.75rem', borderRadius:100 }}>
+            <div style={{ fontFamily:"'Inter', sans-serif", fontSize:'2.6rem', color:'var(--teal)', lineHeight:1 }}>$14.99<span style={{ fontFamily:"'Inter',sans-serif", fontSize:'0.85rem', color:'rgba(255,255,255,0.5)' }}>/mo</span></div>
+            <button className="btn btn-primary" onClick={handleSelect} style={{ marginTop:'0.85rem', justifyContent:'center', padding:'0.75rem 1.75rem' }}>
               Start Free Trial →
             </button>
             <p style={{ color:'rgba(255,255,255,0.4)', fontSize:'0.72rem', marginTop:'0.5rem' }}>Cancel anytime</p>
@@ -200,11 +200,11 @@ export default function Pricing() {
       {/* CTA */}
       <div className="pricing-cta">
         <h2>Ready to find your apartment?</h2>
-        <p>Join hundreds of New Yorkers who skipped the broker and found their place with AptPilot.</p>
-        <button className="btn btn-primary" onClick={handleSelect} style={{ fontSize:'1rem', padding:'0.9rem 2.5rem', borderRadius:100 }}>
+        <p>Set up your criteria in two minutes. Alerts start with a free trial; concierge is a flat one-time fee.</p>
+        <button className="btn btn-primary" onClick={handleSelect} style={{ fontSize:'1rem', padding:'0.9rem 2.5rem' }}>
           Start Your Search →
         </button>
-        <p style={{ color:'var(--slate)', fontSize:'0.8rem', marginTop:'1rem' }}>One-time payment · No subscription · 92% find an apartment within 3 weeks</p>
+        <p style={{ color:'var(--slate)', fontSize:'0.8rem', marginTop:'1rem' }}>Flat pricing · Cancel alerts anytime · 7-day tour guarantee on concierge plans</p>
       </div>
     </div>
   )

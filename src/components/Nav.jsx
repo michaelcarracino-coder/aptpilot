@@ -124,7 +124,7 @@ export default function Nav() {
           display:flex;flex-direction:column;padding:2rem 1.5rem;gap:0.5rem;
           animation:fadeUp 0.2s ease; }
         .mobile-link { display:block;width:100%;text-align:left;background:transparent;border:none;
-          color:#fff;font-size:1.2rem;font-weight:600;font-family:'Playfair Display',serif;
+          color:#fff;font-size:1.2rem;font-weight:600;font-family:'Inter', sans-serif;
           padding:0.85rem 0;border-bottom:1px solid rgba(255,255,255,0.07);cursor:pointer; }
         .mobile-link:last-child { border:none; }
         .mobile-link.teal { color:var(--teal); }
@@ -141,16 +141,16 @@ export default function Nav() {
         transition: 'background 0.35s, backdrop-filter 0.35s, border-color 0.35s, box-shadow 0.35s',
       }}>
         {/* Logo */}
-        <div onClick={() => navigate('/')} style={{ display:'flex', alignItems:'center', gap:'0.55rem', cursor:'pointer', userSelect:'none' }}>
+        <div onClick={() => navigate('/')} style={{ display:'flex', alignItems:'center', gap:'0.6rem', cursor:'pointer', userSelect:'none' }}>
           <div style={{
-            width:30, height:30, borderRadius:8, flexShrink:0,
-            background:'linear-gradient(135deg,#0ABFBF,#00E5CC)',
+            width:26, height:26, borderRadius:6, flexShrink:0,
+            border:'1.5px solid var(--teal)',
             display:'flex', alignItems:'center', justifyContent:'center',
-            fontFamily:'Inter,sans-serif', fontWeight:900, fontSize:'0.9rem',
-            color:'#0C1628', boxShadow:'0 2px 12px rgba(10,191,191,0.45)',
+            fontFamily:'var(--mono)', fontWeight:600, fontSize:'0.78rem',
+            color:'var(--teal)',
           }}>A</div>
-          <span style={{ fontFamily:"'Playfair Display',serif", fontSize:'1.4rem', fontWeight:700, color:'#fff' }}>
-            Apt<span style={{ color:'var(--teal)' }}>Pilot</span>
+          <span style={{ fontFamily:"'Inter', sans-serif", fontSize:'1.08rem', fontWeight:700, letterSpacing:'-0.02em', color:'#fff' }}>
+            AptPilot
           </span>
         </div>
 

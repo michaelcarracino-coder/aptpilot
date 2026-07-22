@@ -10,7 +10,7 @@ const BLANK = { quote: '', name: '', role: '', initials: '', photo_url: '', rati
 
 const css = `
 .admin-t { max-width:860px; margin:0 auto; padding:2rem 1.5rem 5rem; }
-.admin-t h1 { font-family:'Playfair Display',serif; font-size:2rem; color:var(--navy); margin-bottom:0.25rem; }
+.admin-t h1 { font-family:'Inter', sans-serif; font-size:2rem; color:var(--navy); margin-bottom:0.25rem; }
 .t-form { background:#fff; border-radius:var(--radius); box-shadow:var(--shadow); padding:1.75rem; margin-bottom:1.5rem; }
 .t-form h2 { font-size:1rem; font-weight:700; color:var(--navy); margin-bottom:1.25rem; }
 .t-row { background:#fff; border-radius:var(--radius); box-shadow:var(--shadow); padding:1.25rem 1.5rem; margin-bottom:0.75rem; display:flex; gap:1rem; align-items:flex-start; }
