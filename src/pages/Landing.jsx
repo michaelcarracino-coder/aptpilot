@@ -2,6 +2,17 @@ import { useNavigate } from 'react-router-dom'
 import { useState } from 'react'
 import SEO from '../components/SEO'
 
+/* ─── Photography (Pexels, verified URLs) — treated as annotated figures:
+   dark/duotone overlays, hairline borders, mono captions ─── */
+const px = (id, w = 1600) => `https://images.pexels.com/photos/${id}/pexels-photo-${id}.jpeg?auto=compress&cs=tinysrgb&w=${w}`
+const PHOTOS = {
+  skyline:     px(28518041),        // NYC skyline at night
+  brownstones: px(30726437),        // Brooklyn brownstones
+  aerial:      px(18511465),        // Midtown Manhattan aerial
+  manhattan:   px(10633466, 1200),  // Manhattan aerial
+  street:      px(16920867, 1200),  // Manhattan street level
+}
+
 /* ─── Minimal icon set ─── */
 function Icon({ name, size = 18, color = 'currentColor', strokeWidth = 1.8 }) {
   const s = { width: size, height: size, display: 'block', flexShrink: 0 }
@@ -110,6 +121,7 @@ export default function Landing() {
           .land-hero-grid { grid-template-columns: 1fr !important; gap: 3rem !important; }
           .land-products-grid { grid-template-columns: 1fr !important; }
           .land-calc-grid { grid-template-columns: 1fr !important; }
+          .land-photo-grid { grid-template-columns: 1fr !important; }
           .land-footer-grid { grid-template-columns: 1fr 1fr !important; gap: 2rem !important; }
           .land-section { padding: 4rem 1.25rem !important; }
           .land-hero { padding: 7.5rem 1.25rem 4rem !important; }
@@ -124,6 +136,9 @@ export default function Landing() {
 
       {/* ── HERO ── */}
       <section className="land-hero" style={{ background: 'var(--ink)', padding: '9.5rem 2rem 5rem', position: 'relative', overflow: 'hidden' }}>
+        {/* skyline layer, held far back so type and data stay primary */}
+        <img src={PHOTOS.skyline} alt="" aria-hidden="true" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 62%', opacity: 0.35, filter: 'saturate(0.55)' }} />
+        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(175deg, rgba(6,9,15,0.86) 0%, rgba(6,9,15,0.78) 45%, rgba(6,9,15,0.96) 100%)' }} />
         {/* faint blueprint grid */}
         <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', backgroundImage: 'linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px)', backgroundSize: '48px 48px' }} />
         <div className="land-hero-grid" style={{ maxWidth: 1080, margin: '0 auto', display: 'grid', gridTemplateColumns: '1.1fr 0.9fr', gap: '5rem', alignItems: 'center', position: 'relative' }}>
@@ -304,11 +319,46 @@ export default function Landing() {
       {/* ── CALCULATOR ── */}
       <SavingsCalc navigate={navigate} />
 
+      {/* ── COVERAGE — photo grid ── */}
+      <section className="land-section" style={{ padding: '6.5rem 2rem', background: '#fff', borderTop: '1px solid var(--surface-mid)' }}>
+        <div style={{ maxWidth: 1080, margin: '0 auto' }}>
+          <div style={{ marginBottom: '3rem', display: 'flex', flexWrap: 'wrap', alignItems: 'flex-end', justifyContent: 'space-between', gap: '1.5rem' }}>
+            <div style={{ maxWidth: 560 }}>
+              <div className="mono" style={{ fontSize: '0.72rem', color: 'var(--teal-dark)', letterSpacing: '0.08em', marginBottom: '0.9rem' }}>04 — COVERAGE</div>
+              <h2 style={{ fontSize: 'clamp(1.7rem, 3.4vw, 2.3rem)', fontWeight: 700, letterSpacing: '-0.03em', color: 'var(--navy)', lineHeight: 1.15 }}>
+                Every borough. Every block.
+              </h2>
+            </div>
+            <button className="btn btn-outline" onClick={() => navigate('/neighborhoods')}>
+              Browse neighborhoods →
+            </button>
+          </div>
+          <div className="land-photo-grid" style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr 1fr', gap: '1.25rem' }}>
+            {[
+              { img: PHOTOS.brownstones, alt: 'Brooklyn brownstone facades', tag: 'BKN-01', title: 'Brownstone Brooklyn', sub: 'Park Slope · Fort Greene · Bed-Stuy · Crown Heights' },
+              { img: PHOTOS.aerial, alt: 'Aerial view of Midtown Manhattan', tag: 'MAN-02', title: 'Manhattan', sub: 'East Village · UWS · Hell’s Kitchen · Washington Heights' },
+              { img: PHOTOS.street, alt: 'Manhattan street with apartment buildings', tag: 'QNS-03', title: 'Queens & beyond', sub: 'Astoria · LIC · Ridgewood · Jersey City · Hoboken' },
+            ].map(card => (
+              <figure key={card.tag} style={{ margin: 0, border: '1px solid var(--surface-mid)', borderRadius: 10, overflow: 'hidden', background: '#fff' }}>
+                <div style={{ position: 'relative', height: 240, overflow: 'hidden' }}>
+                  <img src={card.img} alt={card.alt} loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'saturate(0.8)', display: 'block' }} />
+                  <span className="mono" style={{ position: 'absolute', top: 10, left: 10, background: 'rgba(6,9,15,0.78)', color: 'var(--teal)', fontSize: '0.64rem', letterSpacing: '0.08em', padding: '0.25rem 0.55rem', borderRadius: 4 }}>{card.tag}</span>
+                </div>
+                <figcaption style={{ padding: '1rem 1.15rem', borderTop: '1px solid var(--surface-mid)' }}>
+                  <div style={{ fontWeight: 700, color: 'var(--navy)', letterSpacing: '-0.01em', fontSize: '0.95rem' }}>{card.title}</div>
+                  <div className="mono" style={{ fontSize: '0.7rem', color: 'var(--slate)', marginTop: '0.35rem', lineHeight: 1.6 }}>{card.sub}</div>
+                </figcaption>
+              </figure>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* ── FAQ ── */}
       <section id="faq" className="land-section" style={{ padding: '6.5rem 2rem', background: 'var(--surface)', borderTop: '1px solid var(--surface-mid)' }}>
         <div style={{ maxWidth: 760, margin: '0 auto' }}>
           <div className="reveal" style={{ marginBottom: '2.5rem' }}>
-            <div className="mono" style={{ fontSize: '0.72rem', color: 'var(--teal-dark)', letterSpacing: '0.08em', marginBottom: '0.9rem' }}>04 — QUESTIONS</div>
+            <div className="mono" style={{ fontSize: '0.72rem', color: 'var(--teal-dark)', letterSpacing: '0.08em', marginBottom: '0.9rem' }}>05 — QUESTIONS</div>
             <h2 style={{ fontSize: 'clamp(1.7rem, 3.4vw, 2.3rem)', fontWeight: 700, letterSpacing: '-0.03em', color: 'var(--navy)', lineHeight: 1.15 }}>
               Fair questions.
             </h2>
@@ -321,8 +371,20 @@ export default function Landing() {
         </div>
       </section>
 
+      {/* ── BROWNSTONE BAND ── */}
+      <section style={{ position: 'relative', minHeight: 340, overflow: 'hidden', display: 'flex', alignItems: 'center' }}>
+        <img src={PHOTOS.manhattan} alt="Aerial view of Manhattan apartment buildings" loading="lazy" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 45%', filter: 'saturate(0.6)' }} />
+        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(90deg, rgba(6,9,15,0.92) 0%, rgba(6,9,15,0.72) 55%, rgba(6,9,15,0.45) 100%)' }} />
+        <div style={{ position: 'relative', maxWidth: 1080, margin: '0 auto', padding: '4.5rem 2rem', width: '100%' }}>
+          <div className="mono" style={{ fontSize: '0.7rem', color: 'var(--teal)', letterSpacing: '0.08em', marginBottom: '1rem' }}>3.7M HOUSING UNITS IN NYC · ONE OF THEM IS YOURS</div>
+          <p style={{ fontSize: 'clamp(1.3rem, 2.6vw, 1.75rem)', fontWeight: 700, letterSpacing: '-0.025em', color: '#fff', lineHeight: 1.3, maxWidth: 560, margin: 0 }}>
+            The city doesn't slow down for your apartment search. Now you don't have to slow down for the city.
+          </p>
+        </div>
+      </section>
+
       {/* ── FINAL CTA ── */}
-      <section style={{ background: 'var(--ink)', padding: '6rem 2rem' }}>
+      <section style={{ background: 'var(--ink)', padding: '6rem 2rem', borderTop: '1px solid rgba(255,255,255,0.07)' }}>
         <div className="reveal" style={{ maxWidth: 880, margin: '0 auto', display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '2rem' }}>
           <div>
             <h2 style={{ fontSize: 'clamp(1.8rem, 3.6vw, 2.5rem)', fontWeight: 800, letterSpacing: '-0.03em', color: '#fff', lineHeight: 1.12, marginBottom: '0.75rem' }}>
