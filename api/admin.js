@@ -8,7 +8,70 @@ export default async function handler(req, res) {
   if (action === 'metrics') return metrics(req, res);
   if (action === 'scrape-listing') return scrapeListing(req, res);
   if (action === 'trigger-scrape') return triggerScrape(req, res);
+  if (action === 'test-deliverability') return testDeliverability(req, res);
   return res.status(400).json({ error: 'Unknown action' });
+}
+
+// ── TEST DELIVERABILITY ─────────────────────────────────────────────────────
+// Ops diagnostic, gated by the internal scraper API key: sends a real test
+// email (and optionally SMS) and returns the raw provider responses so
+// silent delivery failures become visible.
+async function testDeliverability(req, res) {
+  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
+  if (!process.env.SCRAPER_API_KEY || req.headers['x-api-key'] !== process.env.SCRAPER_API_KEY) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
+  const { email, phone } = req.body || {};
+  const out = {};
+
+  if (email) {
+    try {
+      const resp = await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          from: 'AptPilot <onboarding@resend.dev>',
+          to: [email],
+          subject: 'AptPilot deliverability test',
+          html: '<p>This is a deliverability test from AptPilot ops. If you can read this, email delivery to this address works.</p>',
+        }),
+      });
+      out.resend = { status: resp.status, body: await resp.json().catch(() => null) };
+    } catch (e) {
+      out.resend = { error: String(e.message || e) };
+    }
+  }
+
+  if (phone) {
+    try {
+      const sid = process.env.TWILIO_ACCOUNT_SID;
+      const resp = await fetch(`https://api.twilio.com/2010-04-01/Accounts/${sid}/Messages.json`, {
+        method: 'POST',
+        headers: {
+          Authorization: 'Basic ' + Buffer.from(`${sid}:${process.env.TWILIO_AUTH_TOKEN}`).toString('base64'),
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: new URLSearchParams({
+          From: process.env.TWILIO_PHONE_NUMBER,
+          To: phone,
+          Body: 'AptPilot deliverability test. If you got this, SMS works. Reply STOP to opt out.',
+        }),
+      });
+      out.twilio = { status: resp.status, body: await resp.json().catch(() => null) };
+    } catch (e) {
+      out.twilio = { error: String(e.message || e) };
+    }
+  }
+
+  out.env = {
+    resendKey: !!process.env.RESEND_API_KEY,
+    twilioSid: !!process.env.TWILIO_ACCOUNT_SID,
+    twilioAuth: !!process.env.TWILIO_AUTH_TOKEN,
+    twilioFrom: process.env.TWILIO_PHONE_NUMBER || null,
+  };
+
+  return res.status(200).json(out);
 }
 
 // ── TRIGGER SCRAPE ──────────────────────────────────────────────────────────
