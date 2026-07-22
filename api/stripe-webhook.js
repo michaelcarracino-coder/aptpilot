@@ -121,7 +121,7 @@ export default async function handler(req, res) {
         }
 
         if (search) {
-          // Enqueue a scrape job — cron-scrape-jobs.js picks it up and retries up to 3x
+          // Enqueue a scrape job — api/cron.js (scrape-jobs) picks it up and retries up to 3x
           await supabase.from('scrape_jobs').insert({
             search_id: search.id,
             user_id: userId,

@@ -109,7 +109,7 @@ export default function AdminListings() {
     setScraping(true)
     setScrapeError('')
     try {
-      const res = await fetch('/api/scrape-listing', {
+      const res = await fetch('/api/admin?action=scrape-listing', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ url }),

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { supabase } from '../lib/supabaseClient'
+import { supabase } from '../lib/supabase'
 import Chart from 'chart.js/auto'
 
 const ADMIN_EMAIL = 'aptpilot1@gmail.com'
@@ -120,7 +120,7 @@ export default function AdminDashboard() {
       return
     }
     try {
-      const res = await fetch('/api/admin-metrics', {
+      const res = await fetch('/api/admin?action=metrics', {
         headers: { Authorization: `Bearer ${session.access_token}` },
       })
       if (!res.ok) throw new Error(`API error ${res.status}`)

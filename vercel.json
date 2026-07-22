@@ -4,12 +4,8 @@
   ],
   "crons": [
     {
-      "path": "/api/cron-scrape-jobs",
-      "schedule": "*/5 * * * *"
-    },
-    {
-      "path": "/api/cron-keepalive",
-      "schedule": "*/5 * * * *"
+      "path": "/api/cron",
+      "schedule": "0 12 * * *"
     }
   ]
 }

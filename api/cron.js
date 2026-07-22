@@ -1,11 +1,55 @@
-// Vercel cron: runs every 5 minutes
-// Picks up pending/failed scrape jobs and fires the scraper, retrying up to 3 times.
+// Consolidated cron endpoint (Vercel Hobby allows max 12 functions + daily crons).
+// The Railway scraper's 5-minute heartbeat POSTs here with { job: 'scrape-jobs' };
+// the daily Vercel cron GETs with no job and runs everything as a backstop.
 export default async function handler(req, res) {
-  // Allow Vercel cron (GET) or internal calls (POST)
   if (req.method !== 'GET' && req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
+  const job = req.query?.job || req.body?.job || 'all';
+  const out = { ts: new Date().toISOString() };
+
+  if (job === 'keepalive' || job === 'all') {
+    out.keepalive = await runKeepalive();
+  }
+  if (job === 'scrape-jobs' || job === 'all') {
+    out.scrapeJobs = await runScrapeJobs();
+    out.processed = out.scrapeJobs.processed;
+  }
+
+  return res.status(200).json(out);
+}
+
+async function runKeepalive() {
+  const results = {};
+
+  try {
+    const resp = await fetch(`${process.env.SCRAPER_URL}/health`, {
+      signal: AbortSignal.timeout(10000),
+    });
+    results.scraper = resp.ok ? 'ok' : `status ${resp.status}`;
+  } catch (err) {
+    results.scraper = `error: ${err.message}`;
+    console.error('Scraper keepalive failed:', err.message);
+  }
+
+  try {
+    const { createClient } = await import('@supabase/supabase-js');
+    const supabase = createClient(
+      process.env.VITE_SUPABASE_URL,
+      process.env.SUPABASE_SERVICE_ROLE_KEY
+    );
+    const { error } = await supabase.from('profiles').select('id').limit(1);
+    results.supabase = error ? `error: ${error.message}` : 'ok';
+  } catch (err) {
+    results.supabase = `error: ${err.message}`;
+    console.error('Supabase keepalive failed:', err.message);
+  }
+
+  return results;
+}
+
+async function runScrapeJobs() {
   const { createClient } = await import('@supabase/supabase-js');
   const supabase = createClient(
     process.env.VITE_SUPABASE_URL,
@@ -22,11 +66,11 @@ export default async function handler(req, res) {
 
   if (error) {
     console.error('scrape-jobs cron fetch error:', error);
-    return res.status(500).json({ error: error.message });
+    return { processed: 0, error: error.message };
   }
 
   if (!jobs?.length) {
-    return res.status(200).json({ processed: 0 });
+    return { processed: 0 };
   }
 
   const results = await Promise.allSettled(
@@ -68,7 +112,6 @@ export default async function handler(req, res) {
           .eq('id', job.id);
 
         if (isFinal) {
-          // Fetch user email for graceful failure notification
           const { data: profile } = await supabase
             .from('profiles')
             .select('email')
@@ -77,7 +120,6 @@ export default async function handler(req, res) {
 
           const emailPromises = [];
 
-          // Tell the user we're on it manually
           if (profile?.email) {
             emailPromises.push(
               fetch('https://api.resend.com/emails', {
@@ -101,7 +143,6 @@ export default async function handler(req, res) {
             );
           }
 
-          // Alert admin
           emailPromises.push(
             fetch('https://api.resend.com/emails', {
               method: 'POST',
@@ -125,5 +166,5 @@ export default async function handler(req, res) {
 
   const summary = results.map((r) => (r.status === 'fulfilled' ? r.value : { error: r.reason?.message }));
   console.log('scrape-jobs cron done:', summary);
-  return res.status(200).json({ processed: jobs.length, results: summary });
+  return { processed: jobs.length, results: summary };
 }
