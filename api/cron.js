@@ -90,7 +90,7 @@ async function runDailyDigest() {
       headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({
         from: 'AptPilot Ops <onboarding@resend.dev>',
-        to: ['michael.carracino@compass.com'],
+        to: ['michael.carracino@gmail.com'],
         subject: `AptPilot daily: $${mrr.toFixed(0)} MRR · ${signups24h} signups · ${notifsSent24h} alerts sent${alarms.length ? ' · ⚠ ' + alarms.length + ' issue(s)' : ''}`,
         html,
       }),
@@ -231,7 +231,7 @@ async function runScrapeJobs() {
               headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
               body: JSON.stringify({
                 from: 'AptPilot Alerts <onboarding@resend.dev>',
-                to: ['michael.carracino@compass.com'],
+                to: ['michael.carracino@gmail.com'],
                 subject: `ACTION REQUIRED: Scrape job failed — search ${job.search_id}`,
                 html: `<p>Job <strong>${job.id}</strong> for search <strong>${job.search_id}</strong> (user <strong>${job.user_id}</strong>, email: ${profile?.email || 'unknown'}) failed 3 times and needs manual scraping.</p><p>Last error: ${err.message}</p><p><a href="https://aptpilot.vercel.app/admin">Open Admin →</a></p>`,
               }),

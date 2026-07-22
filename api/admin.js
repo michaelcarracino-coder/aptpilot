@@ -64,6 +64,27 @@ async function testDeliverability(req, res) {
     }
   }
 
+  // Toll-free numbers cannot send SMS until carrier verification is approved —
+  // surface the verification status so we know if SMS is silently blocked.
+  try {
+    const sid = process.env.TWILIO_ACCOUNT_SID;
+    const auth = 'Basic ' + Buffer.from(`${sid}:${process.env.TWILIO_AUTH_TOKEN}`).toString('base64');
+    const resp = await fetch('https://messaging.twilio.com/v1/Tollfree/Verifications', {
+      headers: { Authorization: auth },
+    });
+    const body = await resp.json().catch(() => null);
+    out.tollfreeVerification = {
+      status: resp.status,
+      verifications: (body?.verifications || []).map(v => ({
+        number_sid: v.tollfree_phone_number_sid,
+        status: v.status,
+        rejection_reason: v.rejection_reason || null,
+      })),
+    };
+  } catch (e) {
+    out.tollfreeVerification = { error: String(e.message || e) };
+  }
+
   out.env = {
     resendKey: !!process.env.RESEND_API_KEY,
     twilioSid: !!process.env.TWILIO_ACCOUNT_SID,

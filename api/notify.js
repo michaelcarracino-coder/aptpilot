@@ -60,7 +60,7 @@ async function handleNewSearch(req, res) {
   `
 
   await sendEmail({
-    to: 'aptpilot1@gmail.com',
+    to: 'michael.carracino@gmail.com',
     subject: `🏠 New Search — ${userEmail} | $${criteria.min_budget}–$${criteria.max_budget}/mo | ${(criteria.neighborhoods || []).slice(0,2).join(', ')}`,
     html,
   })
