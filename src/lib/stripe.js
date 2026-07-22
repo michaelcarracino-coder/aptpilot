@@ -16,12 +16,13 @@ export const PRICES = {
   },
 }
 
-export async function redirectToCheckout(priceId, userId, userEmail) {
+export async function redirectToCheckout(priceId, userId, userEmail, plan) {
   const res = await fetch('/api/create-checkout-session', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       priceId,
+      plan,
       userId,
       userEmail,
       origin: window.location.origin,

@@ -74,7 +74,7 @@ const css = `
 .doc-upload-btn:hover { background:rgba(10,191,191,0.18); }
 .doc-uploaded-file { display:flex; align-items:center; gap:0.45rem; font-size:0.75rem; color:#059669; margin-top:0.35rem; font-weight:500; width:100%; }
 .doc-uploaded-file button:hover { color:#EF4444 !important; }
-.tier-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:0.75rem; }
+.tier-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:0.75rem; }
 @media(max-width:700px){ .tier-grid{grid-template-columns:1fr;} }
 .tier-card { border:2px solid var(--surface-mid); border-radius:12px; padding:1.25rem; cursor:pointer; transition:all 0.18s; position:relative; }
 .tier-card.on { border-color:var(--teal); background:var(--teal-pale); }
@@ -428,14 +428,15 @@ export default function Intake() {
               <div className="section-label"><span className="section-label-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg></span>Choose Your Plan</div>
               <div className="tier-grid">
                 {[
-                  { id:'standard', name:'Standard', price:'$299', feats:['Full listing search','Tour agenda','Automated scheduling','Real-time alerts','Dedicated support'] },
-                  { id:'core', name:'Core', price:'$399', badge:'Most Popular', feats:['Everything in Standard','Application document organizer','Negotiation support','Application tracking','Priority scheduling'] },
-                  { id:'pro', name:'Pro', price:'$499', feats:['Everything in Core','1-on-1 NYC broker','24/7 broker access','Last-minute tour priority','Lease review'] },
+                  { id:'alerts', name:'Alerts', price:'$14.99', period:'/mo', badge:'3-Day Free Trial', feats:['Instant SMS + email listing alerts','New no-fee matches within minutes','Be first to tour — before the crowd','Cancel anytime','Search on your own, we watch 24/7'] },
+                  { id:'standard', name:'Standard', price:'$299', period:'one-time', feats:['Full listing search','Tour agenda','Automated scheduling','Real-time alerts','Dedicated support'] },
+                  { id:'core', name:'Core', price:'$399', period:'one-time', badge:'Most Popular', feats:['Everything in Standard','Application document organizer','Negotiation support','Application tracking','Priority scheduling'] },
+                  { id:'pro', name:'Pro', price:'$499', period:'one-time', feats:['Everything in Core','1-on-1 NYC broker','24/7 broker access','Last-minute tour priority','Lease review'] },
                 ].map(t => (
                   <div key={t.id} className={`tier-card ${form.tier === t.id ? 'on' : ''}`} onClick={() => set('tier', t.id)}>
                     {t.badge && <div className="tier-badge">{t.badge}</div>}
                     <div className="tier-name">{t.name}</div>
-                    <div className="tier-price">{t.price} <span>one-time</span></div>
+                    <div className="tier-price">{t.price} <span>{t.period}</span></div>
                     <div className="tier-feats">{t.feats.map(f => <div className="tier-feat" key={f}>{f}</div>)}</div>
                   </div>
                 ))}
@@ -443,9 +444,9 @@ export default function Intake() {
             </div>
             <div className="section-card">
               <div className="section-label"><span className="section-label-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></span>Order Summary</div>
-              <div className="order-row"><span style={{ color:'var(--gray)' }}>{form.tier === 'pro' ? 'Pro Plan' : form.tier === 'standard' ? 'Standard Plan' : 'Core Plan'}</span><span>{form.tier === 'pro' ? '$499' : form.tier === 'standard' ? '$299' : '$399'}</span></div>
+              <div className="order-row"><span style={{ color:'var(--gray)' }}>{form.tier === 'alerts' ? 'Alerts Plan' : form.tier === 'pro' ? 'Pro Plan' : form.tier === 'standard' ? 'Standard Plan' : 'Core Plan'}</span><span>{form.tier === 'alerts' ? '$14.99/mo' : form.tier === 'pro' ? '$499' : form.tier === 'standard' ? '$299' : '$399'}</span></div>
               {form.chauffeur && <div className="order-row"><span style={{ color:'var(--gray)' }}>Chauffeur Add-On</span><span>Per booking</span></div>}
-              <div className="order-row"><span>Total Due Today</span><span style={{ color:'var(--teal)', fontFamily:"'Playfair Display',serif", fontSize:'1.2rem' }}>{form.tier === 'pro' ? '$499' : form.tier === 'standard' ? '$299' : '$399'}</span></div>
+              <div className="order-row"><span>Total Due Today</span><span style={{ color:'var(--teal)', fontFamily:"'Playfair Display',serif", fontSize:'1.2rem' }}>{form.tier === 'alerts' ? '$0 today · 3-day trial' : form.tier === 'pro' ? '$499' : form.tier === 'standard' ? '$299' : '$399'}</span></div>
             </div>
           </div>
         )}

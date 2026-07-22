@@ -49,7 +49,7 @@ const PLANS = [
 
 const FAQS = [
   { q: 'What does AptPilot actually do?', a: 'We search every listing source in NYC, contact agents on your behalf, schedule tours at your available times, and keep your application documents organized and ready — all for a single flat fee.' },
-  { q: 'Is this a subscription?', a: 'No. Core and Standard are one-time payments per search. Pro is also a one-time payment, but it gives you unlimited searches forever — use it for your next move, the year after, or whenever you need it again.' },
+  { q: 'Is this a subscription?', a: 'The concierge plans are not — Core and Standard are one-time payments per search, and Pro is a one-time payment with unlimited searches forever. AptPilot Alerts is the exception: it\'s $14.99/mo (after a 3-day free trial) because we monitor new listings for you around the clock. Cancel anytime.' },
   { q: 'How is this different from a broker?', a: 'A broker typically charges one month\'s rent (up to $4,000+). We charge a flat fee that covers the entire search from listing to lease, no recurring cost.' },
   { q: 'What if I don\'t find an apartment?', a: 'We\'ll work with you until you do. If we can\'t find a qualifying match within your criteria, reach out and we\'ll discuss a solution.' },
   { q: 'What\'s the chauffeur add-on?', a: 'On your tour day, we book a car to take you between every showing — so you\'re not sweating on the subway between 5 tours. Billed per day booked.' },
@@ -110,6 +110,26 @@ export default function Pricing() {
         <p style={{ color:'var(--teal)', fontWeight:700, fontSize:'0.8rem', letterSpacing:'0.1em', textTransform:'uppercase', marginBottom:'1rem' }}>Transparent Pricing</p>
         <h1>One fee. No broker.<br />No surprises.</h1>
         <p>Pay once and we handle everything — searching, scheduling, applying. Save thousands compared to a traditional broker fee.</p>
+      </div>
+
+      {/* Alerts subscription */}
+      <div style={{ maxWidth:960, margin:'0 auto', padding:'3rem 1.5rem 0' }}>
+        <div style={{ background:'var(--navy)', borderRadius:20, padding:'2rem 2.25rem', display:'flex', flexWrap:'wrap', alignItems:'center', gap:'1.5rem', border:'1.5px solid var(--teal)', boxShadow:'var(--shadow-teal)' }}>
+          <div style={{ flex:'1 1 320px' }}>
+            <div style={{ display:'inline-block', background:'var(--teal)', color:'var(--navy)', fontSize:'0.68rem', fontWeight:800, padding:'0.25rem 0.75rem', borderRadius:100, textTransform:'uppercase', letterSpacing:'0.07em', marginBottom:'0.75rem' }}>New · 3-Day Free Trial</div>
+            <h2 style={{ fontFamily:"'Playfair Display',serif", color:'#fff', fontSize:'1.7rem', marginBottom:'0.4rem' }}>AptPilot Alerts</h2>
+            <p style={{ color:'rgba(255,255,255,0.6)', fontSize:'0.9rem', lineHeight:1.65, margin:0 }}>
+              Good no-fee apartments in NYC lease within hours. We watch new listings around the clock and text + email you the instant one matches your criteria — so you tour first.
+            </p>
+          </div>
+          <div style={{ textAlign:'center', flex:'0 0 auto' }}>
+            <div style={{ fontFamily:"'Playfair Display',serif", fontSize:'2.6rem', color:'var(--teal)', lineHeight:1 }}>$14.99<span style={{ fontFamily:"'Inter',sans-serif", fontSize:'0.85rem', color:'rgba(255,255,255,0.5)' }}>/mo</span></div>
+            <button className="btn btn-primary" onClick={handleSelect} style={{ marginTop:'0.85rem', justifyContent:'center', padding:'0.75rem 1.75rem', borderRadius:100 }}>
+              Start Free Trial →
+            </button>
+            <p style={{ color:'rgba(255,255,255,0.4)', fontSize:'0.72rem', marginTop:'0.5rem' }}>Cancel anytime</p>
+          </div>
+        </div>
       </div>
 
       {/* Plans */}

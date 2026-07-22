@@ -1,4 +1,4 @@
-// Merged notify handler. type = 'new-search' | 'tour-confirmed' | 'review-request'
+// Merged notify handler. type = 'new-search' | 'tour-confirmed' | 'review-request' | 'listing-alert'
 import { createClient } from '@supabase/supabase-js'
 
 const supabase = createClient(process.env.VITE_SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY)
@@ -11,6 +11,7 @@ export default async function handler(req, res) {
     if (type === 'new-search') return await handleNewSearch(req, res)
     if (type === 'tour-confirmed') return await handleTourConfirmed(req, res)
     if (type === 'review-request') return await handleReviewRequest(req, res)
+    if (type === 'listing-alert') return await handleListingAlert(req, res)
     return res.status(400).json({ error: 'Unknown type' })
   } catch (err) {
     console.error('Notify error:', err)
@@ -174,6 +175,88 @@ function buildAgendaEmail({ tours, userName, totalConfirmed }) {
       <p style="color:#94A3B8;font-size:0.77rem;text-align:center;margin:0;">More tours may be added as agents respond. Your dashboard always has the latest.</p>
     </div>
   `
+}
+
+// ── LISTING ALERT ───────────────────────────────────────────────────────────
+// Instant notification when the crawler finds a new listing matching an alert.
+// Dedup: insert into alert_notifications first; unique (alert_id, listing_url,
+// channel) means a second attempt fails the insert and we skip the send.
+async function handleListingAlert(req, res) {
+  const { alertId, userId, userEmail, userName, phone, emailEnabled, smsEnabled, listing } = req.body
+  if (!alertId || !listing?.listing_url) return res.status(400).json({ error: 'Missing alertId or listing' })
+
+  const firstName = userName?.split(' ')[0] || 'there'
+  const priceStr = listing.price ? `$${Number(listing.price).toLocaleString()}/mo` : 'price TBD'
+  const bedsStr = listing.bedrooms === 0 ? 'Studio' : listing.bedrooms ? `${listing.bedrooms}BR` : ''
+  const summary = [priceStr, bedsStr, listing.neighborhood].filter(Boolean).join(' · ')
+  const sent = { email: false, sms: false }
+
+  const claimChannel = async (channel) => {
+    const { error } = await supabase.from('alert_notifications').insert({
+      alert_id: alertId,
+      user_id: userId,
+      listing_url: listing.listing_url,
+      address: listing.address,
+      neighborhood: listing.neighborhood,
+      price: listing.price,
+      channel,
+    })
+    return !error // unique violation (already notified) or other failure -> skip send
+  }
+
+  if (emailEnabled !== false && userEmail && await claimChannel('email')) {
+    await sendEmail({
+      to: userEmail,
+      subject: `🚨 New no-fee match: ${summary} — ${listing.address || 'see listing'}`,
+      html: `
+        <div style="font-family:sans-serif;max-width:560px;margin:0 auto;padding:1.5rem;">
+          <p style="color:#0C1628;font-size:1rem;margin:0 0 0.75rem;">Hi ${firstName} — a new no-fee listing just hit the market that matches your alert. <strong>Move fast: good no-fee units in NYC lease within hours.</strong></p>
+          <div style="background:#0C1628;border-radius:14px;padding:1.25rem 1.5rem;margin-bottom:1rem;">
+            <div style="font-family:Georgia,serif;font-size:1.4rem;color:#0ABFBF;font-weight:700;">${priceStr}</div>
+            <div style="color:#fff;font-weight:700;font-size:1.05rem;margin-top:0.25rem;">${listing.address || 'New listing'}</div>
+            <div style="color:rgba(255,255,255,0.6);font-size:0.85rem;margin-top:0.25rem;">${[bedsStr, listing.bathrooms ? listing.bathrooms + ' bath' : '', listing.neighborhood].filter(Boolean).join(' · ')}</div>
+          </div>
+          <a href="${listing.listing_url}" style="display:block;text-align:center;background:#0ABFBF;color:#0C1628;font-weight:700;padding:0.85rem 2rem;border-radius:100px;text-decoration:none;font-size:0.95rem;">View Listing Now →</a>
+          <p style="color:#94A3B8;font-size:0.75rem;text-align:center;margin-top:1.25rem;">AptPilot Alerts · You're getting this because your listing alert is active. Manage alerts in your <a href="https://aptpilot.vercel.app/dashboard" style="color:#0A9396;">dashboard</a>.</p>
+        </div>
+      `,
+    }).then(r => { sent.email = r.ok !== false })
+      .catch(async (e) => {
+        await supabase.from('alert_notifications')
+          .update({ status: 'failed', error: String(e.message || e) })
+          .eq('alert_id', alertId).eq('listing_url', listing.listing_url).eq('channel', 'email')
+      })
+  }
+
+  const twilioSid = process.env.TWILIO_ACCOUNT_SID
+  const twilioAuth = process.env.TWILIO_AUTH_TOKEN
+  const twilioFrom = process.env.TWILIO_PHONE_NUMBER
+  if (smsEnabled !== false && phone && twilioSid && twilioAuth && twilioFrom && await claimChannel('sms')) {
+    try {
+      const body = `AptPilot: new no-fee match! ${summary} — ${listing.address || ''}. View now: ${listing.listing_url} (good units go in hours). Reply STOP to opt out.`
+      const resp = await fetch(`https://api.twilio.com/2010-04-01/Accounts/${twilioSid}/Messages.json`, {
+        method: 'POST',
+        headers: {
+          'Authorization': 'Basic ' + Buffer.from(`${twilioSid}:${twilioAuth}`).toString('base64'),
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: new URLSearchParams({ From: twilioFrom, To: phone, Body: body }),
+      })
+      sent.sms = resp.ok
+      if (!resp.ok) {
+        const errBody = await resp.text().catch(() => '')
+        await supabase.from('alert_notifications')
+          .update({ status: 'failed', error: `Twilio ${resp.status}: ${errBody.slice(0, 300)}` })
+          .eq('alert_id', alertId).eq('listing_url', listing.listing_url).eq('channel', 'sms')
+      }
+    } catch (e) {
+      await supabase.from('alert_notifications')
+        .update({ status: 'failed', error: String(e.message || e) })
+        .eq('alert_id', alertId).eq('listing_url', listing.listing_url).eq('channel', 'sms')
+    }
+  }
+
+  return res.status(200).json({ success: true, sent })
 }
 
 // ── REVIEW REQUEST ──────────────────────────────────────────────────────────

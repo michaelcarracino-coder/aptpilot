@@ -23,8 +23,12 @@ export default function Checkout() {
   const handlePay = async () => {
     if (!search) return
     setPaying(true)
-    const priceId = search.tier === 'pro' ? PRICES.pro.id : search.tier === 'standard' ? PRICES.standard.id : PRICES.core.id
-    await redirectToCheckout(priceId, user.id, user.email)
+    if (search.tier === 'alerts') {
+      await redirectToCheckout(null, user.id, user.email, 'alerts')
+    } else {
+      const priceId = search.tier === 'pro' ? PRICES.pro.id : search.tier === 'standard' ? PRICES.standard.id : PRICES.core.id
+      await redirectToCheckout(priceId, user.id, user.email)
+    }
     setPaying(false)
   }
 
@@ -34,8 +38,11 @@ export default function Checkout() {
     </div>
   )
 
+  const isAlerts = search?.tier === 'alerts'
   const price = search?.tier === 'pro' ? 499 : search?.tier === 'standard' ? 299 : 399
-  const planName = search?.tier === 'pro' ? 'Pro Plan' : search?.tier === 'standard' ? 'Standard Plan' : 'Core Plan'
+  const planName = isAlerts ? 'Alerts Plan' : search?.tier === 'pro' ? 'Pro Plan' : search?.tier === 'standard' ? 'Standard Plan' : 'Core Plan'
+  const priceLabel = isAlerts ? '$14.99/mo' : `$${price}.00`
+  const dueToday = isAlerts ? '$0.00' : `$${price}.00`
 
   return (
     <div style={{ minHeight:'calc(100vh - 64px)', display:'flex', alignItems:'center', justifyContent:'center', padding:'2rem' }}>
@@ -51,8 +58,14 @@ export default function Checkout() {
         <div style={{ background:'var(--surface)', borderRadius:'10px', padding:'1.25rem', marginBottom:'1.5rem' }}>
           <div style={{ display:'flex', justifyContent:'space-between', marginBottom:'0.6rem', fontSize:'0.9rem' }}>
             <span style={{ color:'var(--slate)' }}>{planName}</span>
-            <span style={{ fontWeight:600 }}>${price}.00</span>
+            <span style={{ fontWeight:600 }}>{priceLabel}</span>
           </div>
+          {isAlerts && (
+            <div style={{ display:'flex', justifyContent:'space-between', marginBottom:'0.6rem', fontSize:'0.9rem' }}>
+              <span style={{ color:'var(--slate)' }}>3-day free trial</span>
+              <span style={{ fontWeight:600, color:'#059669' }}>Included</span>
+            </div>
+          )}
           {search?.chauffeur && (
             <div style={{ display:'flex', justifyContent:'space-between', marginBottom:'0.6rem', fontSize:'0.9rem' }}>
               <span style={{ color:'var(--slate)' }}>Chauffeur Add-On</span>
@@ -61,7 +74,7 @@ export default function Checkout() {
           )}
           <div style={{ borderTop:'1px solid var(--surface-mid)', paddingTop:'0.6rem', display:'flex', justifyContent:'space-between', fontWeight:700 }}>
             <span>Total Due Today</span>
-            <span style={{ color:'var(--teal)', fontFamily:"'Playfair Display',serif", fontSize:'1.2rem' }}>${price}.00</span>
+            <span style={{ color:'var(--teal)', fontFamily:"'Playfair Display',serif", fontSize:'1.2rem' }}>{dueToday}</span>
           </div>
         </div>
 
@@ -71,11 +84,11 @@ export default function Checkout() {
         </div>
 
         <button className="btn btn-primary" onClick={handlePay} disabled={paying} style={{ width:'100%', justifyContent:'center', padding:'0.9rem' }}>
-          {paying ? <span className="spinner" /> : `Pay $${price} — Activate AptPilot`}
+          {paying ? <span className="spinner" /> : isAlerts ? 'Start Free Trial — Activate Alerts' : `Pay $${price} — Activate AptPilot`}
         </button>
 
         <p style={{ marginTop:'1rem', textAlign:'center', fontSize:'0.78rem', color:'#94A3B8', lineHeight:1.5 }}>
-          One-time payment. No subscription. No hidden fees.
+          {isAlerts ? '3 days free, then $14.99/mo. Cancel anytime.' : 'One-time payment. No subscription. No hidden fees.'}
         </p>
       </div>
     </div>

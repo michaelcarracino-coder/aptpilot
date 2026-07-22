@@ -36,10 +36,83 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: `Webhook Error: ${err.message}` });
     }
 
+    // ── Alerts subscription lifecycle ──────────────────────────────────────
+    if (event.type === 'customer.subscription.updated' || event.type === 'customer.subscription.deleted') {
+      const sub = event.data.object;
+      const statusMap = {
+        trialing: 'trialing',
+        active: 'active',
+        past_due: 'paused',
+        unpaid: 'paused',
+        canceled: 'canceled',
+        incomplete_expired: 'canceled',
+      };
+      const mapped = event.type === 'customer.subscription.deleted' ? 'canceled' : statusMap[sub.status];
+      if (mapped) {
+        const { createClient } = await import('@supabase/supabase-js');
+        const supabase = createClient(process.env.VITE_SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
+        await supabase
+          .from('alerts')
+          .update({ status: mapped, updated_at: new Date().toISOString() })
+          .eq('stripe_subscription_id', sub.id);
+      }
+      return res.status(200).json({ received: true });
+    }
+
     if (event.type === 'checkout.session.completed') {
       const session = event.data.object;
       const userId = session.client_reference_id;
       const userEmail = session.customer_details?.email;
+
+      // Alerts subscription checkout: activate the alert, skip concierge flow
+      if (session.mode === 'subscription' && userId) {
+        const { createClient } = await import('@supabase/supabase-js');
+        const supabase = createClient(process.env.VITE_SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
+
+        const { data: searches } = await supabase
+          .from('searches')
+          .select('*')
+          .eq('user_id', userId)
+          .order('created_at', { ascending: false })
+          .limit(1);
+        const search = searches?.[0];
+
+        const trialEnds = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString();
+        const { error: alertErr } = await supabase.from('alerts').upsert({
+          user_id: userId,
+          search_id: search?.id || null,
+          phone: search?.phone || null,
+          status: 'trialing',
+          stripe_subscription_id: typeof session.subscription === 'string' ? session.subscription : session.subscription?.id,
+          trial_ends_at: trialEnds,
+          updated_at: new Date().toISOString(),
+        }, { onConflict: 'user_id' });
+        if (alertErr) console.error('Alert activation failed:', alertErr.message);
+
+        const email = userEmail || session.customer_email || '';
+        if (email) {
+          await fetch('https://api.resend.com/emails', {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${process.env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              from: 'AptPilot <onboarding@resend.dev>',
+              to: [email],
+              subject: 'Your AptPilot Alerts are live 🚨',
+              html: `
+                <div style="font-family:sans-serif;max-width:560px;margin:0 auto;padding:2rem;">
+                  <h1 style="color:#0C1628;font-family:Georgia,serif;font-size:1.6rem;">You're on watch.</h1>
+                  <p style="color:#374151;line-height:1.7;">From this moment, we're scanning new no-fee NYC listings around the clock. The instant one matches your criteria, you'll get a text and an email — usually within minutes of it hitting the market.</p>
+                  <p style="color:#374151;line-height:1.7;">Your 3-day free trial is active. After that it's $14.99/mo — cancel anytime from your dashboard.</p>
+                  <a href="https://aptpilot.vercel.app/dashboard" style="display:inline-block;margin-top:0.5rem;background:#0ABFBF;color:#0C1628;font-weight:700;padding:0.85rem 2rem;border-radius:100px;text-decoration:none;">View My Dashboard →</a>
+                  <p style="color:#94A3B8;font-size:0.8rem;margin-top:2rem;">Tip: make sure ${email} and our SMS number are saved in your contacts so alerts never hit spam.</p>
+                </div>
+              `,
+            }),
+          }).catch(e => console.error('Alerts welcome email failed:', e));
+        }
+
+        return res.status(200).json({ received: true });
+      }
 
       if (userId) {
         const { createClient } = await import('@supabase/supabase-js');
