@@ -1,12 +1,7 @@
 {
   "version": "0.0.1",
   "configurations": [
-    {
-      "name": "aptpilot-dev",
-      "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "dev"],
-      "cwd": "/Users/michaelcarracino",
-      "port": 5173
-    }
+    { "name": "aptpilot", "runtimeExecutable": "npm", "runtimeArgs": ["run", "dev"], "port": 5173 },
+    { "name": "aptpilot-prod", "runtimeExecutable": "npm", "runtimeArgs": ["run", "preview", "--", "--port", "4173"], "port": 4173 }
   ]
 }

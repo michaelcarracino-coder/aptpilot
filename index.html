@@ -37,9 +37,18 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 
-    <!-- Favicon -->
+    <!-- Favicon + installed-app icons -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="apple-touch-icon" href="/og-image.png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+
+    <!-- Installable web app. iOS ignores most of the manifest, so the
+         apple-mobile-web-app-* meta tags below are what actually control
+         standalone mode and the status bar on iPhone. -->
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="AptPilot" />
 
     <!-- Structured data. Only claims that are literally true are listed here:
          no aggregateRating / reviewCount, since there are no real reviews yet
@@ -64,8 +73,8 @@
     }
     </script>
 
-    <!-- Theme color (mobile browser bar) -->
-    <meta name="theme-color" content="#0D1B2A" />
+    <!-- Theme color (mobile browser bar) — matches the paper background -->
+    <meta name="theme-color" content="#FAF6EF" />
 
     <!-- Google Search Console verification -->
     <!-- Replace YOUR_CODE_HERE with the code Google gives you in Search Console -->

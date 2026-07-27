@@ -3,6 +3,7 @@ import { lazy, Suspense } from 'react'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import Nav from './components/Nav'
 import ChatWidget from './components/ChatWidget'
+import InstallPrompt from './components/InstallPrompt'
 
 const Landing          = lazy(() => import('./pages/Landing'))
 const Login            = lazy(() => import('./pages/Login'))
@@ -52,7 +53,8 @@ function AppRoutes() {
     <>
       <Nav />
       <ChatWidget />
-      <div style={{ paddingTop: 68 }}>
+      <InstallPrompt />
+      <div style={{ paddingTop: 74 }}>
       <Suspense fallback={<PageFallback />}>
       <Routes>
         <Route path="/"          element={<Landing />} />

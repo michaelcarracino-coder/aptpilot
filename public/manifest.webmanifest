@@ -1,0 +1,22 @@
+{
+  "name": "AptPilot — No-fee NYC apartment alerts",
+  "short_name": "AptPilot",
+  "description": "Get texted the moment a no-fee New York City apartment matches your search.",
+  "id": "/",
+  "start_url": "/login",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#FAF6EF",
+  "theme_color": "#FAF6EF",
+  "categories": ["lifestyle", "utilities"],
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "My dashboard", "url": "/dashboard" },
+    { "name": "Edit my search", "url": "/intake" }
+  ]
+}
