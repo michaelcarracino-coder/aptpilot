@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { supabase } from '../lib/supabase'
-import { redirectToCheckout, PRICES } from '../lib/stripe'
+import { redirectToCheckout, PLAN } from '../lib/stripe'
 
 export default function Checkout() {
   const { user, profile } = useAuth()
@@ -23,12 +23,7 @@ export default function Checkout() {
   const handlePay = async () => {
     if (!search) return
     setPaying(true)
-    if (search.tier === 'alerts') {
-      await redirectToCheckout(null, user.id, user.email, 'alerts')
-    } else {
-      const priceId = search.tier === 'pro' ? PRICES.pro.id : search.tier === 'standard' ? PRICES.standard.id : PRICES.core.id
-      await redirectToCheckout(priceId, user.id, user.email)
-    }
+    await redirectToCheckout(user.id, user.email)
     setPaying(false)
   }
 
@@ -38,12 +33,6 @@ export default function Checkout() {
     </div>
   )
 
-  const isAlerts = search?.tier === 'alerts'
-  const price = search?.tier === 'pro' ? 499 : search?.tier === 'standard' ? 299 : 399
-  const planName = isAlerts ? 'Alerts Plan' : search?.tier === 'pro' ? 'Pro Plan' : search?.tier === 'standard' ? 'Standard Plan' : 'Core Plan'
-  const priceLabel = isAlerts ? '$14.99/mo' : `$${price}.00`
-  const dueToday = isAlerts ? '$0.00' : `$${price}.00`
-
   return (
     <div style={{ minHeight:'calc(100vh - 64px)', display:'flex', alignItems:'center', justifyContent:'center', padding:'2rem' }}>
       <div className="card fade-up" style={{ width:'100%', maxWidth:480 }}>
@@ -52,29 +41,21 @@ export default function Checkout() {
             <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
           </div>
           <h1 className="serif" style={{ fontSize:'1.9rem', color:'var(--navy)', marginBottom:'0.4rem' }}>Almost there!</h1>
-          <p style={{ color:'var(--gray)', fontSize:'0.9rem' }}>Complete payment to activate your AptPilot search.</p>
+          <p style={{ color:'var(--gray)', fontSize:'0.9rem' }}>Start your free trial to activate your alerts.</p>
         </div>
 
         <div style={{ background:'var(--surface)', borderRadius:'10px', padding:'1.25rem', marginBottom:'1.5rem' }}>
           <div style={{ display:'flex', justifyContent:'space-between', marginBottom:'0.6rem', fontSize:'0.9rem' }}>
-            <span style={{ color:'var(--slate)' }}>{planName}</span>
-            <span style={{ fontWeight:600 }}>{priceLabel}</span>
+            <span style={{ color:'var(--slate)' }}>{PLAN.name}</span>
+            <span style={{ fontWeight:600 }}>${PLAN.priceMonthly}/mo</span>
           </div>
-          {isAlerts && (
-            <div style={{ display:'flex', justifyContent:'space-between', marginBottom:'0.6rem', fontSize:'0.9rem' }}>
-              <span style={{ color:'var(--slate)' }}>3-day free trial</span>
-              <span style={{ fontWeight:600, color:'#059669' }}>Included</span>
-            </div>
-          )}
-          {search?.chauffeur && (
-            <div style={{ display:'flex', justifyContent:'space-between', marginBottom:'0.6rem', fontSize:'0.9rem' }}>
-              <span style={{ color:'var(--slate)' }}>Chauffeur Add-On</span>
-              <span style={{ fontWeight:600 }}>Per booking</span>
-            </div>
-          )}
+          <div style={{ display:'flex', justifyContent:'space-between', marginBottom:'0.6rem', fontSize:'0.9rem' }}>
+            <span style={{ color:'var(--slate)' }}>{PLAN.trialDays}-day free trial</span>
+            <span style={{ fontWeight:600, color:'#059669' }}>Included</span>
+          </div>
           <div style={{ borderTop:'1px solid var(--surface-mid)', paddingTop:'0.6rem', display:'flex', justifyContent:'space-between', fontWeight:700 }}>
             <span>Total Due Today</span>
-            <span style={{ color:'var(--teal)', fontFamily:"'Inter', sans-serif", fontSize:'1.2rem' }}>{dueToday}</span>
+            <span style={{ color:'var(--teal)', fontFamily:"'Inter', sans-serif", fontSize:'1.2rem' }}>$0.00</span>
           </div>
         </div>
 
@@ -84,11 +65,11 @@ export default function Checkout() {
         </div>
 
         <button className="btn btn-primary" onClick={handlePay} disabled={paying} style={{ width:'100%', justifyContent:'center', padding:'0.9rem' }}>
-          {paying ? <span className="spinner" /> : isAlerts ? 'Start Free Trial — Activate Alerts' : `Pay $${price} — Activate AptPilot`}
+          {paying ? <span className="spinner" /> : 'Start Free Trial — Activate Alerts'}
         </button>
 
         <p style={{ marginTop:'1rem', textAlign:'center', fontSize:'0.78rem', color:'#94A3B8', lineHeight:1.5 }}>
-          {isAlerts ? '3 days free, then $14.99/mo. Cancel anytime.' : 'One-time payment. No subscription. No hidden fees.'}
+          {PLAN.trialDays} days free, then ${PLAN.priceMonthly}/mo. Cancel anytime.
         </p>
       </div>
     </div>

@@ -112,8 +112,8 @@ export default function BlogPost() {
         </div>
         <div className="post-cta">
           <h3>Ready to find your next apartment?</h3>
-          <p>Let AptPilot handle the search, scheduling, and applications — starting at $299.</p>
-          <button className="btn btn-primary" onClick={() => navigate('/signup')}>Start My Search →</button>
+          <p>Get texted the moment a no-fee listing matches your search — $29/mo, 3 days free.</p>
+          <button className="btn btn-primary" onClick={() => navigate('/signup')}>Start Free Trial →</button>
         </div>
       </div>
     </>

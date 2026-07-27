@@ -55,8 +55,10 @@ async function runDailyDigest() {
     count('email_leads', q => q.gte('created_at', dayAgo)),
   ]);
 
-  const mrr = (typeof active === 'number' ? active : 0) * 14.99;
-  const pendingMrr = (typeof trialing === 'number' ? trialing : 0) * 14.99;
+  // Keep in step with PLAN.priceMonthly in src/lib/stripe.js.
+  const PRICE_MONTHLY = 29;
+  const mrr = (typeof active === 'number' ? active : 0) * PRICE_MONTHLY;
+  const pendingMrr = (typeof trialing === 'number' ? trialing : 0) * PRICE_MONTHLY;
   const crawlerDead = typeof newListings24h === 'number' && newListings24h === 0;
   const alarms = [];
   if (crawlerDead) alarms.push('Crawler found 0 new listings in 24h — likely blocked or down.');

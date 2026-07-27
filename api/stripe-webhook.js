@@ -51,10 +51,21 @@ export default async function handler(req, res) {
       if (mapped) {
         const { createClient } = await import('@supabase/supabase-js');
         const supabase = createClient(process.env.VITE_SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
-        await supabase
+        const { data: updated } = await supabase
           .from('alerts')
           .update({ status: mapped, updated_at: new Date().toISOString() })
-          .eq('stripe_subscription_id', sub.id);
+          .eq('stripe_subscription_id', sub.id)
+          .select('user_id')
+          .maybeSingle();
+
+        // Keep the paywall flag in step with the subscription, or a cancelled
+        // customer keeps dashboard access indefinitely.
+        if (updated?.user_id) {
+          await supabase
+            .from('profiles')
+            .update({ paid: ['trialing', 'active'].includes(mapped) })
+            .eq('id', updated.user_id);
+        }
       }
       return res.status(200).json({ received: true });
     }
@@ -89,6 +100,15 @@ export default async function handler(req, res) {
         }, { onConflict: 'user_id' });
         if (alertErr) console.error('Alert activation failed:', alertErr.message);
 
+        // /dashboard is a PaidRoute gated on profiles.paid. Without this the
+        // subscriber is redirected straight back to /checkout after paying,
+        // with no way to reach the product they just bought.
+        const { error: paidErr } = await supabase
+          .from('profiles')
+          .update({ paid: true, tier: 'alerts' })
+          .eq('id', userId);
+        if (paidErr) console.error('Marking profile paid failed:', paidErr.message);
+
         const email = userEmail || session.customer_email || '';
         if (email) {
           await fetch('https://api.resend.com/emails', {
@@ -102,7 +122,7 @@ export default async function handler(req, res) {
                 <div style="font-family:sans-serif;max-width:560px;margin:0 auto;padding:2rem;">
                   <h1 style="color:#0C1628;font-family:Georgia,serif;font-size:1.6rem;">You're on watch.</h1>
                   <p style="color:#374151;line-height:1.7;">From this moment, we're scanning new no-fee NYC listings around the clock. The instant one matches your criteria, you'll get a text and an email — usually within minutes of it hitting the market.</p>
-                  <p style="color:#374151;line-height:1.7;">Your 3-day free trial is active. After that it's $14.99/mo — cancel anytime from your dashboard.</p>
+                  <p style="color:#374151;line-height:1.7;">Your 3-day free trial is active. After that it's $29/mo — cancel anytime from your dashboard.</p>
                   <a href="https://aptpilot.vercel.app/dashboard" style="display:inline-block;margin-top:0.5rem;background:#0ABFBF;color:#0C1628;font-weight:700;padding:0.85rem 2rem;border-radius:100px;text-decoration:none;">View My Dashboard →</a>
                   <p style="color:#94A3B8;font-size:0.8rem;margin-top:2rem;">Tip: make sure ${email} and our SMS number are saved in your contacts so alerts never hit spam.</p>
                 </div>
@@ -143,7 +163,7 @@ export default async function handler(req, res) {
         // Send welcome email to the user
         const email = userEmail || session.customer_email || '';
         if (email) {
-          const planLabel = search?.tier === 'pro' ? 'Pro ($499)' : search?.tier === 'standard' ? 'Standard ($299)' : 'Core ($399)';
+          const planLabel = 'AptPilot Alerts ($29/mo)';
           await fetch('https://api.resend.com/emails', {
             method: 'POST',
             headers: { 'Authorization': `Bearer ${process.env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },

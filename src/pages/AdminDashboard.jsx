@@ -4,8 +4,10 @@ import { supabase } from '../lib/supabase'
 import Chart from 'chart.js/auto'
 
 const ADMIN_EMAIL = 'aptpilot1@gmail.com'
-const TIER_PRICE = { standard: 299, core: 399, pro: 499 }
-const TIER_COLOR = { standard: '#3b82f6', core: '#0ABFBF', pro: '#a855f7' }
+// AptPilot sells one plan; keep in step with PLAN.priceMonthly in lib/stripe.
+const PRICE_MONTHLY = 29
+const TIER_PRICE = { alerts: PRICE_MONTHLY }
+const TIER_COLOR = { alerts: '#0ABFBF' }
 
 function fmt(n) { return n == null ? '—' : n.toLocaleString() }
 function fmtMoney(n) { return n >= 1000 ? `$${(n / 1000).toFixed(1)}k` : `$${n}` }
@@ -185,10 +187,10 @@ export default function AdminDashboard() {
     const inst = new Chart(revenueRef.current, {
       type: 'doughnut',
       data: {
-        labels: ['Standard ($299)', 'Core ($399)', 'Pro ($499)'],
+        labels: [`Alerts ($${PRICE_MONTHLY}/mo)`],
         datasets: [{
-          data: [tierCounts.standard * 299, tierCounts.core * 399, tierCounts.pro * 499],
-          backgroundColor: ['#3b82f6', '#0ABFBF', '#a855f7'],
+          data: [(tierCounts.alerts || 0) * PRICE_MONTHLY],
+          backgroundColor: ['#0ABFBF'],
           borderWidth: 0, hoverOffset: 6,
         }],
       },
@@ -243,7 +245,7 @@ export default function AdminDashboard() {
   const totalUsers = profiles.length
   const paidCount = paid.length
   const convPct = totalUsers ? Math.round(paidCount / totalUsers * 100) : 0
-  const revenue = paid.reduce((sum, p) => sum + (TIER_PRICE[p.tier] || 399), 0)
+  const revenue = paid.reduce((sum, p) => sum + (TIER_PRICE[p.tier] || PRICE_MONTHLY), 0)
   const weekAgo = Date.now() - 7 * 86400000
   const usersThisWeek = profiles.filter(u => new Date(u.created_at) > weekAgo).length
   const allListings = data.listings || []

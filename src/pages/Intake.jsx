@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { supabase } from '../lib/supabase'
 import NeighborhoodPicker from '../components/NeighborhoodPicker'
+import { PLAN } from '../lib/stripe'
 
 const TIMES = ['8:00 AM','9:00 AM','10:00 AM','11:00 AM','12:00 PM','1:00 PM','2:00 PM','3:00 PM','4:00 PM','5:00 PM','6:00 PM','7:00 PM']
 const AMENITIES = [
@@ -174,7 +175,7 @@ export default function Intake() {
   const [form, setForm]       = useState({
     moveIn:'', moveInDirection:'on_or_before', minBed:'1', maxBed:'2', minBudget:'', maxBudget:'',
     neighborhoods:[], tourTimes:[], notes:'',
-    tier:'core', chauffeur:false,
+    tier:PLAN.id, chauffeur:false,
     phone:'', workAddress:'',
     minBath:'Any', amenities:[], buildingTypes:[], minSqft:'',
   })
@@ -222,7 +223,7 @@ export default function Intake() {
     return { tone:'broad', msg:'Your search is wide open — you can get more than you think! Try narrowing neighborhoods or adding must-have amenities to get better matches.', color:'#D97706', bg:'#FFFBEB', border:'#FCD34D' }
   }
 
-  const STEPS = ['Your Info', 'Criteria', 'Availability', 'Plan']
+  const STEPS = ['Your Info', 'Criteria', 'Plan']
 
   const handleSubmit = async () => {
     setSaving(true)
@@ -400,53 +401,21 @@ export default function Intake() {
         {step === 3 && (
           <div className="fade-up">
             <div className="section-card">
-              <div className="section-label"><span className="section-label-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span>Tour Availability</div>
-              <p style={{ fontSize:'0.83rem', color:'var(--slate)', marginBottom:'1rem' }}>Select all times you're available. We'll book tours in these windows.</p>
-              <div className="time-grid">
-                {TIMES.map(t => (
-                  <button key={t} className={`time-chip ${form.tourTimes.includes(t) ? 'on' : ''}`} onClick={() => toggle('tourTimes', t)}>{t}</button>
-                ))}
-              </div>
-            </div>
-            <div className="section-card">
-              <div className="section-label"><span className="section-label-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg></span>Chauffeur Add-On</div>
-              <div className={`chauffeur-row ${form.chauffeur ? 'on' : ''}`} onClick={() => set('chauffeur', !form.chauffeur)}>
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
-                <div style={{ flex:1 }}>
-                  <strong style={{ fontSize:'0.93rem', color:'var(--navy)' }}>Add chauffeured transport to your tour day</strong>
-                  <p style={{ fontSize:'0.82rem', color:'var(--gray)', marginTop:'0.15rem' }}>A car is automatically booked to take you between every tour. Billed per booking day.</p>
-                </div>
-                <div className="check-box">{form.chauffeur ? <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg> : ''}</div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {step === 4 && (
-          <div className="fade-up">
-            <div className="section-card">
-              <div className="section-label"><span className="section-label-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg></span>Choose Your Plan</div>
-              <div className="tier-grid">
-                {[
-                  { id:'alerts', name:'Alerts', price:'$14.99', period:'/mo', badge:'3-Day Free Trial', feats:['Instant SMS + email listing alerts','New no-fee matches within minutes','Be first to tour — before the crowd','Cancel anytime','Search on your own, we watch 24/7'] },
-                  { id:'standard', name:'Standard', price:'$299', period:'one-time', feats:['Full listing search','Tour agenda','Automated scheduling','Real-time alerts','Dedicated support'] },
-                  { id:'core', name:'Core', price:'$399', period:'one-time', badge:'Most Popular', feats:['Everything in Standard','Application document organizer','Negotiation support','Application tracking','Priority scheduling'] },
-                  { id:'pro', name:'Pro', price:'$499', period:'one-time', feats:['Everything in Core','1-on-1 NYC broker','24/7 broker access','Last-minute tour priority','Lease review'] },
-                ].map(t => (
-                  <div key={t.id} className={`tier-card ${form.tier === t.id ? 'on' : ''}`} onClick={() => set('tier', t.id)}>
-                    {t.badge && <div className="tier-badge">{t.badge}</div>}
-                    <div className="tier-name">{t.name}</div>
-                    <div className="tier-price">{t.price} <span>{t.period}</span></div>
-                    <div className="tier-feats">{t.feats.map(f => <div className="tier-feat" key={f}>{f}</div>)}</div>
-                  </div>
-                ))}
+              <div className="section-label"><span className="section-label-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg></span>Your Plan</div>
+              {/* One plan, so there is nothing to choose — show what they get
+                  instead of making them click a single-option grid. */}
+              <div className="tier-card on" style={{ cursor:'default' }}>
+                <div className="tier-badge">{PLAN.trialDays}-Day Free Trial</div>
+                <div className="tier-name">{PLAN.name}</div>
+                <div className="tier-price">${PLAN.priceMonthly} <span>/mo</span></div>
+                <div className="tier-feats">{PLAN.features.map(f => <div className="tier-feat" key={f}>{f}</div>)}</div>
               </div>
             </div>
             <div className="section-card">
               <div className="section-label"><span className="section-label-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></span>Order Summary</div>
-              <div className="order-row"><span style={{ color:'var(--gray)' }}>{form.tier === 'alerts' ? 'Alerts Plan' : form.tier === 'pro' ? 'Pro Plan' : form.tier === 'standard' ? 'Standard Plan' : 'Core Plan'}</span><span>{form.tier === 'alerts' ? '$14.99/mo' : form.tier === 'pro' ? '$499' : form.tier === 'standard' ? '$299' : '$399'}</span></div>
-              {form.chauffeur && <div className="order-row"><span style={{ color:'var(--gray)' }}>Chauffeur Add-On</span><span>Per booking</span></div>}
-              <div className="order-row"><span>Total Due Today</span><span style={{ color:'var(--teal)', fontFamily:"'Inter', sans-serif", fontSize:'1.2rem' }}>{form.tier === 'alerts' ? '$0 today · 3-day trial' : form.tier === 'pro' ? '$499' : form.tier === 'standard' ? '$299' : '$399'}</span></div>
+              <div className="order-row"><span style={{ color:'var(--gray)' }}>{PLAN.name}</span><span>${PLAN.priceMonthly}/mo</span></div>
+              <div className="order-row"><span style={{ color:'var(--gray)' }}>{PLAN.trialDays}-day free trial</span><span style={{ color:'#059669' }}>Included</span></div>
+              <div className="order-row"><span>Total Due Today</span><span style={{ color:'var(--teal)', fontFamily:"'Inter', sans-serif", fontSize:'1.2rem' }}>$0.00</span></div>
             </div>
           </div>
         )}
@@ -456,7 +425,7 @@ export default function Intake() {
             ? <button className="btn btn-outline" onClick={() => setStep(s => s-1)}>← Back</button>
             : <div />
           }
-          {step < 4
+          {step < 3
             ? <button className="btn btn-dark" onClick={() => { if (step === 2) setShowCriteriaPreview(true); else setStep(s => s+1) }}>Continue →</button>
             : <button className="btn btn-primary" onClick={handleSubmit} disabled={saving}>
                 {saving ? <span className="spinner" /> : 'Proceed to Payment →'}

@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom'
 import { useState } from 'react'
 import SEO from '../components/SEO'
+import { PLAN } from '../lib/stripe'
 
 /* ─── Photography (Pexels, verified URLs) — treated as annotated figures:
    dark/duotone overlays, hairline borders, mono captions ─── */
@@ -35,10 +36,10 @@ function Icon({ name, size = 18, color = 'currentColor', strokeWidth = 1.8 }) {
 const FAQS = [
   { q: "Didn't the FARE Act already kill broker fees?", a: "It killed forced tenant-paid fees — since June 2025, the landlord's broker bills the landlord. What it didn't fix: rents hit a record $4,199 citywide median asking rent a year later (StreetEasy), and no-fee inventory moves faster than ever. The fee is gone; the race isn't." },
   { q: "How fast are the alerts, really?", a: "Our crawler checks for new no-fee listings roughly every 10 minutes, around the clock. When a new listing matches your saved criteria, the text and email go out immediately — typically inside a few minutes of the listing appearing." },
-  { q: "What does the concierge service actually do?", a: "You give us your criteria, budget, and tour availability once. We pull matching listings, contact the listing agents by email and phone, schedule tours in your windows, and hand you a single organized tour agenda with maps and agent contacts. Your application documents live in one place, ready to submit the moment you find the right apartment." },
+  { q: "What does AptPilot actually do?", a: "You set your budget, bedrooms, and neighborhoods once. We watch new NYC rental listings around the clock and, the moment one appears with no broker fee that matches your criteria, we text and email you. You contact the listing agent directly and pay no broker fee at all." },
   { q: "Is AptPilot a brokerage?", a: "No. AptPilot is software. We don't represent landlords, we don't take commissions, and we have no incentive to steer you toward pricier apartments. Flat pricing, published on this page." },
-  { q: "How is this different from StreetEasy or Zillow alerts?", a: "Portal alerts are batched and portal-specific, and they still leave the agent outreach, scheduling, and paperwork to you. AptPilot is built for exactly one job — winning NYC no-fee rentals — with fast alerts on the self-serve plan and humans-plus-software doing the legwork on concierge plans." },
-  { q: "What if it doesn't work for me?", a: "Alerts come with a 3-day free trial and cancel-anytime billing through Stripe. On concierge plans, if we can't schedule a single tour within 7 days of your search launching (with reasonable criteria), we refund you in full." },
+  { q: "How is this different from StreetEasy or Zillow alerts?", a: "Portal alerts are batched and portal-specific, and they still leave the agent outreach, scheduling, and paperwork to you. AptPilot is built for exactly one job — surfacing no-fee NYC rentals the moment they list, and pushing them to you instantly rather than on a batch schedule." },
+  { q: "What if it doesn't work for me?", a: "Every subscription starts with a 3-day free trial and cancel-anytime billing through Stripe. Cancel from your dashboard in two clicks — there is no minimum term and no cancellation fee." },
 ]
 
 function FaqItem({ q, a, open, toggle }) {
@@ -59,7 +60,12 @@ function FaqItem({ q, a, open, toggle }) {
 function SavingsCalc({ navigate }) {
   const [rent, setRent] = useState(3500)
   const brokerFee = Math.round(rent * 1.0833)
-  const savings = brokerFee - 399
+  // Compare against a realistic search, not a single month: NYC searches run
+  // roughly three months, so that is the honest all-in cost to put next to a
+  // one-time broker fee.
+  const SEARCH_MONTHS = 3
+  const aptpilotCost = PLAN.priceMonthly * SEARCH_MONTHS
+  const savings = brokerFee - aptpilotCost
 
   return (
     <section className="land-section" style={{ padding: '6.5rem 2rem', background: '#fff', borderTop: '1px solid var(--surface-mid)' }}>
@@ -87,8 +93,8 @@ function SavingsCalc({ navigate }) {
           <div className="land-calc-right" style={{ background: 'var(--ink)', padding: '2.5rem', display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '1.1rem' }}>
             {[
               { label: 'Old-style broker fee on this rent', val: `$${brokerFee.toLocaleString()}` },
-              { label: 'AptPilot concierge, flat', val: '$399' },
-              { label: 'AptPilot Alerts, monthly', val: '$14.99' },
+              { label: 'AptPilot, monthly', val: `$${PLAN.priceMonthly}` },
+              { label: `AptPilot, typical ${SEARCH_MONTHS}-month search`, val: `$${aptpilotCost}` },
             ].map(row => (
               <div key={row.label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', paddingBottom: '1.1rem', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
                 <span style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.5)' }}>{row.label}</span>
@@ -130,7 +136,7 @@ export default function Landing() {
       `}</style>
       <SEO
         title="AptPilot — Instant alerts for NYC no-fee apartments"
-        description="NYC no-fee listings lease within hours. AptPilot texts you the moment a match appears — and can contact agents and book your tours. Alerts $14.99/mo, concierge from $299."
+        description={`NYC no-fee listings lease within hours. AptPilot texts and emails you the moment a listing matches your criteria — $${PLAN.priceMonthly}/mo, ${PLAN.trialDays}-day free trial, cancel anytime.`}
         canonical="https://aptpilot.vercel.app/"
       />
 
@@ -153,18 +159,18 @@ export default function Landing() {
               Stop refreshing StreetEasy.
             </h1>
             <p style={{ fontSize: '1.05rem', color: 'rgba(255,255,255,0.6)', lineHeight: 1.75, maxWidth: 480, marginBottom: '2.2rem' }}>
-              Good no-fee apartments in New York lease within hours. AptPilot watches new listings around the clock, texts you the moment one matches your criteria — and on concierge plans, contacts the agents and books your tours for you.
+              Good no-fee apartments in New York lease within hours. AptPilot watches new listings around the clock and texts you the moment one matches your criteria — so you reach the agent while the listing is still minutes old.
             </p>
             <div style={{ display: 'flex', gap: '0.85rem', flexWrap: 'wrap' }}>
               <button className="btn btn-primary btn-lg" onClick={() => navigate('/signup')}>
                 Get alerts — 3 days free
               </button>
               <button className="btn btn-ghost btn-lg" onClick={() => navigate('/pricing')}>
-                See concierge plans
+                See pricing
               </button>
             </div>
             <div className="mono" style={{ marginTop: '1.4rem', fontSize: '0.74rem', color: 'rgba(255,255,255,0.35)' }}>
-              $14.99/mo after trial · cancel anytime
+              ${PLAN.priceMonthly}/mo after trial · cancel anytime
             </div>
           </div>
 
@@ -183,7 +189,7 @@ export default function Landing() {
                   { t: '09:41', price: '$2,850', spec: '1BR · Williamsburg', status: 'text + email sent' },
                   { t: '08:57', price: '$3,400', spec: '2BR · Astoria', status: 'text + email sent' },
                   { t: '08:12', price: '$2,395', spec: 'Studio · East Village', status: 'text + email sent' },
-                  { t: '07:48', price: '$4,100', spec: '2BR · Park Slope', status: 'tour requested — concierge' },
+                  { t: '07:48', price: '$4,100', spec: '2BR · Park Slope', status: 'alert sent' },
                 ].map((row, i) => (
                   <div key={i} style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 8, padding: '0.8rem 0.9rem' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '0.3rem' }}>
@@ -217,73 +223,46 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ── TWO PRODUCTS ── */}
+      {/* ── THE PRODUCT ── */}
       <section className="land-section" style={{ padding: '6.5rem 2rem', background: '#fff' }}>
         <div style={{ maxWidth: 1080, margin: '0 auto' }}>
           <div className="reveal" style={{ marginBottom: '3rem', maxWidth: 560 }}>
-            <div className="mono" style={{ fontSize: '0.72rem', color: 'var(--teal-dark)', letterSpacing: '0.08em', marginBottom: '0.9rem' }}>01 — PICK YOUR SPEED</div>
+            <div className="mono" style={{ fontSize: '0.72rem', color: 'var(--teal-dark)', letterSpacing: '0.08em', marginBottom: '0.9rem' }}>01 — THE PRODUCT</div>
             <h2 style={{ fontSize: 'clamp(1.7rem, 3.4vw, 2.3rem)', fontWeight: 700, letterSpacing: '-0.03em', color: 'var(--navy)', lineHeight: 1.15, marginBottom: '0.9rem' }}>
-              Self-serve alerts, or the whole search done for you.
+              One job, done properly: tell you first.
             </h2>
             <p style={{ color: 'var(--text-muted)', fontSize: '0.98rem', lineHeight: 1.7 }}>
-              Same engine underneath. Choose how much of the legwork you want to keep.
+              Set your criteria once. We watch the market around the clock and reach you the moment a no-fee listing matches.
             </p>
           </div>
 
-          <div className="land-products-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem' }}>
-            {/* Alerts */}
-            <div className="reveal" style={{ border: '1px solid var(--surface-mid)', borderRadius: 10, padding: '2.25rem', display: 'flex', flexDirection: 'column' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.7rem', marginBottom: '1.25rem' }}>
-                <div style={{ width: 36, height: 36, borderRadius: 8, border: '1px solid var(--surface-mid)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--teal-dark)' }}>
-                  <Icon name="bell" size={17} />
-                </div>
-                <div>
-                  <div style={{ fontWeight: 700, color: 'var(--navy)', letterSpacing: '-0.01em' }}>Alerts</div>
-                  <div className="mono" style={{ fontSize: '0.72rem', color: 'var(--slate)' }}>$14.99/mo · 3-day free trial</div>
-                </div>
+          <div className="reveal" style={{ maxWidth: 560, border: '1px solid var(--surface-mid)', borderRadius: 10, padding: '2.25rem', display: 'flex', flexDirection: 'column' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.7rem', marginBottom: '1.25rem' }}>
+              <div style={{ width: 36, height: 36, borderRadius: 8, border: '1px solid var(--surface-mid)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--teal-dark)' }}>
+                <Icon name="bell" size={17} />
               </div>
-              <p style={{ fontSize: '0.92rem', color: 'var(--text-muted)', lineHeight: 1.7, marginBottom: '1.5rem' }}>
-                Set your budget, bedrooms, and neighborhoods once. When a new no-fee listing matches, your phone buzzes — usually while the listing is minutes old. You tour first, before the open-house crowd exists.
-              </p>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem', marginBottom: '1.75rem', flex: 1 }}>
-                {['Instant SMS + email on new matches', 'Criteria editable anytime from your dashboard', 'Every alert logged — nothing lost to spam folders', 'Cancel in two clicks, billing by Stripe'].map(f => (
-                  <div key={f} style={{ display: 'flex', gap: '0.6rem', alignItems: 'flex-start', fontSize: '0.88rem', color: 'var(--text)' }}>
-                    <span style={{ color: 'var(--teal-dark)', marginTop: 2 }}><Icon name="check" size={14} strokeWidth={2.2} /></span>
-                    {f}
-                  </div>
-                ))}
+              <div>
+                <div style={{ fontWeight: 700, color: 'var(--navy)', letterSpacing: '-0.01em' }}>{PLAN.name}</div>
+                <div className="mono" style={{ fontSize: '0.72rem', color: 'var(--slate)' }}>${PLAN.priceMonthly}/mo · {PLAN.trialDays}-day free trial</div>
               </div>
-              <button className="btn btn-primary" onClick={() => navigate('/signup')} style={{ justifyContent: 'center' }}>
-                Start free trial
-              </button>
             </div>
-
-            {/* Concierge */}
-            <div className="reveal" style={{ border: '1px solid var(--navy)', borderRadius: 10, padding: '2.25rem', display: 'flex', flexDirection: 'column', background: 'var(--navy)' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.7rem', marginBottom: '1.25rem' }}>
-                <div style={{ width: 36, height: 36, borderRadius: 8, border: '1px solid rgba(255,255,255,0.18)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--teal)' }}>
-                  <Icon name="calendar" size={17} />
+            <p style={{ fontSize: '0.92rem', color: 'var(--text-muted)', lineHeight: 1.7, marginBottom: '1.5rem' }}>
+              Set your budget, bedrooms, and neighborhoods once. When a new no-fee listing matches, your phone buzzes — usually while the listing is minutes old. You tour first, before the open-house crowd exists.
+            </p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem', marginBottom: '1.75rem', flex: 1 }}>
+              {PLAN.features.map(f => (
+                <div key={f} style={{ display: 'flex', gap: '0.6rem', alignItems: 'flex-start', fontSize: '0.88rem', color: 'var(--text)' }}>
+                  <span style={{ color: 'var(--teal-dark)', marginTop: 2 }}><Icon name="check" size={14} strokeWidth={2.2} /></span>
+                  {f}
                 </div>
-                <div>
-                  <div style={{ fontWeight: 700, color: '#fff', letterSpacing: '-0.01em' }}>Concierge</div>
-                  <div className="mono" style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.45)' }}>from $299 · one-time, flat</div>
-                </div>
-              </div>
-              <p style={{ fontSize: '0.92rem', color: 'rgba(255,255,255,0.6)', lineHeight: 1.7, marginBottom: '1.5rem' }}>
-                We run the search. Matching listings pulled, agents contacted by email and phone, tours scheduled inside your availability windows, and a single clean agenda delivered — maps, agent contacts, application docs organized.
-              </p>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem', marginBottom: '1.75rem', flex: 1 }}>
-                {['Agent outreach handled for you', 'Tours booked in your time windows', 'One organized agenda: maps, contacts, notes', 'Tour within 7 days or a full refund'].map(f => (
-                  <div key={f} style={{ display: 'flex', gap: '0.6rem', alignItems: 'flex-start', fontSize: '0.88rem', color: 'rgba(255,255,255,0.8)' }}>
-                    <span style={{ color: 'var(--teal)', marginTop: 2 }}><Icon name="check" size={14} strokeWidth={2.2} /></span>
-                    {f}
-                  </div>
-                ))}
-              </div>
-              <button className="btn btn-primary" onClick={() => navigate('/pricing')} style={{ justifyContent: 'center' }}>
-                Compare plans
-              </button>
+              ))}
             </div>
+            <button className="btn btn-primary" onClick={() => navigate('/signup')} style={{ justifyContent: 'center' }}>
+              Start free trial
+            </button>
+            <p className="mono" style={{ fontSize: '0.72rem', color: 'var(--slate)', marginTop: '0.75rem', textAlign: 'center' }}>
+              $0 today · cancel anytime
+            </p>
           </div>
         </div>
       </section>
@@ -299,9 +278,9 @@ export default function Landing() {
           </div>
           <div style={{ display: 'flex', flexDirection: 'column' }}>
             {[
-              { n: '01', t: 'Define the search', d: 'Budget, bedrooms, neighborhoods, move-in window, tour availability. Two minutes, editable anytime.' },
+              { n: '01', t: 'Define the search', d: 'Budget, bedrooms, neighborhoods, move-in window. Two minutes, editable anytime.' },
               { n: '02', t: 'The engine watches', d: 'New no-fee listings are checked roughly every 10 minutes, around the clock — weekends and 2am included.' },
-              { n: '03', t: 'You get there first', d: 'Alerts subscribers get an instant text and email. Concierge clients get agents contacted and tours booked into their windows automatically.' },
+              { n: '03', t: 'You get there first', d: 'You get an instant text and email with the address, price, and a direct link — while the listing is still fresh enough to matter.' },
               { n: '04', t: 'Apply the same day', d: 'Your documents — pay stubs, IDs, guarantor forms — are already organized in your dashboard. When you like a unit, the application goes out while others are still scheduling a viewing.' },
             ].map((step, i) => (
               <div key={i} className="reveal" style={{ display: 'grid', gridTemplateColumns: '64px 1fr', gap: '1.5rem', padding: '1.6rem 0', borderBottom: i < 3 ? '1px solid var(--surface-mid)' : 'none', transitionDelay: `${i * 0.05}s` }}>
@@ -411,7 +390,7 @@ export default function Landing() {
                 <span style={{ fontWeight: 700, letterSpacing: '-0.02em', color: '#fff' }}>AptPilot</span>
               </div>
               <p style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.38)', lineHeight: 1.7, maxWidth: 280 }}>
-                Software for winning NYC no-fee rentals: instant listing alerts and a concierge that books the tours for you.
+                Software for winning NYC no-fee rentals: instant listing alerts, the moment a match goes live.
               </p>
             </div>
             {[
