@@ -3,10 +3,38 @@ import { createClient } from '@supabase/supabase-js'
 
 const supabase = createClient(process.env.VITE_SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY)
 
+// Server-to-server types are driven by the scraper / Stripe webhook and carry
+// the internal API key. Admin types are fired from the browser, so they carry
+// the caller's Supabase JWT instead and are checked against the admin account.
+const INTERNAL_TYPES = ['new-search', 'listing-alert']
+const ADMIN_TYPES = ['tour-confirmed', 'review-request']
+const ADMIN_EMAIL = 'aptpilot1@gmail.com'
+
+async function authorize(req, type) {
+  if (INTERNAL_TYPES.includes(type)) {
+    const key = process.env.SCRAPER_API_KEY
+    if (!key || req.headers['x-api-key'] !== key) return 'Unauthorized'
+    return null
+  }
+  if (ADMIN_TYPES.includes(type)) {
+    const token = req.headers.authorization?.replace('Bearer ', '')
+    if (!token) return 'Unauthorized'
+    const anonClient = createClient(process.env.VITE_SUPABASE_URL, process.env.VITE_SUPABASE_ANON_KEY)
+    const { data: { user }, error } = await anonClient.auth.getUser(token)
+    if (error || !user) return 'Unauthorized'
+    if (user.email !== ADMIN_EMAIL) return 'Forbidden'
+    return null
+  }
+  return 'Unauthorized'
+}
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' })
 
   const { type } = req.body
+  const denied = await authorize(req, type)
+  if (denied) return res.status(denied === 'Forbidden' ? 403 : 401).json({ error: denied })
+
   try {
     if (type === 'new-search') return await handleNewSearch(req, res)
     if (type === 'tour-confirmed') return await handleTourConfirmed(req, res)

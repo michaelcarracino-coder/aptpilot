@@ -184,6 +184,15 @@ export default function AdminListings() {
     selectSearch(selectedSearch)
   }
 
+  // /api/notify verifies the caller's Supabase JWT for admin-fired notifications.
+  async function notifyHeaders() {
+    const { data: { session } } = await supabase.auth.getSession()
+    return {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${session?.access_token ?? ''}`,
+    }
+  }
+
   async function confirmTour(listing) {
     const scheduledAt = tourTimes[listing.id]
     if (!scheduledAt) {
@@ -193,7 +202,7 @@ export default function AdminListings() {
     setSendingId(listing.id)
     await fetch('/api/notify', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: await notifyHeaders(),
       body: JSON.stringify({
         type: 'tour-confirmed',
         listing,
@@ -213,7 +222,7 @@ export default function AdminListings() {
     setSendingReview(true)
     await fetch('/api/notify', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: await notifyHeaders(),
       body: JSON.stringify({
         type: 'review-request',
         userEmail: selectedSearch.profiles?.email,

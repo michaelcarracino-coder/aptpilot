@@ -5,24 +5,30 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
     <!-- Primary SEO -->
-    <title>AptPilot — NYC Apartment Search Without the Broker Fee</title>
-    <meta name="description" content="AptPilot searches every NYC listing, books your tours, and submits your applications automatically — all for a one-time $399 flat fee. No broker. No stress." />
-    <meta name="keywords" content="NYC apartment search, no broker fee NYC, New York City rentals, apartment search app, NYC rental help, find apartment NYC, broker fee alternative" />
+    <!-- This is a client-rendered SPA: crawlers and social scrapers that don't
+         run JS only ever see these static tags, so they must describe the
+         current lead product (Alerts), not the older flat-fee concierge. -->
+    <title>AptPilot — Instant No-Fee NYC Apartment Alerts</title>
+    <meta name="description" content="No-fee NYC apartments lease within hours. AptPilot texts and emails you the moment a listing matches your criteria — $14.99/mo, 3-day free trial. Concierge tour booking from $299." />
+    <meta name="keywords" content="no fee apartments NYC, NYC apartment alerts, no broker fee NYC, New York City rentals, StreetEasy alerts, NYC rental help, find apartment NYC" />
     <meta name="author" content="AptPilot" />
     <meta name="robots" content="index, follow" />
 
     <!-- Open Graph (Facebook, LinkedIn, iMessage previews) -->
     <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="AptPilot" />
     <meta property="og:url" content="https://aptpilot.vercel.app/" />
-    <meta property="og:title" content="AptPilot — NYC Apartment Search Without the Broker Fee" />
-    <meta property="og:description" content="Search every listing, book tours, and apply automatically. One-time $399 flat fee. Save thousands vs. a broker." />
-    <meta property="og:image" content="https://aptpilot.vercel.app/og-image.svg" />
+    <meta property="og:title" content="AptPilot — Instant No-Fee NYC Apartment Alerts" />
+    <meta property="og:description" content="Get texted the second a no-fee NYC listing matches your search. $14.99/mo, 3-day free trial." />
+    <meta property="og:image" content="https://aptpilot.vercel.app/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
 
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="AptPilot — NYC Apartment Search Without the Broker Fee" />
-    <meta name="twitter:description" content="Search every listing, book tours, and apply automatically. One-time $399 flat fee. Save thousands vs. a broker." />
-    <meta name="twitter:image" content="https://aptpilot.vercel.app/og-image.svg" />
+    <meta name="twitter:title" content="AptPilot — Instant No-Fee NYC Apartment Alerts" />
+    <meta name="twitter:description" content="Get texted the second a no-fee NYC listing matches your search. $14.99/mo, 3-day free trial." />
+    <meta name="twitter:image" content="https://aptpilot.vercel.app/og-image.png" />
 
     <!-- Canonical -->
     <link rel="canonical" href="https://aptpilot.vercel.app/" />
@@ -33,6 +39,30 @@
 
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/og-image.png" />
+
+    <!-- Structured data. Only claims that are literally true are listed here:
+         no aggregateRating / reviewCount, since there are no real reviews yet
+         and fabricating them is both a policy violation and a trust risk. -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Service",
+      "name": "AptPilot Alerts",
+      "serviceType": "No-fee apartment listing alerts",
+      "description": "Instant SMS and email alerts when a no-broker-fee NYC rental listing matches your search criteria.",
+      "url": "https://aptpilot.vercel.app/",
+      "areaServed": { "@type": "City", "name": "New York City" },
+      "provider": { "@type": "Organization", "name": "AptPilot", "url": "https://aptpilot.vercel.app/" },
+      "offers": {
+        "@type": "Offer",
+        "price": "14.99",
+        "priceCurrency": "USD",
+        "url": "https://aptpilot.vercel.app/pricing",
+        "availability": "https://schema.org/InStock"
+      }
+    }
+    </script>
 
     <!-- Theme color (mobile browser bar) -->
     <meta name="theme-color" content="#0D1B2A" />

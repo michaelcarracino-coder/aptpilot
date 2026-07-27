@@ -203,7 +203,7 @@ export default async function handler(req, res) {
 
           await fetch(`https://aptpilot.vercel.app/api/notify`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 'Content-Type': 'application/json', 'x-api-key': process.env.SCRAPER_API_KEY },
             body: JSON.stringify({
               type: 'new-search',
               searchId: search.id,

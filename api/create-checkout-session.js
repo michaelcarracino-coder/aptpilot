@@ -53,6 +53,9 @@ export default async function handler(req, res) {
 
     return res.status(200).json({ url: session.url });
   } catch (err) {
-    return res.status(500).json({ error: err.message, stack: err.stack });
+    // Log server-side; never return the message or stack to the browser —
+    // Stripe errors can echo key prefixes, account ids, and internal paths.
+    console.error('create-checkout-session error:', err);
+    return res.status(500).json({ error: 'Could not start checkout. Please try again.' });
   }
 }
