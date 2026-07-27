@@ -109,12 +109,12 @@ const css = `
 .legal-hero-badge {
   display: inline-flex; align-items: center; gap: 0.4rem;
   background: rgba(10,191,191,0.12); border: 1px solid rgba(10,191,191,0.25);
-  color: #0ABFBF; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em;
+  color: var(--clay); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em;
   text-transform: uppercase; padding: 0.35rem 0.9rem; border-radius: 100px;
   margin-bottom: 1.25rem;
 }
 .legal-hero h1 {
-  font-family: 'Inter', sans-serif;
+  font-family: 'Fraunces', Georgia, serif;
   font-size: clamp(2.2rem, 5vw, 3.2rem);
   color: #fff; margin-bottom: 0.75rem; line-height: 1.15;
 }
@@ -133,7 +133,7 @@ const css = `
 }
 .legal-section:last-of-type { border-bottom: none; }
 .legal-num {
-  font-family: 'Inter', sans-serif;
+  font-family: 'Fraunces', Georgia, serif;
   font-size: 2rem; font-weight: 700;
   color: rgba(10,191,191,0.22); line-height: 1;
   flex-shrink: 0; width: 2.5rem; padding-top: 0.1rem;
@@ -141,7 +141,7 @@ const css = `
 }
 .legal-content { flex: 1; }
 .legal-content h2 {
-  font-family: 'Inter', sans-serif;
+  font-family: 'Fraunces', Georgia, serif;
   font-size: 1.15rem; color: var(--navy);
   margin-bottom: 0.75rem;
 }
@@ -160,7 +160,7 @@ const css = `
   font-size: 0.8rem; line-height: 1.7; margin-top: 2.5rem;
   display: flex; gap: 0.75rem; align-items: flex-start;
 }
-.legal-footer-note a { color: #0ABFBF; }
+.legal-footer-note a { color: var(--clay); }
 @media(max-width:540px){
   .legal-section { flex-direction: column; gap: 0.4rem; }
   .legal-num { font-size: 0.9rem; width: auto; }
@@ -197,7 +197,7 @@ export default function Privacy() {
           ))}
 
           <div className="legal-footer-note">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0ABFBF" strokeWidth="2" style={{flexShrink:0,marginTop:1}}><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--clay)" strokeWidth="2" style={{flexShrink:0,marginTop:1}}><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
             <span>
               This policy applies to all AptPilot users. For questions, contact <a href="mailto:support@aptpilot.com">support@aptpilot.com</a>. See also our <a href="/terms">Terms of Service</a>.
             </span>

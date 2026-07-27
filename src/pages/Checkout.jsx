@@ -55,7 +55,7 @@ export default function Checkout() {
           </div>
           <div style={{ borderTop:'1px solid var(--surface-mid)', paddingTop:'0.6rem', display:'flex', justifyContent:'space-between', fontWeight:700 }}>
             <span>Total Due Today</span>
-            <span style={{ color:'var(--teal)', fontFamily:"'Inter', sans-serif", fontSize:'1.2rem' }}>$0.00</span>
+            <span style={{ color:'var(--teal)', fontFamily:"'Fraunces', Georgia, serif", fontSize:'1.2rem' }}>$0.00</span>
           </div>
         </div>
 

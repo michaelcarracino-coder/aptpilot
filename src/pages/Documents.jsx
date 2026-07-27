@@ -21,7 +21,7 @@ const GUARANTOR_DOCS = [
 
 const css = `
 .docs-page { max-width: 960px; margin: 0 auto; padding: 2.5rem 2rem 5rem; }
-.docs-page h1 { font-family:'Inter', sans-serif; font-size:2rem; color:var(--navy); margin-bottom:0.3rem; }
+.docs-page h1 { font-family:'Fraunces', Georgia, serif; font-size:2rem; color:var(--navy); margin-bottom:0.3rem; }
 .docs-page .sub { color:var(--slate); font-size:0.9rem; margin-bottom:2rem; }
 .docs-role-tabs { display:flex; gap:0; margin-bottom:1.75rem; background:var(--surface); border-radius:9px; padding:3px; max-width:320px; }
 .docs-role-tab { flex:1; padding:0.5rem 0.75rem; border-radius:7px; border:none; font-size:0.83rem; font-weight:600; cursor:pointer; background:transparent; color:var(--slate); transition:all 0.15s; font-family:inherit; }
@@ -55,7 +55,7 @@ const css = `
 .progress-label { font-size:0.78rem; color:var(--slate); }
 .summary-modal-overlay { position:fixed;inset:0;background:rgba(6,9,15,0.55);backdrop-filter:blur(6px);z-index:1000;display:flex;align-items:center;justify-content:center;padding:1.5rem; }
 .summary-modal { background:#fff;border-radius:20px;max-width:480px;width:100%;padding:2rem;box-shadow:0 24px 80px rgba(0,0,0,0.22);animation:fadeUp 0.25s ease; }
-.summary-modal h2 { font-family:'Inter', sans-serif;font-size:1.35rem;color:var(--navy);margin-bottom:0.3rem; }
+.summary-modal h2 { font-family:'Fraunces', Georgia, serif;font-size:1.35rem;color:var(--navy);margin-bottom:0.3rem; }
 .summary-modal .modal-sub { font-size:0.82rem;color:var(--slate);margin-bottom:1.4rem;line-height:1.55; }
 .summary-field { display:flex;flex-direction:column;gap:0.3rem;margin-bottom:0.9rem; }
 .summary-field label { font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:var(--slate); }

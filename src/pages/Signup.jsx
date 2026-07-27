@@ -37,19 +37,13 @@ export default function Signup() {
   return (
     <div className="auth-page">
       <div className="auth-card">
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1.75rem' }}>
-          <div style={{
-            width: 32, height: 32, borderRadius: 9, flexShrink: 0,
-            background: 'linear-gradient(135deg, #0ABFBF, #00E5CC)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontWeight: 900, fontSize: '0.9rem', color: 'var(--navy)',
-          }}>A</div>
-          <span style={{ fontFamily: "'Inter', sans-serif", fontSize: '1.2rem', fontWeight: 700, color: 'var(--navy)' }}>
-            Apt<span style={{ color: 'var(--teal)' }}>Pilot</span>
+        <div style={{ marginBottom: '1.75rem' }}>
+          <span style={{ fontFamily: "'Fraunces', Georgia, serif", fontSize: '1.35rem', fontWeight: 600, letterSpacing: '-0.02em', color: 'var(--text)' }}>
+            Apt<span style={{ color: 'var(--clay)' }}>Pilot</span>
           </span>
         </div>
 
-        <h1 style={{ fontFamily: "'Inter', sans-serif", fontSize: '2rem', color: 'var(--navy)', marginBottom: '0.4rem', lineHeight: 1.2 }}>
+        <h1 style={{ fontFamily: "'Fraunces', Georgia, serif", fontSize: '2rem', color: 'var(--navy)', marginBottom: '0.4rem', lineHeight: 1.2 }}>
           Create your account
         </h1>
         <p className="sub">Start your AptPilot search in minutes.</p>
@@ -72,7 +66,7 @@ export default function Signup() {
               {error}
             </div>
           )}
-          <button className="btn btn-primary" type="submit" disabled={loading} style={{ marginTop: '0.5rem', justifyContent: 'center', borderRadius: 100 }}>
+          <button className="btn btn-primary" type="submit" disabled={loading} style={{ marginTop: '0.5rem', justifyContent: 'center' }}>
             {loading ? <span className="spinner" /> : 'Create Account →'}
           </button>
         </form>

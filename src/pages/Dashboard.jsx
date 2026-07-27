@@ -17,7 +17,7 @@ const css = `
 .dash-main { display:grid; grid-template-columns:1fr 1fr; gap:1.5rem; align-items:start; }
 @media(max-width:900px){ .dash-main{grid-template-columns:1fr;} }
 .dash-header { display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:2rem;flex-wrap:wrap;gap:1rem; }
-.dash-header h1 { font-family:'Inter', sans-serif; font-size:2rem; color:var(--navy); }
+.dash-header h1 { font-family:'Fraunces', Georgia, serif; font-size:2rem; color:var(--navy); }
 .dash-header p { color:var(--slate); font-size:0.88rem; margin-top:0.25rem; }
 .live-badge { background:#ECFDF5;color:#059669;border:1px solid #A7F3D0;padding:0.4rem 1rem;border-radius:100px;font-size:0.8rem;font-weight:600;display:flex;align-items:center;gap:0.45rem; }
 .pulse { width:7px;height:7px;border-radius:50%;background:#059669;animation:pulse 2s infinite; }
@@ -25,7 +25,7 @@ const css = `
 @media(max-width:700px){ .kpi-row{grid-template-columns:repeat(2,1fr);} }
 .kpi { background:#fff;border-radius:var(--radius);padding:1.25rem;box-shadow:var(--shadow); }
 .kpi-label { font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:var(--slate);margin-bottom:0.3rem; }
-.kpi-val { font-family:'Inter', sans-serif;font-size:2.1rem;color:var(--navy);line-height:1; }
+.kpi-val { font-family:'Fraunces', Georgia, serif;font-size:2.1rem;color:var(--navy);line-height:1; }
 .kpi-sub { font-size:0.77rem;color:var(--teal);font-weight:600;margin-top:0.3rem; }
 .sect-title { font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--slate);margin-bottom:0.75rem; }
 .two-col { display:grid;grid-template-columns:1fr 320px;gap:1.5rem; }
@@ -37,8 +37,8 @@ const css = `
 .tour-icon { background:var(--navy);color:#fff;border-radius:10px;padding:0.6rem 0.75rem;text-align:center;min-width:52px;flex-shrink:0; }
 .tour-addr { font-weight:600;font-size:0.92rem;color:var(--navy); }
 .tour-meta { font-size:0.8rem;color:var(--slate);margin-top:0.2rem;display:flex;gap:0.75rem;flex-wrap:wrap; }
-.tour-price { font-family:'Inter', sans-serif;font-size:1.15rem;color:var(--teal);text-align:right;flex-shrink:0; }
-.tour-price small { font-family:'Inter',sans-serif;font-size:0.72rem;color:var(--slate);display:block; }
+.tour-price { font-family:'Fraunces', Georgia, serif;font-size:1.15rem;color:var(--teal);text-align:right;flex-shrink:0; }
+.tour-price small { font-family:'Fraunces', Georgia, serif;font-size:0.72rem;color:var(--slate);display:block; }
 .status-pill { padding:0.28rem 0.65rem;border-radius:100px;font-size:0.72rem;font-weight:700;margin-top:0.3rem;display:inline-block; }
 .s-pending { background:#FEF3C7;color:#D97706; }
 .s-outreach_sent { background:#EFF6FF;color:#2563EB; }
@@ -55,7 +55,7 @@ const css = `
 .success-banner { background:#ECFDF5;border:1px solid #A7F3D0;border-radius:12px;padding:1rem 1.5rem;margin-bottom:1.5rem;display:flex;align-items:center;gap:0.75rem;color:#065F46;font-size:0.88rem;font-weight:500; }
 .onboard-card { background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);padding:1.5rem;margin-bottom:1.75rem; }
 .onboard-criteria-row { display:grid;grid-template-columns:1fr;gap:1.25rem;align-items:start;margin-bottom:1.75rem; }
-.onboard-title { font-family:'Inter', sans-serif;font-size:1.1rem;color:var(--navy);margin-bottom:1.1rem; }
+.onboard-title { font-family:'Fraunces', Georgia, serif;font-size:1.1rem;color:var(--navy);margin-bottom:1.1rem; }
 .onboard-steps { display:flex;flex-direction:column;gap:0; }
 .onboard-step { display:flex;gap:1rem;align-items:flex-start;padding:0.7rem 0;position:relative; }
 .onboard-step:not(:last-child)::after { content:'';position:absolute;left:13px;top:36px;bottom:0;width:2px;background:var(--surface-mid); }
@@ -89,7 +89,7 @@ const css = `
 .edit-modal { background:#fff;border-radius:18px;max-width:940px;width:100%;box-shadow:0 24px 80px rgba(0,0,0,0.2);animation:fadeUp 0.22s ease;display:grid;grid-template-columns:1fr 300px; }
 .edit-modal-form { padding:1.75rem;overflow-y:auto;max-height:88vh; }
 .edit-modal-preview { background:var(--surface);border-left:1px solid var(--surface-mid);padding:1.75rem;overflow-y:auto;max-height:88vh; }
-.edit-modal h3 { font-family:'Inter', sans-serif;font-size:1.2rem;color:var(--navy);margin-bottom:1.1rem; }
+.edit-modal h3 { font-family:'Fraunces', Georgia, serif;font-size:1.2rem;color:var(--navy);margin-bottom:1.1rem; }
 .em-field { display:flex;flex-direction:column;gap:0.3rem;margin-bottom:0.85rem; }
 .em-field label { font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:var(--slate); }
 .em-field input, .em-field select { padding:0.5rem 0.8rem;border:1.5px solid var(--surface-mid);border-radius:8px;font-size:0.88rem;font-family:inherit;color:var(--navy);outline:none;transition:border-color 0.15s;background:#fff; }
@@ -99,7 +99,7 @@ const css = `
 .em-amenity-chip { font-size:0.72rem;font-weight:600;padding:0.22rem 0.6rem;border-radius:100px;cursor:pointer;border:1.5px solid transparent;transition:all 0.15s;user-select:none; }
 .em-amenity-chip:hover .bt-tooltip { opacity:1 !important; }
 @media(max-width:700px){ .edit-modal{grid-template-columns:1fr;} .edit-modal-preview{display:none;} }
-.referral-card h3 { font-family:'Inter', sans-serif;font-size:1rem;margin-bottom:0.35rem; }
+.referral-card h3 { font-family:'Fraunces', Georgia, serif;font-size:1rem;margin-bottom:0.35rem; }
 .referral-code-box { background:rgba(10,191,191,0.12);border:1.5px solid rgba(10,191,191,0.3);border-radius:8px;padding:0.6rem 0.85rem;font-family:'Inter',monospace;font-size:0.88rem;font-weight:700;color:var(--teal);letter-spacing:0.08em;margin:0.75rem 0;display:flex;justify-content:space-between;align-items:center;cursor:pointer;transition:background 0.15s; }
 .referral-code-box:hover { background:rgba(10,191,191,0.2); }
 .msg-card { background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);display:flex;flex-direction:column;overflow:hidden;margin-top:1.25rem; }
@@ -121,10 +121,10 @@ const css = `
 .readiness-card { background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);padding:1.5rem 1.75rem;margin-bottom:1.75rem;display:flex;align-items:center;gap:2rem;flex-wrap:wrap; }
 .readiness-ring-wrap { position:relative;flex-shrink:0;width:110px;height:110px; }
 .readiness-ring-label { position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center; }
-.readiness-ring-pct { font-family:'Inter', sans-serif;font-size:1.65rem;color:var(--navy);line-height:1; }
+.readiness-ring-pct { font-family:'Fraunces', Georgia, serif;font-size:1.65rem;color:var(--navy);line-height:1; }
 .readiness-ring-word { font-size:0.6rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;margin-top:3px; }
 .readiness-body { flex:1;min-width:220px; }
-.readiness-title { font-family:'Inter', sans-serif;font-size:1.15rem;color:var(--navy);margin-bottom:0.2rem; }
+.readiness-title { font-family:'Fraunces', Georgia, serif;font-size:1.15rem;color:var(--navy);margin-bottom:0.2rem; }
 .readiness-sub { font-size:0.82rem;color:var(--slate);margin-bottom:1rem;line-height:1.5; }
 .readiness-factors { display:flex;flex-direction:column;gap:0.45rem; }
 .rf { display:flex;align-items:center;gap:0.6rem;font-size:0.83rem; }
@@ -464,7 +464,7 @@ export default function Dashboard() {
   ]
   const readinessScore = rfFactors.reduce((sum, f) => sum + (f.done ? f.pts : 0), 0)
   const readinessWord  = readinessScore >= 90 ? 'Ready' : readinessScore >= 60 ? 'Almost' : readinessScore >= 30 ? 'Started' : 'Early'
-  const readinessColor = readinessScore >= 90 ? '#059669' : readinessScore >= 60 ? '#0ABFBF' : readinessScore >= 30 ? '#D97706' : '#94A3B8'
+  const readinessColor = readinessScore >= 90 ? '#059669' : readinessScore >= 60 ? 'var(--clay)' : readinessScore >= 30 ? '#D97706' : '#94A3B8'
   const RING_R = 46; const RING_C = 2 * Math.PI * RING_R
   const ringDash = (readinessScore / 100) * RING_C
 
@@ -488,7 +488,7 @@ export default function Dashboard() {
                 <div style={{ width:48, height:48, borderRadius:13, background:'var(--teal-pale)', display:'flex', alignItems:'center', justifyContent:'center', marginBottom:'1rem' }}>
                   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
                 </div>
-                <h2 style={{ fontFamily:"'Inter', sans-serif", fontSize:'1.45rem', color:'var(--navy)', marginBottom:'0.4rem' }}>Applying with others?</h2>
+                <h2 style={{ fontFamily:"'Fraunces', Georgia, serif", fontSize:'1.45rem', color:'var(--navy)', marginBottom:'0.4rem' }}>Applying with others?</h2>
                 <p style={{ color:'var(--slate)', fontSize:'0.87rem', lineHeight:1.6, marginBottom:'1.4rem' }}>
                   Invite roommates or guarantors to join your group. They'll be able to view all your listings, tours, and search activity — no extra payment needed.
                 </p>
@@ -525,7 +525,7 @@ export default function Dashboard() {
                 <div style={{ width:52, height:52, borderRadius:14, background:'#ECFDF5', display:'flex', alignItems:'center', justifyContent:'center', margin:'0 auto 1rem' }}>
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#059669" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
                 </div>
-                <h2 style={{ fontFamily:"'Inter', sans-serif", fontSize:'1.45rem', color:'var(--navy)', marginBottom:'0.4rem' }}>Invites sent!</h2>
+                <h2 style={{ fontFamily:"'Fraunces', Georgia, serif", fontSize:'1.45rem', color:'var(--navy)', marginBottom:'0.4rem' }}>Invites sent!</h2>
                 <p style={{ color:'var(--slate)', fontSize:'0.87rem', lineHeight:1.6, marginBottom:'1.4rem' }}>
                   They'll receive an email with a link to join your group and view the search.
                 </p>
@@ -1235,7 +1235,7 @@ export default function Dashboard() {
             {/* Modal header */}
             <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'1.5rem 1.75rem', background:'#fff', borderBottom:'1px solid var(--surface-mid)', flexShrink:0 }}>
               <div>
-                <div style={{ fontFamily:"'Inter', sans-serif", fontSize:'1.3rem', color:'var(--navy)', fontWeight:700 }}>Listings Found</div>
+                <div style={{ fontFamily:"'Fraunces', Georgia, serif", fontSize:'1.3rem', color:'var(--navy)', fontWeight:700 }}>Listings Found</div>
                 <div style={{ fontSize:'0.78rem', color:'var(--slate)', marginTop:'0.15rem' }}>{listings.length} apartment{listings.length !== 1 ? 's' : ''} matching your criteria</div>
               </div>
               <button onClick={() => setShowListingsModal(false)} style={{ background:'none', border:'none', cursor:'pointer', color:'var(--slate)', padding:'0.25rem' }}>

@@ -34,7 +34,7 @@ const GUARANTOR_DOCS = [
 
 const css = `
 .intake { max-width: 960px; margin: 0 auto; padding: 2.5rem 2rem; animation: fadeUp 0.4s ease both; }
-.intake h1 { font-family:'Inter', sans-serif; font-size:2rem; color:var(--navy); margin-bottom:0.3rem; }
+.intake h1 { font-family:'Fraunces', Georgia, serif; font-size:2rem; color:var(--navy); margin-bottom:0.3rem; }
 .intake .sub { color:var(--slate); font-size:0.9rem; margin-bottom:2rem; }
 .progress-wrap { margin-bottom:2rem; }
 .step-labels { display:flex; justify-content:space-between; font-size:0.75rem; font-weight:600; text-transform:uppercase; letter-spacing:0.04em; color:var(--slate); margin-bottom:0.5rem; }
@@ -81,8 +81,8 @@ const css = `
 .tier-card.on { border-color:var(--teal); background:var(--teal-pale); }
 .tier-badge { position:absolute;top:-10px;right:12px;background:var(--teal);color:#fff;font-size:0.7rem;font-weight:700;padding:0.2rem 0.6rem;border-radius:100px;text-transform:uppercase;letter-spacing:0.05em; }
 .tier-name { font-weight:700; font-size:1rem; color:var(--navy); }
-.tier-price { font-family:'Inter', sans-serif; font-size:1.7rem; color:var(--teal); }
-.tier-price span { font-family:'Inter',sans-serif; font-size:0.8rem; color:var(--slate); font-weight:400; }
+.tier-price { font-family:'Fraunces', Georgia, serif; font-size:1.7rem; color:var(--teal); }
+.tier-price span { font-family:'Fraunces', Georgia, serif; font-size:0.8rem; color:var(--slate); font-weight:400; }
 .tier-feats { margin-top:0.75rem; display:flex; flex-direction:column; gap:0.3rem; }
 .tier-feat { font-size:0.8rem; color:#475569; display:flex; gap:0.4rem; }
 .tier-feat::before { content:"✓"; color:var(--teal); font-weight:700; }
@@ -270,7 +270,7 @@ export default function Intake() {
           boxShadow:'0 24px 80px rgba(0,0,0,0.3)',
         }}>
           <div style={{ fontSize:'2.8rem', marginBottom:'0.5rem' }}>🏙️</div>
-          <h2 style={{ fontFamily:"'Inter', sans-serif", fontSize:'1.75rem', color:'var(--navy)', marginBottom:'0.5rem' }}>
+          <h2 style={{ fontFamily:"'Fraunces', Georgia, serif", fontSize:'1.75rem', color:'var(--navy)', marginBottom:'0.5rem' }}>
             AptPilot found <span style={{ color:'var(--teal)' }}>{teaser.count} listings</span> for you
           </h2>
           <p style={{ color:'var(--slate)', fontSize:'0.95rem', marginBottom:'0.35rem' }}>
@@ -415,7 +415,7 @@ export default function Intake() {
               <div className="section-label"><span className="section-label-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></span>Order Summary</div>
               <div className="order-row"><span style={{ color:'var(--gray)' }}>{PLAN.name}</span><span>${PLAN.priceMonthly}/mo</span></div>
               <div className="order-row"><span style={{ color:'var(--gray)' }}>{PLAN.trialDays}-day free trial</span><span style={{ color:'#059669' }}>Included</span></div>
-              <div className="order-row"><span>Total Due Today</span><span style={{ color:'var(--teal)', fontFamily:"'Inter', sans-serif", fontSize:'1.2rem' }}>$0.00</span></div>
+              <div className="order-row"><span>Total Due Today</span><span style={{ color:'var(--teal)', fontFamily:"'Fraunces', Georgia, serif", fontSize:'1.2rem' }}>$0.00</span></div>
             </div>
           </div>
         )}
@@ -456,7 +456,7 @@ export default function Intake() {
               {/* Header */}
               <div style={{ padding:'1.75rem 1.75rem 1.25rem', borderBottom:'1px solid var(--surface-mid)' }}>
                 <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:'0.5rem' }}>
-                  <div style={{ fontFamily:"'Inter', sans-serif", fontSize:'1.35rem', color:'var(--navy)', fontWeight:700 }}>Your Search Criteria</div>
+                  <div style={{ fontFamily:"'Fraunces', Georgia, serif", fontSize:'1.35rem', color:'var(--navy)', fontWeight:700 }}>Your Search Criteria</div>
                   <button onClick={() => setShowCriteriaPreview(false)} style={{ background:'none', border:'none', cursor:'pointer', color:'var(--slate)' }}>
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                   </button>
