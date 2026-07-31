@@ -1,11 +1,11 @@
-// AptPilot sells one thing: a monthly subscription to no-fee listing alerts.
-// The retired one-time concierge tiers used pre-created Stripe price ids from
-// env vars; this uses inline price_data instead, so the sandbox -> live cutover
-// is purely a STRIPE_SECRET_KEY swap with no price ids to re-create.
+// AptPilot sells one thing: lifetime access, one time, $199.99.
 //
-// Keep PLAN_AMOUNT_CENTS in step with PLAN.priceMonthly in src/lib/stripe.js.
-const PLAN_AMOUNT_CENTS = 2900;
-const TRIAL_DAYS = 3;
+// This uses inline price_data rather than a pre-created Stripe price id, so
+// the sandbox -> live cutover is purely a STRIPE_SECRET_KEY swap with no price
+// ids to re-create.
+//
+// Keep PLAN_AMOUNT_CENTS in step with PLAN.price in src/lib/stripe.js.
+const PLAN_AMOUNT_CENTS = 19999;
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -19,26 +19,25 @@ export default async function handler(req, res) {
     const { userId, userEmail, origin } = req.body;
 
     const session = await stripe.checkout.sessions.create({
-      mode: 'subscription',
+      // 'payment', not 'subscription' — there is nothing to renew or cancel.
+      mode: 'payment',
       payment_method_types: ['card'],
       line_items: [{
         price_data: {
           currency: 'usd',
           product_data: {
-            name: 'AptPilot Alerts',
-            description: 'Instant SMS + email alerts for new no-fee NYC listings matching your criteria',
+            name: 'AptPilot — lifetime access',
+            description: 'Instant no-fee NYC listing alerts, qualification and document guidance, and unlimited searches. One payment, no renewal.',
           },
           unit_amount: PLAN_AMOUNT_CENTS,
-          recurring: { interval: 'month' },
         },
         quantity: 1,
       }],
-      subscription_data: { trial_period_days: TRIAL_DAYS },
-      success_url: `${origin}/dashboard?alerts=active`,
+      success_url: `${origin}/dashboard?welcome=1`,
       cancel_url: `${origin}/pricing`,
       customer_email: userEmail,
       client_reference_id: userId,
-      metadata: { plan: 'alerts' },
+      metadata: { plan: 'lifetime' },
     });
 
     return res.status(200).json({ url: session.url });

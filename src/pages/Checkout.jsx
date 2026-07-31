@@ -41,21 +41,21 @@ export default function Checkout() {
             <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
           </div>
           <h1 className="serif" style={{ fontSize:'1.9rem', color:'var(--navy)', marginBottom:'0.4rem' }}>Almost there!</h1>
-          <p style={{ color:'var(--gray)', fontSize:'0.9rem' }}>Start your free trial to activate your alerts.</p>
+          <p style={{ color:'var(--gray)', fontSize:'0.9rem' }}>One payment and your alerts go live.</p>
         </div>
 
         <div style={{ background:'var(--surface)', borderRadius:'10px', padding:'1.25rem', marginBottom:'1.5rem' }}>
           <div style={{ display:'flex', justifyContent:'space-between', marginBottom:'0.6rem', fontSize:'0.9rem' }}>
-            <span style={{ color:'var(--slate)' }}>{PLAN.name}</span>
-            <span style={{ fontWeight:600 }}>${PLAN.priceMonthly}/mo</span>
+            <span style={{ color:'var(--slate)' }}>{PLAN.name} — lifetime access</span>
+            <span style={{ fontWeight:600 }}>${PLAN.price}</span>
           </div>
           <div style={{ display:'flex', justifyContent:'space-between', marginBottom:'0.6rem', fontSize:'0.9rem' }}>
-            <span style={{ color:'var(--slate)' }}>{PLAN.trialDays}-day free trial</span>
-            <span style={{ fontWeight:600, color:'#059669' }}>Included</span>
+            <span style={{ color:'var(--slate)' }}>Recurring charges</span>
+            <span style={{ fontWeight:600, color:'#059669' }}>None</span>
           </div>
           <div style={{ borderTop:'1px solid var(--surface-mid)', paddingTop:'0.6rem', display:'flex', justifyContent:'space-between', fontWeight:700 }}>
             <span>Total Due Today</span>
-            <span style={{ color:'var(--teal)', fontFamily:"'Fraunces', Georgia, serif", fontSize:'1.2rem' }}>$0.00</span>
+            <span style={{ color:'var(--teal)', fontFamily:"'Fraunces', Georgia, serif", fontSize:'1.2rem' }}>${PLAN.price}</span>
           </div>
         </div>
 
@@ -65,11 +65,11 @@ export default function Checkout() {
         </div>
 
         <button className="btn btn-primary" onClick={handlePay} disabled={paying} style={{ width:'100%', justifyContent:'center', padding:'0.9rem' }}>
-          {paying ? <span className="spinner" /> : 'Start Free Trial — Activate Alerts'}
+          {paying ? <span className="spinner" /> : `Pay $${PLAN.price} — Activate Alerts`}
         </button>
 
         <p style={{ marginTop:'1rem', textAlign:'center', fontSize:'0.78rem', color:'#94A3B8', lineHeight:1.5 }}>
-          {PLAN.trialDays} days free, then ${PLAN.priceMonthly}/mo. Cancel anytime.
+          One payment. Nothing renews, and there is nothing to cancel.
         </p>
       </div>
     </div>

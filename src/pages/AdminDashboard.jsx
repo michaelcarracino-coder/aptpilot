@@ -4,10 +4,10 @@ import { supabase } from '../lib/supabase'
 import Chart from 'chart.js/auto'
 
 const ADMIN_EMAIL = 'aptpilot1@gmail.com'
-// AptPilot sells one plan; keep in step with PLAN.priceMonthly in lib/stripe.
-const PRICE_MONTHLY = 29
-const TIER_PRICE = { alerts: PRICE_MONTHLY }
-const TIER_COLOR = { alerts: '#0ABFBF' }
+// AptPilot sells one thing, once; keep in step with PLAN.price in lib/stripe.
+const PRICE_ONCE = 199.99
+const TIER_PRICE = { lifetime: PRICE_ONCE, alerts: PRICE_ONCE }
+const TIER_COLOR = { lifetime: '#C6A15B', alerts: '#C6A15B' }
 
 function fmt(n) { return n == null ? '—' : n.toLocaleString() }
 function fmtMoney(n) { return n >= 1000 ? `$${(n / 1000).toFixed(1)}k` : `$${n}` }

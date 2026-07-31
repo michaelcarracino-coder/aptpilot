@@ -40,14 +40,14 @@ async function runDailyDigest() {
   };
 
   const [
-    signups24h, totalUsers, trialing, active, canceled,
+    signups24h, totalUsers, buyers24h, activeAlerts, totalBuyers,
     notifsSent24h, notifsFailed24h, newListings24h, failedJobs, leads24h,
   ] = await Promise.all([
     count('profiles', q => q.gte('created_at', dayAgo)),
     count('profiles'),
-    count('alerts', q => q.eq('status', 'trialing')),
+    count('profiles', q => q.eq('paid', true).gte('created_at', dayAgo)),
     count('alerts', q => q.eq('status', 'active')),
-    count('alerts', q => q.eq('status', 'canceled')),
+    count('profiles', q => q.eq('paid', true)),
     count('alert_notifications', q => q.eq('status', 'sent').gte('created_at', dayAgo)),
     count('alert_notifications', q => q.eq('status', 'failed').gte('created_at', dayAgo)),
     count('seen_listings', q => q.gte('first_seen', dayAgo)),
@@ -55,10 +55,12 @@ async function runDailyDigest() {
     count('email_leads', q => q.gte('created_at', dayAgo)),
   ]);
 
-  // Keep in step with PLAN.priceMonthly in src/lib/stripe.js.
-  const PRICE_MONTHLY = 29;
-  const mrr = (typeof active === 'number' ? active : 0) * PRICE_MONTHLY;
-  const pendingMrr = (typeof trialing === 'number' ? trialing : 0) * PRICE_MONTHLY;
+  // AptPilot charges once, so there is no MRR to report — the meaningful
+  // numbers are cash booked in the last 24h and lifetime revenue to date.
+  // Keep in step with PLAN.price in src/lib/stripe.js.
+  const PRICE_ONCE = 199.99;
+  const revenue24h = (typeof buyers24h === 'number' ? buyers24h : 0) * PRICE_ONCE;
+  const revenueTotal = (typeof totalBuyers === 'number' ? totalBuyers : 0) * PRICE_ONCE;
   const crawlerDead = typeof newListings24h === 'number' && newListings24h === 0;
   const alarms = [];
   if (crawlerDead) alarms.push('Crawler found 0 new listings in 24h — likely blocked or down.');
@@ -71,9 +73,10 @@ async function runDailyDigest() {
       <h2 style="color:#0C1628;font-family:Georgia,serif;">AptPilot Daily Digest</h2>
       ${alarms.length ? `<div style="background:#FEF2F2;border:1px solid #FECACA;border-radius:10px;padding:0.85rem 1rem;margin-bottom:1rem;color:#991B1B;font-size:0.88rem;"><strong>⚠ Needs attention</strong><ul style="margin:0.5rem 0 0;padding-left:1.1rem;">${alarms.map(a => `<li>${a}</li>`).join('')}</ul></div>` : '<p style="color:#059669;font-size:0.9rem;">✅ All systems normal.</p>'}
       <table style="width:100%;border-collapse:collapse;font-size:0.9rem;">
-        ${row('MRR (active subs)', `$${mrr.toFixed(2)}`)}
-        ${row('Pending MRR (trials)', `$${pendingMrr.toFixed(2)}`)}
-        ${row('Alerts: trialing / active / canceled', `${trialing} / ${active} / ${canceled}`)}
+        ${row('Revenue (24h)', `$${revenue24h.toFixed(2)}`)}
+        ${row('Revenue (lifetime)', `$${revenueTotal.toFixed(2)}`)}
+        ${row('Buyers (24h / total)', `${buyers24h} / ${totalBuyers}`)}
+        ${row('Alerts active', activeAlerts)}
         ${row('Signups (24h)', signups24h)}
         ${row('Total users', totalUsers)}
         ${row('Email leads (24h)', leads24h)}

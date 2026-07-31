@@ -157,7 +157,6 @@ export default function Dashboard() {
   const [listings, setListings] = useState([])
   const [loading, setLoading]  = useState(true)
   const [toast, setToast]      = useState(null)
-  const [portalLoading, setPortalLoading] = useState(false)
   const [referrals, setReferrals] = useState(0)
   const [copied, setCopied] = useState(false)
   const [newIds, setNewIds]    = useState(new Set())
@@ -773,22 +772,11 @@ export default function Dashboard() {
               }
             </p>
           </div>
+          {/* No billing link: AptPilot is a one-time purchase, so there is no
+              subscription to manage and a portal here would imply recurring
+              charges that do not exist. Stripe emails the receipt. */}
           <div style={{ display:'flex', gap:'0.75rem', alignItems:'center', flexWrap:'wrap' }}>
             <div className="live-badge"><div className="pulse" />Live</div>
-            <button
-              onClick={async () => {
-                setPortalLoading(true)
-                const res = await fetch('/api/customer-portal', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ userId: user.id }) })
-                const { url, error } = await res.json()
-                setPortalLoading(false)
-                if (url) window.location.href = url
-                else showToast(error || 'Could not open billing portal')
-              }}
-              disabled={portalLoading}
-              style={{ fontSize:'0.78rem', color:'var(--slate)', background:'transparent', border:'1px solid var(--surface-mid)', borderRadius:100, padding:'0.35rem 0.85rem', cursor:'pointer', fontFamily:'inherit' }}
-            >
-              {portalLoading ? '...' : 'Billing →'}
-            </button>
           </div>
         </div>
 

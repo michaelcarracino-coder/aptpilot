@@ -35,7 +35,7 @@ const FAQS = [
   },
   {
     q: 'What if I don’t find a place?',
-    a: `Cancel whenever you like. Most searches wrap up within a couple of months, and the subscription is built to be cancelled the day you sign a lease — no minimum term, no cancellation fee.`,
+    a: `Nothing changes — there is no clock running. You pay once, so a search that takes twelve weeks costs exactly what one that takes two costs. And the account is still yours the next time you move.`,
   },
 ]
 
@@ -97,9 +97,7 @@ function FaqItem({ q, a, open, toggle }) {
 function TheMath({ navigate }) {
   const [rent, setRent] = useState(3500)
   const brokerFee = Math.round(rent * 1.0833)
-  const SEARCH_MONTHS = 3
-  const aptpilotCost = PLAN.priceMonthly * SEARCH_MONTHS
-  const savings = brokerFee - aptpilotCost
+  const savings = Math.round(brokerFee - PLAN.price)
 
   return (
     <section style={{ position: 'relative', background: 'var(--forest)', overflow: 'hidden' }}>
@@ -151,8 +149,8 @@ function TheMath({ navigate }) {
           <div style={{ borderLeft: '1px solid rgba(250,246,239,0.16)', paddingLeft: '3rem' }}>
             {[
               { label: 'Broker fee, one month’s rent', val: `$${brokerFee.toLocaleString()}` },
-              { label: 'AptPilot, per month', val: `$${PLAN.priceMonthly}` },
-              { label: `AptPilot, typical ${SEARCH_MONTHS}-month search`, val: `$${aptpilotCost}` },
+              { label: 'AptPilot, paid once', val: `$${PLAN.price}` },
+              { label: 'Every search after this one', val: '$0' },
             ].map(row => (
               <div key={row.label} style={{
                 display: 'flex', justifyContent: 'space-between', alignItems: 'baseline',
@@ -170,7 +168,7 @@ function TheMath({ navigate }) {
                 ${savings.toLocaleString()}
               </div>
               <button className="btn btn-cream btn-lg" onClick={() => navigate('/signup')} style={{ marginTop: '2rem' }}>
-                Start your free trial
+                Get lifetime access
               </button>
             </div>
           </div>
@@ -188,7 +186,7 @@ export default function Landing() {
     <div style={{ background: 'var(--paper)' }}>
       <SEO
         title="AptPilot — Instant alerts for no-fee NYC apartments"
-        description={`No-fee apartments in New York lease within hours. AptPilot texts and emails you the moment a listing matches your criteria — $${PLAN.priceMonthly}/mo, ${PLAN.trialDays}-day free trial, cancel anytime.`}
+        description={`No-fee apartments in New York lease within hours. AptPilot texts you the moment a listing matches, then walks you through qualifying and the application — $${PLAN.price} once, no subscription.`}
         canonical="https://aptpilot.vercel.app/"
       />
 
@@ -227,14 +225,14 @@ export default function Landing() {
 
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.85rem', margin: '2.4rem 0 1.1rem' }}>
                 <button className="btn btn-primary btn-lg" onClick={() => navigate('/signup')}>
-                  Start {PLAN.trialDays} days free
+                  Get started
                 </button>
                 <button className="btn btn-outline btn-lg" onClick={() => navigate('/pricing')}>
                   See pricing
                 </button>
               </div>
               <p style={{ fontSize: '0.85rem', color: 'var(--text-faint)' }}>
-                ${PLAN.priceMonthly}/month after the trial · cancel anytime
+                ${PLAN.price} once · no subscription · nothing to cancel
               </p>
             </div>
 
@@ -359,8 +357,8 @@ export default function Landing() {
                 Start before the next one lists.
               </h2>
               <p style={{ color: 'rgba(250,246,239,0.65)', fontSize: '0.98rem', lineHeight: 1.75, margin: '1.2rem 0 2.2rem', maxWidth: 380 }}>
-                Two minutes to set up. {PLAN.trialDays} days free, then ${PLAN.priceMonthly} a month.
-                Cancel the day you sign a lease.
+                Two minutes to set up. ${PLAN.price} once, and the account stays yours —
+                through this lease and the next one.
               </p>
               <button className="btn btn-cream btn-lg" onClick={() => navigate('/signup')}>
                 Create your search

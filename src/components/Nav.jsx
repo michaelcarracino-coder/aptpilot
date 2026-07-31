@@ -166,7 +166,7 @@ export default function Nav() {
           )}
           {user
             ? <button className="nav-link" onClick={handleSignOut}>Sign out</button>
-            : <button className="btn btn-primary btn-sm" onClick={() => navigate('/signup')} style={{ marginLeft:'0.6rem' }}>Start free trial</button>
+            : <button className="btn btn-primary btn-sm" onClick={() => navigate('/signup')} style={{ marginLeft:'0.6rem' }}>Get started</button>
           }
         </div>
 
@@ -226,7 +226,7 @@ export default function Nav() {
           ))}
           {user
             ? <button className="mobile-link accent" onClick={handleSignOut}>Sign out</button>
-            : <button className="mobile-link accent" onClick={() => navigate('/signup')}>Start free trial →</button>
+            : <button className="mobile-link accent" onClick={() => navigate('/signup')}>Get started →</button>
           }
         </div>
       )}

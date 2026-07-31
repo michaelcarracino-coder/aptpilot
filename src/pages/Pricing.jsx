@@ -8,10 +8,11 @@ const PHOTO = 'https://images.pexels.com/photos/30726437/pexels-photo-30726437.j
 
 const FAQS = [
   { q: 'What does AptPilot actually do?', a: 'We watch new NYC rental listings around the clock. The moment one appears with no broker fee that matches your budget, bedroom count and neighborhoods, we text and email you — so you can reach the agent before the listing is gone.' },
-  { q: 'Is this a subscription?', a: `Yes — $${PLAN.priceMonthly} a month after a ${PLAN.trialDays}-day free trial, because we monitor listings for you continuously. Cancel anytime from your dashboard; you keep access through the end of the period you have already paid for.` },
-  { q: 'Why pay when StreetEasy alerts are free?', a: 'Free portal alerts are generally batched and do not filter for no-fee units. In a market where a good no-fee listing can be gone the same day, minutes matter — we push the moment we see a match, and only for listings with no broker fee.' },
-  { q: 'How is this different from a broker?', a: 'A broker typically charges one month’s rent — often $4,000 or more — to represent you. We do not represent you and we do not show apartments. We tell you the instant a no-fee listing appears so you can contact the listing agent directly and pay no fee at all.' },
-  { q: 'What if I don’t find an apartment?', a: 'Cancel whenever you like. Most searches wrap up within a couple of months, and the subscription is built to be cancelled the day you sign a lease — there is no minimum term and no cancellation fee.' },
+  { q: 'Is this really one payment?', a: `Yes. $${PLAN.price} once. Nothing renews, nothing recurs, and there is nothing to cancel. The account stays yours for this search and for the next lease after it.` },
+  { q: 'Why not charge monthly?', a: 'Because an apartment search ends. A monthly plan would bill you hardest right when you are still looking and then force you to remember to cancel the week you finally sign. Charging once removes both problems — and means we are not quietly hoping your search drags on.' },
+  { q: 'Why pay when StreetEasy alerts are free?', a: 'Free portal alerts are generally batched and do not filter for no-fee units. In a market where a good no-fee listing can be gone the same day, minutes matter — we push the moment we see a match, and only for listings with no broker fee. Then we help you actually act on it.' },
+  { q: 'How is this different from a broker?', a: 'A broker typically charged one month’s rent — often $4,000 or more. Since the FARE Act, the listing agent works for the landlord, which means most renters now have nobody on their side of the deal. AptPilot is that side: it tells you what you qualify for, what documents a landlord will demand, and what a listing actually costs you over a year.' },
+  { q: 'What if my search takes months?', a: 'It costs exactly the same. There is no clock running, so a search that takes twelve weeks and a search that takes two are the same price. If you move again in three years, the account is still there.' },
   { q: 'What areas do you cover?', a: 'All five boroughs. You choose the neighborhoods you care about during setup, and you can change them at any time from your dashboard.' },
 ]
 
@@ -55,7 +56,7 @@ export default function Pricing() {
     <div style={{ background: 'var(--paper)' }}>
       <SEO
         title="Pricing — AptPilot"
-        description={`One plan: $${PLAN.priceMonthly} a month for instant no-fee NYC listing alerts, with a ${PLAN.trialDays}-day free trial. No broker fee, no contract, cancel anytime.`}
+        description={`One payment of $${PLAN.price} for instant no-fee NYC listing alerts and a guide through the whole rental process. No broker fee, no subscription, nothing to cancel.`}
         canonical="https://aptpilot.vercel.app/pricing"
       />
 
@@ -72,11 +73,11 @@ export default function Pricing() {
         <div className="wrap">
           <div className="eyebrow">Pricing</div>
           <h1 className="display display-xl" style={{ margin: '1.4rem 0 1.5rem', maxWidth: 720 }}>
-            One plan. Cancel<br />the day you sign.
+            Pay once.<br />Keep it for good.
           </h1>
           <p className="lede" style={{ maxWidth: 520 }}>
-            No broker fee, no setup fee, no contract. Just an alert the moment a no-fee apartment
-            matches what you are looking for.
+            No broker fee, no setup fee, no subscription. One payment for the alerts and
+            for someone who knows the process standing on your side of it.
           </p>
         </div>
       </section>
@@ -94,14 +95,14 @@ export default function Pricing() {
                 fontSize: '0.7rem', fontWeight: 600, letterSpacing: '0.13em', textTransform: 'uppercase',
                 padding: '0.35rem 0.75rem', borderRadius: 3, marginBottom: '1.5rem',
               }}>
-                {PLAN.trialDays}-day free trial
+                One payment · lifetime access
               </div>
 
               <h2 className="display display-md" style={{ marginBottom: '0.9rem' }}>{PLAN.name}</h2>
 
               <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.4rem', marginBottom: '1.4rem' }}>
-                <span className="display" style={{ fontSize: '4rem', lineHeight: 1 }}>${PLAN.priceMonthly}</span>
-                <span style={{ fontSize: '0.95rem', color: 'var(--text-muted)' }}>per month</span>
+                <span className="display" style={{ fontSize: '4rem', lineHeight: 1 }}>${PLAN.price}</span>
+                <span style={{ fontSize: '0.95rem', color: 'var(--text-muted)' }}>once</span>
               </div>
 
               <p style={{ fontSize: '0.96rem', color: 'var(--text-muted)', lineHeight: 1.75, marginBottom: '2rem', maxWidth: 420 }}>
@@ -120,10 +121,10 @@ export default function Pricing() {
               </div>
 
               <button className="btn btn-primary btn-lg" onClick={handleSelect} style={{ width: '100%' }}>
-                Start your free trial
+                Get lifetime access
               </button>
               <p style={{ fontSize: '0.82rem', color: 'var(--text-faint)', marginTop: '0.9rem', textAlign: 'center' }}>
-                $0 today · ${PLAN.priceMonthly}/mo after {PLAN.trialDays} days · cancel anytime
+                ${PLAN.price} once · nothing renews · nothing to cancel
               </p>
             </div>
 
@@ -157,11 +158,12 @@ export default function Pricing() {
               <div style={{ color: 'var(--clay)' }}>AptPilot</div>
             </div>
             {[
-              ['Cost', "One month's rent, often $4,000+", `$${PLAN.priceMonthly}/mo, cancel anytime`],
+              ['Cost', "One month's rent, often $4,000+", `$${PLAN.price}, once`],
               ['Who they work for', 'Paid more on pricier apartments', 'Flat fee — no bias'],
               ['No-fee listings', 'Rarely their priority', 'The only thing we send'],
               ['Speed', 'Business hours', 'The moment a match is posted'],
-              ['Commitment', 'Fee due at lease signing', 'Month to month, no contract'],
+              ['If your search drags', 'Fee due whenever you sign', 'Costs the same either way'],
+              ['Next time you move', 'Pay the fee again', 'Account is still yours'],
             ].map(([feat, broker, us]) => (
               <div key={feat} style={{
                 display: 'grid', gridTemplateColumns: '1.1fr 1fr 1fr', gap: '1rem',
@@ -197,12 +199,12 @@ export default function Pricing() {
             {/* rgba on paper, not --text-muted: the muted token is tuned for
                 light backgrounds and is nearly unreadable on forest. */}
             <p style={{ color: 'rgba(250,246,239,0.7)', fontSize: '0.98rem', lineHeight: 1.7, margin: '1rem auto 2rem', maxWidth: 420 }}>
-              Set up your criteria in two minutes. The first {PLAN.trialDays} days are free.
+              Set up your criteria in two minutes. One payment and it is yours for good.
             </p>
             {/* Cream on forest — a forest button here would be invisible. */}
-            <button className="btn btn-cream btn-lg" onClick={handleSelect}>Start your free trial</button>
+            <button className="btn btn-cream btn-lg" onClick={handleSelect}>Get lifetime access</button>
             <p style={{ color: 'rgba(250,246,239,0.5)', fontSize: '0.8rem', marginTop: '1rem' }}>
-              No card charged for {PLAN.trialDays} days · cancel anytime
+              ${PLAN.price} once · no subscription · no broker fee
             </p>
           </div>
         </div>
