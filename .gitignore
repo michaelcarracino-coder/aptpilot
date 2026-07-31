@@ -1,4 +1,53 @@
-node_modules
-dist
-.DS_Store
+# ============================================================
+# This git repo is rooted at the HOME directory, which means
+# everything personal — shell history, Library, Documents,
+# Downloads, credentials — physically sits inside the repo.
+#
+# So this file is DENY-BY-DEFAULT: ignore everything, then
+# explicitly allow only the files that belong to AptPilot.
+#
+# Adding a new project file at the repo root? You must add an
+# allow rule for it below, or git will not see it.
+# ============================================================
+
+# --- 1. Ignore everything at the repo root. ---
+/*
+
+# --- 2. Allow AptPilot's project files. ---
+!/.gitignore
+!/index.html
+!/package.json
+!/package-lock.json
+!/vercel.json
+!/vite.config.js
+!/api/
+!/src/
+
+# --- 3. public/ is literally the same directory as macOS ~/Public
+#        (the filesystem is case-insensitive). Allow the site assets,
+#        never the world-writable Drop Box or macOS metadata. ---
+!/public/
+/public/Drop Box/
+/public/.localized
+
+# --- 4. Claude Code: only the launch config. Never sessions,
+#        telemetry, cached credentials, or memory files. ---
+!/.claude/
+/.claude/*
+!/.claude/launch.json
+
+# --- 5. ~/aptpilot is a STALE DUPLICATE of the app. Only the two
+#        files already tracked there; nothing else. ---
+!/aptpilot/
+/aptpilot/*
+!/aptpilot/package.json
+!/aptpilot/package-lock.json
+
+# --- 6. Secrets and build artifacts, belt-and-braces. These are
+#        already covered by rule 1, but are repeated so the rules
+#        still hold if this file is ever restructured. ---
 .env
+.env.*
+node_modules/
+dist/
+.DS_Store
