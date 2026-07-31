@@ -1,23 +1,9 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { supabase } from '../lib/supabase'
-
-const TENANT_DOCS = [
-  { id:'t1', label:'ID or Passport' },
-  { id:'t2', label:'Offer Letter or Letter of Employment' },
-  { id:'t3', label:'2 Most Recent Bank Statements' },
-  { id:'t4', label:'Top 2 Pages of 2 Most Recent Tax Returns' },
-  { id:'t5', label:'6 Months Proof of Rent Payments or Landlord Letter', optional: true },
-]
-
-const GUARANTOR_DOCS = [
-  { id:'g1', label:'ID or Passport' },
-  { id:'g2', label:'Letter of Employment' },
-  { id:'g3', label:'2 Most Recent Paystubs' },
-  { id:'g4', label:'2 Most Recent Bank Statements' },
-  { id:'g5', label:'Top 2 Pages of 2 Most Recent Tax Returns' },
-  { id:'g6', label:'2 Most Recent W-2s', optional: true },
-]
+// Shared with api/ai-chat.js so the agent's "what's missing" answer is read
+// from the same checklist these upload slots are rendered from.
+import { TENANT_DOCS, GUARANTOR_DOCS } from '../lib/documents'
 
 const css = `
 .docs-page { max-width: 960px; margin: 0 auto; padding: 2.5rem 2rem 5rem; }

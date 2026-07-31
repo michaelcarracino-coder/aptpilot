@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import { useAuth } from '../context/AuthContext'
+import { supabase } from '../lib/supabase'
 
 const css = `
 .cw-fab {
@@ -131,10 +131,9 @@ const css = `
 .cw-send:disabled { opacity: 0.4; cursor: default; }
 `
 
-const INTRO = { id: 'intro', body: "Hi! I'm the AptPilot assistant. Ask me anything about your search, documents, or the NYC rental process.", from_admin: true }
+const INTRO = { id: 'intro', body: "I'm your AptPilot guide. Ask me what you qualify for, what's missing from your application, what's on the market, or anything about how renting in New York actually works.", from_admin: true }
 
 export default function ChatWidget() {
-  const { user } = useAuth()
   const [open, setOpen] = useState(false)
   const [messages, setMessages] = useState([INTRO])
   const [input, setInput] = useState('')
@@ -155,10 +154,17 @@ export default function ChatWidget() {
     setMessages(prev => [...prev, userMsg])
     setLoading(true)
     try {
+      // The server derives identity from this token, not from anything we
+      // claim in the body — a browser-supplied user id would let anyone read
+      // another renter's account.
+      const { data: { session } } = await supabase.auth.getSession()
       const res = await fetch('/api/ai-chat', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: user?.id || null, message: body, conversationHistory: messages.slice(-8) }),
+        headers: {
+          'Content-Type': 'application/json',
+          ...(session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {}),
+        },
+        body: JSON.stringify({ message: body, conversationHistory: messages.slice(-8) }),
       })
       const { reply } = await res.json()
       if (reply) {
