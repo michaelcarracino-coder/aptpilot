@@ -135,9 +135,10 @@ export default function Nav() {
       `}</style>
 
       <nav className={`nav${scrolled ? ' scrolled' : ''}`}>
-        {/* Wordmark — editorial, no chip, no monogram tile */}
-        <div className="nav-logo" onClick={() => navigate('/')}>
-          Apt<span>Pilot</span>
+        {/* Wordmark — the logo artwork itself (keyhole mark + aptpilot) */}
+        <div className="nav-logo" onClick={() => navigate('/')} role="link" tabIndex={0}
+             onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') navigate('/') }}>
+          <img src="/logo-wordmark.png" alt="AptPilot" width="440" height="105" />
         </div>
 
         <div className="nav-desktop" style={{ display:'flex', alignItems:'center', gap:'0.15rem' }}>

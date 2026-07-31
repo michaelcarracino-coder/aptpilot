@@ -206,17 +206,17 @@ input, select, textarea { font-family: inherit; }
   border-color: var(--line);
 }
 .nav-logo {
-  font-family: 'Fraunces', Georgia, serif;
-  font-size: 1.32rem; font-weight: 600;
-  font-variation-settings: 'opsz' 120;
-  letter-spacing: -0.02em;
-  color: var(--text); cursor: pointer;
-  /* No gap: the wordmark is two adjacent text nodes ("Apt" + "Pilot"),
-     and flex gap would split it into "Apt Pilot". */
-  display: flex; align-items: baseline; gap: 0;
-  user-select: none;
+  display: flex; align-items: center;
+  cursor: pointer; user-select: none;
 }
-.nav-logo span { color: var(--clay); }
+/* The wordmark is the logo artwork (transparent PNG at 4x), so it is sized
+   by height and the width follows. */
+.nav-logo img {
+  height: 26px; width: auto; display: block;
+}
+@media (max-width: 640px) {
+  .nav-logo img { height: 22px; }
+}
 .nav-links { display: flex; align-items: center; gap: 0.15rem; }
 .nav-link {
   padding: 0.5rem 0.9rem; border-radius: var(--radius-sm); font-size: 0.89rem;
