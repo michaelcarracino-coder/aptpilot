@@ -27,6 +27,13 @@
   --clay-pale:   rgba(190,100,56,0.10);
   --sand:        #DCCDB8;
 
+  /* App-only status hues (dashboard, documents, intake). Same warm family
+     as the accent, desaturated — not the SaaS red/blue/purple/green set. */
+  --rust:        #9C3B2E;  /* declined / incomplete / error */
+  --rust-pale:   rgba(156,59,46,0.10);
+  --moss:        #5B6B4F;  /* neutral / in-progress, sits between forest and clay */
+  --moss-pale:   rgba(91,107,79,0.10);
+
   /* Type */
   --text:        #1F1A14;  /* warm near-black */
   --text-muted:  #6B6055;

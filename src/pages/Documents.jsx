@@ -11,41 +11,41 @@ const css = `
 .docs-page .sub { color:var(--slate); font-size:0.9rem; margin-bottom:2rem; }
 .docs-role-tabs { display:flex; gap:0; margin-bottom:1.75rem; background:var(--surface); border-radius:9px; padding:3px; max-width:320px; }
 .docs-role-tab { flex:1; padding:0.5rem 0.75rem; border-radius:7px; border:none; font-size:0.83rem; font-weight:600; cursor:pointer; background:transparent; color:var(--slate); transition:all 0.15s; font-family:inherit; }
-.docs-role-tab.on { background:#fff; color:var(--navy); box-shadow:0 1px 4px rgba(12,22,40,0.1); }
+.docs-role-tab.on { background:#fff; color:var(--navy); box-shadow:var(--shadow-xs); }
 .docs-header-row { display:flex; align-items:center; justify-content:space-between; margin-bottom:1.25rem; flex-wrap:wrap; gap:0.75rem; }
 .docs-section { display:flex; flex-direction:column; gap:0.75rem; }
-.doc-slot { background:#fff; border-radius:12px; box-shadow:var(--shadow); overflow:hidden; }
+.doc-slot { background:#fff; border-radius:var(--radius); box-shadow:var(--shadow); overflow:hidden; }
 .doc-slot-header { display:flex; align-items:center; gap:0.9rem; padding:1rem 1.25rem; border-bottom:1.5px solid var(--surface-mid); }
 .doc-slot-num { width:28px; height:28px; border-radius:50%; background:var(--teal); color:#fff; font-size:0.8rem; font-weight:700; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
 .doc-slot-num.empty { background:var(--surface-mid); color:var(--slate); }
 .doc-slot-title { font-weight:700; font-size:0.9rem; color:var(--navy); flex:1; }
 .doc-slot-badge { font-size:0.68rem; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; padding:0.18rem 0.55rem; border-radius:100px; }
-.doc-slot-badge.done { background:#ECFDF5; color:#059669; }
-.doc-slot-badge.missing { background:#FEF3C7; color:#D97706; }
+.doc-slot-badge.done { background:rgba(30,61,51,0.08); color:var(--forest); }
+.doc-slot-badge.missing { background:var(--clay-pale); color:var(--clay-dark); }
 .doc-slot-badge.optional { background:var(--surface); color:var(--slate); }
 .doc-slot-body { padding:0.85rem 1.25rem; display:flex; flex-direction:column; gap:0.5rem; }
-.doc-file-row { display:flex; align-items:center; gap:0.65rem; padding:0.6rem 0.75rem; background:var(--surface); border-radius:8px; font-size:0.83rem; }
+.doc-file-row { display:flex; align-items:center; gap:0.65rem; padding:0.6rem 0.75rem; background:var(--surface); border-radius:var(--radius-lg); font-size:0.83rem; }
 .doc-file-name { flex:1; color:var(--navy); font-weight:500; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .doc-file-actions { display:flex; gap:0.4rem; flex-shrink:0; }
-.doc-file-btn { display:inline-flex; align-items:center; gap:0.3rem; font-size:0.75rem; font-weight:600; padding:0.28rem 0.65rem; border-radius:6px; border:none; cursor:pointer; font-family:inherit; transition:all 0.15s; }
+.doc-file-btn { display:inline-flex; align-items:center; gap:0.3rem; font-size:0.75rem; font-weight:600; padding:0.28rem 0.65rem; border-radius:var(--radius-lg); border:none; cursor:pointer; font-family:inherit; transition:all 0.15s; }
 .doc-file-btn.view { background:var(--teal-pale); color:var(--teal); }
-.doc-file-btn.view:hover { background:rgba(10,191,191,0.2); }
-.doc-file-btn.del { background:#FEF2F2; color:#EF4444; }
-.doc-file-btn.del:hover { background:#FECACA; }
+.doc-file-btn.view:hover { background:rgba(190,100,56,0.2); }
+.doc-file-btn.del { background:var(--rust-pale); color:var(--rust); }
+.doc-file-btn.del:hover { background:rgba(156,59,46,0.2); }
 .doc-empty { font-size:0.82rem; color:var(--slate); font-style:italic; }
-.collate-btn { display:inline-flex; align-items:center; gap:0.5rem; background:var(--navy); color:#fff; border:none; border-radius:10px; padding:0.65rem 1.25rem; font-size:0.88rem; font-weight:700; cursor:pointer; font-family:inherit; transition:all 0.15s; }
-.collate-btn:hover { background:#1a2d4f; }
+.collate-btn { display:inline-flex; align-items:center; gap:0.5rem; background:var(--navy); color:#fff; border:none; border-radius:var(--radius-xl); padding:0.65rem 1.25rem; font-size:0.88rem; font-weight:700; cursor:pointer; font-family:inherit; transition:all 0.15s; }
+.collate-btn:hover { background:var(--forest-mid); }
 .collate-btn:disabled { opacity:0.6; cursor:not-allowed; }
 .progress-bar-wrap { background:var(--surface-mid); border-radius:100px; height:6px; overflow:hidden; margin-bottom:0.4rem; }
 .progress-bar-fill { background:var(--teal); height:100%; border-radius:100px; transition:width 0.3s ease; }
 .progress-label { font-size:0.78rem; color:var(--slate); }
-.summary-modal-overlay { position:fixed;inset:0;background:rgba(6,9,15,0.55);backdrop-filter:blur(6px);z-index:1000;display:flex;align-items:center;justify-content:center;padding:1.5rem; }
-.summary-modal { background:#fff;border-radius:20px;max-width:480px;width:100%;padding:2rem;box-shadow:0 24px 80px rgba(0,0,0,0.22);animation:fadeUp 0.25s ease; }
+.summary-modal-overlay { position:fixed;inset:0;background:rgba(31,26,20,0.45);z-index:1000;display:flex;align-items:center;justify-content:center;padding:1.5rem; }
+.summary-modal { background:#fff;border-radius:var(--radius-xl);max-width:480px;width:100%;padding:2rem;box-shadow:var(--shadow-xl);animation:fadeUp 0.25s ease; }
 .summary-modal h2 { font-family:'Fraunces', Georgia, serif;font-size:1.35rem;color:var(--navy);margin-bottom:0.3rem; }
 .summary-modal .modal-sub { font-size:0.82rem;color:var(--slate);margin-bottom:1.4rem;line-height:1.55; }
 .summary-field { display:flex;flex-direction:column;gap:0.3rem;margin-bottom:0.9rem; }
 .summary-field label { font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:var(--slate); }
-.summary-field input, .summary-field select { padding:0.55rem 0.85rem;border:1.5px solid var(--surface-mid);border-radius:9px;font-size:0.88rem;font-family:inherit;color:var(--navy);outline:none;transition:border-color 0.15s; }
+.summary-field input, .summary-field select { padding:0.55rem 0.85rem;border:1.5px solid var(--surface-mid);border-radius:var(--radius-lg);font-size:0.88rem;font-family:inherit;color:var(--navy);outline:none;transition:border-color 0.15s; }
 .summary-field input:focus, .summary-field select:focus { border-color:var(--teal); }
 .summary-field-row { display:grid;grid-template-columns:1fr 1fr;gap:0.75rem; }
 `
@@ -361,7 +361,7 @@ export default function Documents() {
         </div>
 
         {loading
-          ? <div style={{ display:'flex', justifyContent:'center', padding:'3rem' }}><div className="spinner" style={{ borderColor:'rgba(10,191,191,0.3)', borderTopColor:'var(--teal)', width:28, height:28 }} /></div>
+          ? <div style={{ display:'flex', justifyContent:'center', padding:'3rem' }}><div className="spinner" style={{ borderColor:'var(--clay-pale)', borderTopColor:'var(--teal)', width:28, height:28 }} /></div>
           : (
             <div className="docs-section">
               {docList.map((slot, i) => {
@@ -383,7 +383,7 @@ export default function Documents() {
                       <div className="doc-slot-body">
                         <label style={{ display:'inline-flex', alignItems:'center', gap:'0.4rem', cursor:'pointer', fontSize:'0.8rem', fontWeight:600, color:'var(--teal)', padding:'0.35rem 0', alignSelf:'flex-start' }}>
                           {uploadingSlot === slot.id
-                            ? <><span className="spinner" style={{ borderColor:'rgba(10,191,191,0.3)', borderTopColor:'var(--teal)', width:12, height:12, display:'inline-block' }} /> Uploading…</>
+                            ? <><span className="spinner" style={{ borderColor:'var(--clay-pale)', borderTopColor:'var(--teal)', width:12, height:12, display:'inline-block' }} /> Uploading…</>
                             : <><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg> {done ? 'Upload another' : 'Upload file'}</>
                           }
                           <input type="file" accept=".pdf,.jpg,.jpeg,.png" style={{ display:'none' }} onChange={e => handleUpload(slot, e.target.files[0])} disabled={uploadingSlot === slot.id} />

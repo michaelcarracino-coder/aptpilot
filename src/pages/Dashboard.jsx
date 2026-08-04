@@ -19,8 +19,8 @@ const css = `
 .dash-header { display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:2rem;flex-wrap:wrap;gap:1rem; }
 .dash-header h1 { font-family:'Fraunces', Georgia, serif; font-size:2rem; color:var(--navy); }
 .dash-header p { color:var(--slate); font-size:0.88rem; margin-top:0.25rem; }
-.live-badge { background:#ECFDF5;color:#059669;border:1px solid #A7F3D0;padding:0.4rem 1rem;border-radius:100px;font-size:0.8rem;font-weight:600;display:flex;align-items:center;gap:0.45rem; }
-.pulse { width:7px;height:7px;border-radius:50%;background:#059669;animation:pulse 2s infinite; }
+.live-badge { background:var(--paper-deep);color:var(--text-muted);border:1px solid var(--line);padding:0.4rem 1rem;border-radius:100px;font-size:0.8rem;font-weight:600;display:flex;align-items:center;gap:0.45rem; }
+.pulse { width:7px;height:7px;border-radius:50%;background:var(--clay);animation:pulse 2s infinite; }
 .kpi-row { display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:1.75rem; }
 @media(max-width:700px){ .kpi-row{grid-template-columns:repeat(2,1fr);} }
 .kpi { background:#fff;border-radius:var(--radius);padding:1.25rem;box-shadow:var(--shadow); }
@@ -33,17 +33,17 @@ const css = `
 .tour-card { background:#fff;border-radius:var(--radius);padding:1.1rem 1.25rem;box-shadow:var(--shadow);display:flex;align-items:center;gap:1.25rem;margin-bottom:0.75rem;border:1.5px solid transparent;transition:all 0.18s; }
 .tour-card:hover { border-color:var(--teal); }
 .tour-card.new-listing { animation:highlightIn 1.2s ease; }
-@keyframes highlightIn { 0%{background:#E0FFF9;border-color:var(--teal);} 100%{background:#fff;border-color:transparent;} }
-.tour-icon { background:var(--navy);color:#fff;border-radius:10px;padding:0.6rem 0.75rem;text-align:center;min-width:52px;flex-shrink:0; }
+@keyframes highlightIn { 0%{background:var(--clay-pale);border-color:var(--teal);} 100%{background:#fff;border-color:transparent;} }
+.tour-icon { background:var(--navy);color:#fff;border-radius:var(--radius-lg);padding:0.6rem 0.75rem;text-align:center;min-width:52px;flex-shrink:0; }
 .tour-addr { font-weight:600;font-size:0.92rem;color:var(--navy); }
 .tour-meta { font-size:0.8rem;color:var(--slate);margin-top:0.2rem;display:flex;gap:0.75rem;flex-wrap:wrap; }
 .tour-price { font-family:'Fraunces', Georgia, serif;font-size:1.15rem;color:var(--teal);text-align:right;flex-shrink:0; }
 .tour-price small { font-family:'Fraunces', Georgia, serif;font-size:0.72rem;color:var(--slate);display:block; }
 .status-pill { padding:0.28rem 0.65rem;border-radius:100px;font-size:0.72rem;font-weight:700;margin-top:0.3rem;display:inline-block; }
-.s-pending { background:#FEF3C7;color:#D97706; }
-.s-outreach_sent { background:#EFF6FF;color:#2563EB; }
-.s-confirmed { background:#ECFDF5;color:#059669; }
-.s-declined { background:#FEF2F2;color:#EF4444; }
+.s-pending { background:var(--clay-pale);color:var(--clay-dark); }
+.s-outreach_sent { background:var(--moss-pale);color:var(--moss); }
+.s-confirmed { background:rgba(30,61,51,0.08);color:var(--forest); }
+.s-declined { background:var(--rust-pale);color:var(--rust); }
 .tracker-card { background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);padding:1.25rem; }
 .tracker-row { display:flex;gap:0.85rem;padding:0.65rem 0;border-bottom:1px solid var(--surface-mid); }
 .tracker-row:last-child { border:none; }
@@ -52,7 +52,7 @@ const css = `
 .crit-row { display:flex;justify-content:space-between;padding:0.45rem 0;border-bottom:1px solid var(--surface-mid);font-size:0.85rem; }
 .crit-row:last-child { border:none; }
 .empty-state { text-align:center;padding:2.5rem;color:var(--slate);font-size:0.9rem;background:#fff;border-radius:var(--radius);box-shadow:var(--shadow); }
-.success-banner { background:#ECFDF5;border:1px solid #A7F3D0;border-radius:12px;padding:1rem 1.5rem;margin-bottom:1.5rem;display:flex;align-items:center;gap:0.75rem;color:#065F46;font-size:0.88rem;font-weight:500; }
+.success-banner { background:rgba(30,61,51,0.06);border:1px solid rgba(30,61,51,0.18);border-radius:var(--radius-xl);padding:1rem 1.5rem;margin-bottom:1.5rem;display:flex;align-items:center;gap:0.75rem;color:var(--forest);font-size:0.88rem;font-weight:500; }
 .onboard-card { background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);padding:1.5rem;margin-bottom:1.75rem; }
 .onboard-criteria-row { display:grid;grid-template-columns:1fr;gap:1.25rem;align-items:start;margin-bottom:1.75rem; }
 .onboard-title { font-family:'Fraunces', Georgia, serif;font-size:1.1rem;color:var(--navy);margin-bottom:1.1rem; }
@@ -61,11 +61,11 @@ const css = `
 .onboard-step:not(:last-child)::after { content:'';position:absolute;left:13px;top:36px;bottom:0;width:2px;background:var(--surface-mid); }
 .onboard-dot { width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:0.75rem;font-weight:700;z-index:1; }
 .onboard-dot.done { background:var(--teal);color:#fff; }
-.onboard-dot.active { background:var(--navy);color:#fff;box-shadow:0 0 0 4px rgba(10,191,191,0.15); }
+.onboard-dot.active { background:var(--navy);color:#fff;box-shadow:0 0 0 4px var(--clay-pale); }
 .onboard-dot.pending { background:var(--surface-mid);color:var(--slate); }
 .onboard-label { font-weight:600;font-size:0.88rem;color:var(--navy);line-height:1.3; }
 .onboard-sublabel { font-size:0.78rem;color:var(--slate);margin-top:0.15rem; }
-.rt-toast { position:fixed;bottom:1.5rem;right:1.5rem;background:var(--navy);color:#fff;padding:0.75rem 1.25rem;border-radius:12px;font-size:0.85rem;font-weight:500;box-shadow:var(--shadow-lg);z-index:999;animation:fadeUp 0.3s ease;display:flex;align-items:center;gap:0.6rem; }
+.rt-toast { position:fixed;bottom:1.5rem;right:1.5rem;background:var(--navy);color:#fff;padding:0.75rem 1.25rem;border-radius:var(--radius-xl);font-size:0.85rem;font-weight:500;box-shadow:var(--shadow-lg);z-index:999;animation:fadeUp 0.3s ease;display:flex;align-items:center;gap:0.6rem; }
 .group-members-card { background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);padding:1.25rem;margin-bottom:1.75rem; }
 .group-member-row { display:flex;align-items:center;gap:1rem;padding:0.75rem 0;border-bottom:1px solid var(--surface-mid); }
 .group-member-row:last-child { border:none; }
@@ -75,24 +75,24 @@ const css = `
 .member-tags { display:flex;gap:0.4rem;flex-wrap:wrap;margin-top:0.35rem; }
 .member-tag { font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;padding:0.18rem 0.55rem;border-radius:100px; }
 .tag-owner { background:var(--teal-pale);color:var(--teal); }
-.tag-tenant { background:#EFF6FF;color:#2563EB; }
-.tag-guarantor { background:#F5F3FF;color:#7C3AED; }
-.tag-complete { background:#ECFDF5;color:#059669; }
-.tag-partial { background:#FEF3C7;color:#D97706; }
-.tag-incomplete { background:#FEF2F2;color:#EF4444; }
-.referral-card { background:linear-gradient(135deg,var(--navy),var(--navy-soft));border-radius:var(--radius);padding:1.25rem;color:#fff; }
-.s-apply_requested { background:#F5F3FF;color:#7C3AED; }
-.apply-btn { margin-top:0.5rem;display:inline-flex;align-items:center;gap:0.35rem;font-size:0.75rem;font-weight:700;padding:0.3rem 0.75rem;border-radius:100px;border:1.5px solid #7C3AED;background:transparent;color:#7C3AED;cursor:pointer;font-family:inherit;transition:all 0.15s; }
-.apply-btn:hover { background:#F5F3FF; }
-.apply-btn.sent { border-color:#059669;color:#059669;cursor:default; }
-.edit-modal-overlay { position:fixed;inset:0;background:rgba(6,9,15,0.5);backdrop-filter:blur(5px);z-index:1000;display:flex;align-items:center;justify-content:center;padding:1.5rem; }
-.edit-modal { background:#fff;border-radius:18px;max-width:940px;width:100%;box-shadow:0 24px 80px rgba(0,0,0,0.2);animation:fadeUp 0.22s ease;display:grid;grid-template-columns:1fr 300px; }
+.tag-tenant { background:var(--moss-pale);color:var(--moss); }
+.tag-guarantor { background:rgba(30,61,51,0.08);color:var(--forest); }
+.tag-complete { background:rgba(30,61,51,0.08);color:var(--forest); }
+.tag-partial { background:var(--clay-pale);color:var(--clay-dark); }
+.tag-incomplete { background:var(--rust-pale);color:var(--rust); }
+.referral-card { background:var(--navy);border-radius:var(--radius-lg);padding:1.25rem;color:#fff; }
+.s-apply_requested { background:var(--moss-pale);color:var(--moss); }
+.apply-btn { margin-top:0.5rem;display:inline-flex;align-items:center;gap:0.35rem;font-size:0.75rem;font-weight:700;padding:0.3rem 0.75rem;border-radius:100px;border:1.5px solid var(--clay);background:transparent;color:var(--clay);cursor:pointer;font-family:inherit;transition:all 0.15s; }
+.apply-btn:hover { background:var(--clay-pale); }
+.apply-btn.sent { border-color:var(--forest);color:var(--forest);cursor:default; }
+.edit-modal-overlay { position:fixed;inset:0;background:rgba(31,26,20,0.45);z-index:1000;display:flex;align-items:center;justify-content:center;padding:1.5rem; }
+.edit-modal { background:#fff;border-radius:var(--radius-xl);max-width:940px;width:100%;box-shadow:var(--shadow-xl);animation:fadeUp 0.22s ease;display:grid;grid-template-columns:1fr 300px; }
 .edit-modal-form { padding:1.75rem;overflow-y:auto;max-height:88vh; }
 .edit-modal-preview { background:var(--surface);border-left:1px solid var(--surface-mid);padding:1.75rem;overflow-y:auto;max-height:88vh; }
 .edit-modal h3 { font-family:'Fraunces', Georgia, serif;font-size:1.2rem;color:var(--navy);margin-bottom:1.1rem; }
 .em-field { display:flex;flex-direction:column;gap:0.3rem;margin-bottom:0.85rem; }
 .em-field label { font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:var(--slate); }
-.em-field input, .em-field select { padding:0.5rem 0.8rem;border:1.5px solid var(--surface-mid);border-radius:8px;font-size:0.88rem;font-family:inherit;color:var(--navy);outline:none;transition:border-color 0.15s;background:#fff; }
+.em-field input, .em-field select { padding:0.5rem 0.8rem;border:1.5px solid var(--surface-mid);border-radius:var(--radius-xl);font-size:0.88rem;font-family:inherit;color:var(--navy);outline:none;transition:border-color 0.15s;background:#fff; }
 .em-field input:focus, .em-field select:focus { border-color:var(--teal); }
 .em-row { display:grid;grid-template-columns:1fr 1fr;gap:0.75rem; }
 .em-amenity-grid { display:flex;flex-wrap:wrap;gap:0.35rem;margin-top:0.4rem; }
@@ -100,22 +100,22 @@ const css = `
 .em-amenity-chip:hover .bt-tooltip { opacity:1 !important; }
 @media(max-width:700px){ .edit-modal{grid-template-columns:1fr;} .edit-modal-preview{display:none;} }
 .referral-card h3 { font-family:'Fraunces', Georgia, serif;font-size:1rem;margin-bottom:0.35rem; }
-.referral-code-box { background:rgba(10,191,191,0.12);border:1.5px solid rgba(10,191,191,0.3);border-radius:8px;padding:0.6rem 0.85rem;font-family:'Inter',monospace;font-size:0.88rem;font-weight:700;color:var(--teal);letter-spacing:0.08em;margin:0.75rem 0;display:flex;justify-content:space-between;align-items:center;cursor:pointer;transition:background 0.15s; }
-.referral-code-box:hover { background:rgba(10,191,191,0.2); }
+.referral-code-box { background:var(--clay-pale);border:1.5px solid var(--clay);border-radius:var(--radius-xl);padding:0.6rem 0.85rem;font-family:'Inter',monospace;font-size:0.88rem;font-weight:700;color:var(--clay-dark);letter-spacing:0.08em;margin:0.75rem 0;display:flex;justify-content:space-between;align-items:center;cursor:pointer;transition:background 0.15s; }
+.referral-code-box:hover { background:rgba(190,100,56,0.2); }
 .msg-card { background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);display:flex;flex-direction:column;overflow:hidden;margin-top:1.25rem; }
 .msg-thread { flex:1;overflow-y:auto;max-height:260px;padding:1rem;display:flex;flex-direction:column;gap:0.6rem; }
-.msg-bubble { max-width:82%;padding:0.55rem 0.85rem;border-radius:14px;font-size:0.84rem;line-height:1.5; }
+.msg-bubble { max-width:82%;padding:0.55rem 0.85rem;border-radius:var(--radius-xl);font-size:0.84rem;line-height:1.5; }
 .msg-bubble.mine { align-self:flex-end;background:var(--navy);color:#fff;border-bottom-right-radius:4px; }
 .msg-bubble.theirs { align-self:flex-start;background:var(--surface);color:var(--navy);border-bottom-left-radius:4px; }
 .msg-bubble .msg-time { font-size:0.68rem;opacity:0.55;margin-top:0.2rem; }
 .msg-input-row { display:flex;gap:0.5rem;padding:0.75rem 1rem;border-top:1px solid var(--surface-mid); }
-.msg-input { flex:1;border:1.5px solid var(--surface-mid);border-radius:9px;padding:0.5rem 0.75rem;font-size:0.85rem;font-family:inherit;color:var(--navy);outline:none;transition:border-color 0.15s; }
+.msg-input { flex:1;border:1.5px solid var(--surface-mid);border-radius:var(--radius-lg);padding:0.5rem 0.75rem;font-size:0.85rem;font-family:inherit;color:var(--navy);outline:none;transition:border-color 0.15s; }
 .msg-input:focus { border-color:var(--teal); }
-.msg-send-btn { background:var(--navy);color:#fff;border:none;border-radius:9px;padding:0.5rem 1rem;font-size:0.82rem;font-weight:700;cursor:pointer;font-family:inherit;transition:background 0.15s; }
-.msg-send-btn:hover { background:#1a2d4f; }
+.msg-send-btn { background:var(--navy);color:#fff;border:none;border-radius:var(--radius-lg);padding:0.5rem 1rem;font-size:0.82rem;font-weight:700;cursor:pointer;font-family:inherit;transition:background 0.15s; }
+.msg-send-btn:hover { background:var(--forest-mid); }
 .msg-send-btn:disabled { opacity:0.5;cursor:not-allowed; }
-.msg-unread-dot { width:7px;height:7px;border-radius:50%;background:#EF4444;display:inline-block;margin-left:5px;vertical-align:middle; }
-.commute-mode { display:inline-flex;align-items:center;gap:0.25rem;background:#F8FAFB;border:1px solid var(--surface-mid);border-radius:6px;padding:0.2rem 0.45rem;font-size:0.72rem;color:var(--navy);font-weight:600;text-decoration:none;transition:background 0.12s; }
+.msg-unread-dot { width:7px;height:7px;border-radius:50%;background:var(--rust);display:inline-block;margin-left:5px;vertical-align:middle; }
+.commute-mode { display:inline-flex;align-items:center;gap:0.25rem;background:var(--paper-deep);border:1px solid var(--surface-mid);border-radius:var(--radius-lg);padding:0.2rem 0.45rem;font-size:0.72rem;color:var(--navy);font-weight:600;text-decoration:none;transition:background 0.12s; }
 .commute-mode:hover { background:var(--teal-pale);border-color:var(--teal); }
 .commute-mode span { font-weight:400;color:var(--slate); }
 .readiness-card { background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);padding:1.5rem 1.75rem;margin-bottom:1.75rem;display:flex;align-items:center;gap:2rem;flex-wrap:wrap; }
@@ -135,11 +135,11 @@ const css = `
 `
 
 const STATUS_COLORS = {
-  pending: '#D97706',
-  outreach_sent: '#2563EB',
-  confirmed: '#059669',
-  declined: '#EF4444',
-  apply_requested: '#7C3AED',
+  pending: 'var(--clay)',
+  outreach_sent: 'var(--moss)',
+  confirmed: 'var(--forest)',
+  declined: 'var(--rust)',
+  apply_requested: 'var(--moss)',
 }
 
 const ONBOARD_STEPS = [
@@ -463,7 +463,7 @@ export default function Dashboard() {
   ]
   const readinessScore = rfFactors.reduce((sum, f) => sum + (f.done ? f.pts : 0), 0)
   const readinessWord  = readinessScore >= 90 ? 'Ready' : readinessScore >= 60 ? 'Almost' : readinessScore >= 30 ? 'Started' : 'Early'
-  const readinessColor = readinessScore >= 90 ? '#059669' : readinessScore >= 60 ? 'var(--clay)' : readinessScore >= 30 ? '#D97706' : '#94A3B8'
+  const readinessColor = readinessScore >= 90 ? 'var(--forest)' : readinessScore >= 60 ? 'var(--clay)' : readinessScore >= 30 ? 'var(--moss)' : 'var(--text-faint)'
   const RING_R = 46; const RING_C = 2 * Math.PI * RING_R
   const ringDash = (readinessScore / 100) * RING_C
 
@@ -480,11 +480,11 @@ export default function Dashboard() {
 
       {/* Group invite modal */}
       {showGroupModal && (
-        <div style={{ position:'fixed', inset:0, zIndex:1000, background:'rgba(6,9,15,0.6)', backdropFilter:'blur(6px)', display:'flex', alignItems:'center', justifyContent:'center', padding:'1.5rem' }}>
-          <div style={{ background:'#fff', borderRadius:20, maxWidth:460, width:'100%', padding:'2rem', boxShadow:'0 24px 80px rgba(0,0,0,0.25)', animation:'fadeUp 0.3s ease' }}>
+        <div style={{ position:'fixed', inset:0, zIndex:1000, background:'rgba(31,26,20,0.45)', display:'flex', alignItems:'center', justifyContent:'center', padding:'1.5rem' }}>
+          <div style={{ background:'#fff', borderRadius:'var(--radius-xl)', maxWidth:460, width:'100%', padding:'2rem', boxShadow:'var(--shadow-xl)', animation:'fadeUp 0.3s ease' }}>
             {!inviteSent ? (
               <>
-                <div style={{ width:48, height:48, borderRadius:13, background:'var(--teal-pale)', display:'flex', alignItems:'center', justifyContent:'center', marginBottom:'1rem' }}>
+                <div style={{ width:48, height:48, borderRadius:'var(--radius-xl)', background:'var(--teal-pale)', display:'flex', alignItems:'center', justifyContent:'center', marginBottom:'1rem' }}>
                   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
                 </div>
                 <h2 style={{ fontFamily:"'Fraunces', Georgia, serif", fontSize:'1.45rem', color:'var(--navy)', marginBottom:'0.4rem' }}>Applying with others?</h2>
@@ -499,10 +499,10 @@ export default function Dashboard() {
                         placeholder={`Email address ${i + 1}`}
                         value={email}
                         onChange={e => setInviteEmails(arr => arr.map((v, j) => j === i ? e.target.value : v))}
-                        style={{ flex:1, padding:'0.6rem 0.85rem', border:'1.5px solid var(--surface-mid)', borderRadius:9, fontSize:'0.87rem', fontFamily:'inherit', color:'var(--navy)', outline:'none' }}
+                        style={{ flex:1, padding:'0.6rem 0.85rem', border:'1.5px solid var(--surface-mid)', borderRadius:'var(--radius-lg)', fontSize:'0.87rem', fontFamily:'inherit', color:'var(--navy)', outline:'none' }}
                       />
                       {inviteEmails.length > 1 && (
-                        <button onClick={() => setInviteEmails(arr => arr.filter((_, j) => j !== i))} style={{ background:'none', border:'none', color:'#94A3B8', cursor:'pointer', fontSize:'1rem', padding:'0 0.25rem' }}>✕</button>
+                        <button onClick={() => setInviteEmails(arr => arr.filter((_, j) => j !== i))} style={{ background:'none', border:'none', color:'var(--text-faint)', cursor:'pointer', fontSize:'1rem', padding:'0 0.25rem' }}>✕</button>
                       )}
                     </div>
                   ))}
@@ -521,8 +521,8 @@ export default function Dashboard() {
               </>
             ) : (
               <div style={{ textAlign:'center' }}>
-                <div style={{ width:52, height:52, borderRadius:14, background:'#ECFDF5', display:'flex', alignItems:'center', justifyContent:'center', margin:'0 auto 1rem' }}>
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#059669" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                <div style={{ width:52, height:52, borderRadius:'var(--radius-xl)', background:'rgba(30,61,51,0.08)', display:'flex', alignItems:'center', justifyContent:'center', margin:'0 auto 1rem' }}>
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--forest)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
                 </div>
                 <h2 style={{ fontFamily:"'Fraunces', Georgia, serif", fontSize:'1.45rem', color:'var(--navy)', marginBottom:'0.4rem' }}>Invites sent!</h2>
                 <p style={{ color:'var(--slate)', fontSize:'0.87rem', lineHeight:1.6, marginBottom:'1.4rem' }}>
@@ -617,7 +617,7 @@ export default function Dashboard() {
                             <span style={{ marginLeft:'0.25rem', fontSize:'0.65rem', opacity:0.6 }}>ⓘ</span>
                             <span style={{
                               position:'absolute', bottom:'calc(100% + 8px)', left:'50%', transform:'translateX(-50%)',
-                              background:'#1E293B', color:'#fff', fontSize:'0.72rem', fontWeight:500, lineHeight:1.4,
+                              background:'var(--forest)', color:'#fff', fontSize:'0.72rem', fontWeight:500, lineHeight:1.4,
                               padding:'0.45rem 0.7rem', borderRadius:7, width:220, pointerEvents:'none',
                               opacity:0, transition:'opacity 0.15s',
                               whiteSpace:'normal', textAlign:'center', zIndex:9999,
@@ -673,11 +673,11 @@ export default function Dashboard() {
                 {(() => {
                   const selected = criteriaForm.neighborhoods || []
                   const boroughColors = {
-                    Manhattan: { bg:'#EFF6FF', color:'#2563EB', border:'#2563EB55' },
-                    Brooklyn:  { bg:'#F0FDF4', color:'#16A34A', border:'#16A34A55' },
-                    Queens:    { bg:'#FFF7ED', color:'#EA580C', border:'#EA580C55' },
-                    Bronx:     { bg:'#FDF4FF', color:'#9333EA', border:'#9333EA55' },
-                    NJ:        { bg:'#FFF1F2', color:'#E11D48', border:'#E11D4855' },
+                    Manhattan: { bg:'var(--clay-pale)', color:'var(--clay-dark)', border:'rgba(190,100,56,0.4)' },
+                    Brooklyn:  { bg:'rgba(30,61,51,0.08)', color:'var(--forest)', border:'rgba(30,61,51,0.4)' },
+                    Queens:    { bg:'rgba(176,135,72,0.10)', color:'var(--gold)', border:'rgba(176,135,72,0.4)' },
+                    Bronx:     { bg:'var(--rust-pale)', color:'var(--rust)', border:'rgba(156,59,46,0.4)' },
+                    NJ:        { bg:'var(--moss-pale)', color:'var(--moss)', border:'rgba(91,107,79,0.4)' },
                   }
                   const activeBoroughs = Object.keys(BOROUGH_NEIGHBORHOODS).filter(b =>
                     BOROUGH_NEIGHBORHOODS[b].some(n => selected.includes(n))
@@ -738,20 +738,20 @@ export default function Dashboard() {
 
         {justPaid && (
           <div className="success-banner">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#059669" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink:0 }}><polyline points="20 6 9 17 4 12"/></svg>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--forest)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink:0 }}><polyline points="20 6 9 17 4 12"/></svg>
             <span>Payment confirmed — check your email for a summary of what happens next. We're already on it.</span>
           </div>
         )}
 
         {groupInfo?.role === 'member' && (
-          <div style={{ background:'var(--teal-pale)', border:'1.5px solid rgba(10,191,191,0.3)', borderRadius:12, padding:'0.85rem 1.25rem', marginBottom:'1.25rem', display:'flex', alignItems:'center', gap:'0.75rem', fontSize:'0.86rem', color:'var(--navy)' }}>
+          <div style={{ background:'var(--teal-pale)', border:'1.5px solid var(--teal)', borderRadius:'var(--radius-xl)', padding:'0.85rem 1.25rem', marginBottom:'1.25rem', display:'flex', alignItems:'center', gap:'0.75rem', fontSize:'0.86rem', color:'var(--navy)' }}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
             <span>You're viewing <strong>{groupInfo.ownerName}'s</strong> group search.</span>
           </div>
         )}
 
         {groupInfo?.role === 'owner' && (
-          <div style={{ background:'#fff', border:'1.5px solid var(--surface-mid)', borderRadius:12, padding:'0.85rem 1.25rem', marginBottom:'1.25rem', display:'flex', alignItems:'center', justifyContent:'space-between', gap:'1rem', fontSize:'0.86rem', color:'var(--navy)', flexWrap:'wrap' }}>
+          <div style={{ background:'#fff', border:'1.5px solid var(--surface-mid)', borderRadius:'var(--radius-xl)', padding:'0.85rem 1.25rem', marginBottom:'1.25rem', display:'flex', alignItems:'center', justifyContent:'space-between', gap:'1rem', fontSize:'0.86rem', color:'var(--navy)', flexWrap:'wrap' }}>
             <div style={{ display:'flex', alignItems:'center', gap:'0.65rem' }}>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
               <span>You have a group. Invite more people to share this search.</span>
@@ -803,7 +803,7 @@ export default function Dashboard() {
         <div className="readiness-card" id="readiness">
           <div className="readiness-ring-wrap">
             <svg width="110" height="110" viewBox="0 0 110 110">
-              <circle cx="55" cy="55" r={RING_R} fill="none" stroke="#F1F5F9" strokeWidth="8" />
+              <circle cx="55" cy="55" r={RING_R} fill="none" stroke="var(--surface-mid)" strokeWidth="8" />
               <circle cx="55" cy="55" r={RING_R} fill="none" stroke={readinessColor} strokeWidth="8"
                 strokeDasharray={`${ringDash} ${RING_C}`}
                 strokeLinecap="round"
@@ -826,7 +826,7 @@ export default function Dashboard() {
             <div className="readiness-factors">
               {rfFactors.map(f => (
                 <div className="rf" key={f.key}>
-                  <div className="rf-dot" style={{ background: f.done ? '#059669' : '#E2E8F0' }} />
+                  <div className="rf-dot" style={{ background: f.done ? 'var(--forest)' : 'var(--surface-mid)' }} />
                   <span className="rf-label" style={{ color: f.done ? 'var(--navy)' : 'var(--slate)', textDecoration: f.done ? 'none' : 'none' }}>
                     {f.label}
                   </span>
@@ -836,7 +836,7 @@ export default function Dashboard() {
                       : <Link to={f.action} className="rf-action">{f.actionLabel}</Link>
                   )}
                   {f.done && (
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#059669" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--forest)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
                   )}
                 </div>
               ))}
@@ -876,9 +876,9 @@ export default function Dashboard() {
               <button onClick={() => { setCriteriaForm({ min_budget: search?.min_budget || '', max_budget: search?.max_budget || '', beds: search?.min_bed ? search.min_bed.split(',').filter(Boolean) : [], min_bath: search?.min_bath || 'Any', min_sqft: search?.min_sqft || '', move_in: search?.move_in || '', move_in_direction: search?.move_in_direction || 'on_or_before', neighborhoods: search?.neighborhoods || [], building_types: search?.building_types || [], amenities: search?.amenities || [] }); setShowEditCriteria(true) }} style={{ fontSize:'0.75rem', fontWeight:600, color:'var(--teal)', background:'none', border:'none', cursor:'pointer', fontFamily:'inherit', padding:0 }}>Edit →</button>
             </div>
             <div className="criteria-card">
-              <div style={{ background:'#F0FFF4', border:'1px solid #86EFAC', borderRadius:8, padding:'0.35rem 0.75rem', display:'flex', alignItems:'center', gap:'0.4rem', marginBottom:'0.75rem' }}>
+              <div style={{ background:'rgba(30,61,51,0.06)', border:'1px solid rgba(30,61,51,0.2)', borderRadius:'var(--radius-xl)', padding:'0.35rem 0.75rem', display:'flex', alignItems:'center', gap:'0.4rem', marginBottom:'0.75rem' }}>
                 <span style={{ fontSize:'0.8rem' }}>💡</span>
-                <p style={{ margin:0, fontSize:'0.73rem', color:'#166534', lineHeight:1.4 }}>The more flexible your criteria, the more inventory we can find you.</p>
+                <p style={{ margin:0, fontSize:'0.73rem', color:'var(--forest)', lineHeight:1.4 }}>The more flexible your criteria, the more inventory we can find you.</p>
               </div>
               {[
                 ['Budget',        search ? `$${search.min_budget || '?'} – $${search.max_budget || '?'}/mo` : '—'],
@@ -897,11 +897,11 @@ export default function Dashboard() {
               {(() => {
                 const selected = search?.neighborhoods || []
                 const boroughColors = {
-                  Manhattan: { bg:'#EFF6FF', color:'#2563EB', border:'#2563EB55' },
-                  Brooklyn:  { bg:'#F0FDF4', color:'#16A34A', border:'#16A34A55' },
-                  Queens:    { bg:'#FFF7ED', color:'#EA580C', border:'#EA580C55' },
-                  Bronx:     { bg:'#FDF4FF', color:'#9333EA', border:'#9333EA55' },
-                  NJ:        { bg:'#FFF1F2', color:'#E11D48', border:'#E11D4855' },
+                  Manhattan: { bg:'var(--clay-pale)', color:'var(--clay-dark)', border:'rgba(190,100,56,0.4)' },
+                  Brooklyn:  { bg:'rgba(30,61,51,0.08)', color:'var(--forest)', border:'rgba(30,61,51,0.4)' },
+                  Queens:    { bg:'rgba(176,135,72,0.10)', color:'var(--gold)', border:'rgba(176,135,72,0.4)' },
+                  Bronx:     { bg:'var(--rust-pale)', color:'var(--rust)', border:'rgba(156,59,46,0.4)' },
+                  NJ:        { bg:'var(--moss-pale)', color:'var(--moss)', border:'rgba(91,107,79,0.4)' },
                 }
                 const activeBoroughs = Object.keys(BOROUGH_NEIGHBORHOODS).filter(b =>
                   BOROUGH_NEIGHBORHOODS[b].some(n => selected.includes(n))
@@ -1012,7 +1012,7 @@ export default function Dashboard() {
                     </button>
                   )}
                   {l.status === 'apply_requested' && (
-                    <div style={{ marginTop:'0.4rem', fontSize:'0.78rem', color:'#7C3AED', fontWeight:600 }}>
+                    <div style={{ marginTop:'0.4rem', fontSize:'0.78rem', color:'var(--moss)', fontWeight:600 }}>
                       ✓ Apply request sent — we'll be in touch
                     </div>
                   )}
@@ -1036,7 +1036,7 @@ export default function Dashboard() {
                             <span style={{ fontSize:'0.7rem', color:'var(--slate)' }}>{cr.distanceMiles} mi</span>
                           </div>
                         )}
-                        {cr?.error && <div style={{ fontSize:'0.73rem', color:'#EF4444' }}>{cr.error}</div>}
+                        {cr?.error && <div style={{ fontSize:'0.73rem', color:'var(--rust)' }}>{cr.error}</div>}
                       </div>
                     )
                   })}
@@ -1115,7 +1115,7 @@ export default function Dashboard() {
                       <div style={{ fontSize:'0.78rem', color:'var(--slate)' }}>{r.date}</div>
                       <div style={{ fontSize:'0.78rem', color:'var(--teal)', fontWeight:600 }}>{r.price}</div>
                       <div>
-                        <span style={{ background: r.status === 'Confirmed' ? '#D1FAE5' : '#FEF9C3', color: r.status === 'Confirmed' ? '#065F46' : '#854D0E', fontSize:'0.7rem', fontWeight:700, padding:'0.2rem 0.55rem', borderRadius:100 }}>{r.status}</span>
+                        <span style={{ background: r.status === 'Confirmed' ? 'rgba(30,61,51,0.08)' : 'var(--clay-pale)', color: r.status === 'Confirmed' ? 'var(--forest)' : 'var(--clay-dark)', fontSize:'0.7rem', fontWeight:700, padding:'0.2rem 0.55rem', borderRadius:100 }}>{r.status}</span>
                       </div>
                     </div>
                   ))
@@ -1135,7 +1135,7 @@ export default function Dashboard() {
                   <p style={{ color:'var(--slate)', fontSize:'0.82rem', padding:'0.5rem 0' }}>Listings will appear here once found.</p>
                 ) : listings.map(l => (
                   <div className="tracker-row" key={l.id}>
-                    <div className="t-dot" style={{ background: STATUS_COLORS[l.status] || '#94A3B8' }} />
+                    <div className="t-dot" style={{ background: STATUS_COLORS[l.status] || 'var(--text-faint)' }} />
                     <div>
                       <div style={{ fontWeight:600, fontSize:'0.82rem', color:'var(--navy)' }}>{l.address}{l.unit ? `, ${l.unit}` : ''}</div>
                       <div style={{ fontSize:'0.74rem', color:'var(--slate)', marginTop:'0.1rem' }}>
@@ -1217,9 +1217,9 @@ export default function Dashboard() {
 
       {/* Listings Found Modal */}
       {showListingsModal && (
-        <div style={{ position:'fixed', inset:0, zIndex:1200, background:'rgba(6,9,15,0.6)', backdropFilter:'blur(6px)', display:'flex', alignItems:'center', justifyContent:'center', padding:'2rem' }}
+        <div style={{ position:'fixed', inset:0, zIndex:1200, background:'rgba(31,26,20,0.45)', display:'flex', alignItems:'center', justifyContent:'center', padding:'2rem' }}
           onClick={e => { if (e.target === e.currentTarget) setShowListingsModal(false) }}>
-          <div style={{ background:'var(--surface)', borderRadius:20, width:'100%', maxWidth:860, maxHeight:'85vh', display:'flex', flexDirection:'column', boxShadow:'0 24px 80px rgba(0,0,0,0.3)', overflow:'hidden' }}>
+          <div style={{ background:'var(--surface)', borderRadius:'var(--radius-xl)', width:'100%', maxWidth:860, maxHeight:'85vh', display:'flex', flexDirection:'column', boxShadow:'var(--shadow-xl)', overflow:'hidden' }}>
             {/* Modal header */}
             <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'1.5rem 1.75rem', background:'#fff', borderBottom:'1px solid var(--surface-mid)', flexShrink:0 }}>
               <div>

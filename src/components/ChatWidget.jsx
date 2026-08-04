@@ -17,22 +17,22 @@ const css = `
   width: 52px;
   height: 52px;
   border-radius: 50%;
-  background: var(--teal, #0ABFBF);
+  background: var(--teal);
   border: none;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 16px rgba(10,191,191,0.35);
+  box-shadow: var(--shadow-teal);
   transition: transform 0.15s, box-shadow 0.15s;
   flex-shrink: 0;
 }
-.cw-btn:hover { transform: scale(1.06); box-shadow: 0 6px 20px rgba(10,191,191,0.45); }
+.cw-btn:hover { transform: scale(1.06); box-shadow: 0 12px 38px rgba(190,100,56,0.28); }
 .cw-panel {
   width: 320px;
   background: #fff;
-  border-radius: 16px;
-  box-shadow: 0 8px 40px rgba(0,0,0,0.14);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-xl);
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -44,7 +44,7 @@ const css = `
   to   { opacity:1; transform: scale(1) translateY(0); }
 }
 .cw-header {
-  background: var(--teal, #0ABFBF);
+  background: var(--teal);
   color: #fff;
   padding: 14px 16px;
   display: flex;
@@ -56,7 +56,7 @@ const css = `
 .cw-header-dot {
   width: 8px; height: 8px;
   border-radius: 50%;
-  background: #5fffaa;
+  background: var(--sand);
   flex-shrink: 0;
 }
 .cw-thread {
@@ -70,39 +70,39 @@ const css = `
 .cw-bubble {
   max-width: 82%;
   padding: 8px 12px;
-  border-radius: 14px;
+  border-radius: var(--radius-xl);
   font-size: 0.82rem;
   line-height: 1.45;
   word-break: break-word;
 }
 .cw-bubble.mine {
-  background: var(--teal, #0ABFBF);
+  background: var(--teal);
   color: #fff;
   align-self: flex-end;
   border-bottom-right-radius: 4px;
 }
 .cw-bubble.theirs {
-  background: #F0F4F8;
-  color: #1a2733;
+  background: var(--paper-deep);
+  color: var(--text);
   align-self: flex-start;
   border-bottom-left-radius: 4px;
 }
 .cw-bubble.typing {
-  background: #F0F4F8;
+  background: var(--paper-deep);
   align-self: flex-start;
-  color: #888;
+  color: var(--text-faint);
   font-style: italic;
   font-size: 0.78rem;
 }
 .cw-input-row {
   display: flex;
-  border-top: 1px solid #eef0f2;
+  border-top: 1px solid var(--line);
   padding: 10px 12px;
   gap: 8px;
 }
 .cw-input {
   flex: 1;
-  border: 1.5px solid #e2e8f0;
+  border: 1.5px solid var(--line);
   border-radius: 20px;
   padding: 7px 14px;
   font-size: 0.82rem;
@@ -113,12 +113,12 @@ const css = `
   max-height: 80px;
   overflow-y: auto;
 }
-.cw-input:focus { border-color: var(--teal, #0ABFBF); }
+.cw-input:focus { border-color: var(--teal); }
 .cw-send {
   width: 34px;
   height: 34px;
   border-radius: 50%;
-  background: var(--teal, #0ABFBF);
+  background: var(--teal);
   border: none;
   cursor: pointer;
   display: flex;
