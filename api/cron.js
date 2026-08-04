@@ -1,3 +1,4 @@
+import { timingSafeEqual } from 'node:crypto';
 import { MODEL } from './ai-chat.js';
 
 // Consolidated cron endpoint (Vercel Hobby allows max 12 functions + daily crons).
@@ -13,9 +14,34 @@ import { MODEL } from './ai-chat.js';
 // health probe reports the real state instead of a guess.
 const MAIL_FROM = 'AptPilot Ops <onboarding@resend.dev>';
 
+// This endpoint mutates state and sends mail, so it should not be open to the
+// internet: anyone who found the URL could trigger the digest email on repeat.
+//
+// It stays open while CRON_SECRET is UNSET, deliberately. The Railway scraper
+// heartbeats here on a schedule, and locking the door before that caller has
+// the key would stop the pipeline silently — the exact failure mode this file's
+// health probe exists to catch. Set CRON_SECRET in Vercel and in Railway and it
+// begins enforcing; Vercel's own cron attaches the bearer token automatically
+// once the variable exists, so the daily run needs no further change.
+const CRON_SECRET = process.env.CRON_SECRET || '';
+
+function isAuthorized(req) {
+  if (!CRON_SECRET) return true;
+  const header = req.headers.authorization || '';
+  const provided = header.startsWith('Bearer ') ? header.slice(7)
+    : (req.query?.secret || req.body?.secret || '');
+  const a = Buffer.from(String(provided));
+  const b = Buffer.from(CRON_SECRET);
+  // timingSafeEqual throws on a length mismatch, so compare lengths first.
+  return a.length === b.length && timingSafeEqual(a, b);
+}
+
 export default async function handler(req, res) {
   if (req.method !== 'GET' && req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
+  }
+  if (!isAuthorized(req)) {
+    return res.status(401).json({ error: 'Unauthorized' });
   }
 
   const job = req.query?.job || req.body?.job || 'all';
