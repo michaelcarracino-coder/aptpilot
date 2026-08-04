@@ -11,7 +11,10 @@
  *
  * Bump CACHE_VERSION to force every client to drop its old caches.
  */
-const CACHE_VERSION = 'v1'
+// v2: icon backgrounds recoloured from the logo PDF's cream (#FBF8F2) to the
+// site's --paper (#FAF6EF). The icons keep their filenames, so without this
+// bump every already-installed client would serve the old cream from IMAGE_CACHE.
+const CACHE_VERSION = 'v2'
 const SHELL_CACHE = `aptpilot-shell-${CACHE_VERSION}`
 const ASSET_CACHE = `aptpilot-assets-${CACHE_VERSION}`
 const IMAGE_CACHE = `aptpilot-images-${CACHE_VERSION}`
