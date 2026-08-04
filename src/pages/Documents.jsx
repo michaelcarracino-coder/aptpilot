@@ -57,6 +57,7 @@ export default function Documents() {
   const [loading, setLoading] = useState(true)
   const [collating, setCollating] = useState(false)
   const [deletingPath, setDeletingPath] = useState(null)
+  const [deleteError, setDeleteError] = useState(null)
   const [uploadingSlot, setUploadingSlot] = useState(null)
   const [showSummaryModal, setShowSummaryModal] = useState(false)
   const [generatingSummary, setGeneratingSummary] = useState(false)
@@ -85,10 +86,36 @@ export default function Documents() {
     setLoading(false)
   }
 
+  // Delete the stored object FIRST, and refuse to drop the row unless it is
+  // really gone. Until the `Users can delete their own documents` policy was
+  // added, storage RLS denied this silently; because nothing checked the
+  // result, the row was deleted and the renter was told their passport or tax
+  // return was removed while the file sat in the bucket, orphaned and beyond
+  // their reach. Two such objects were still in prod from 2026-06-25.
+  //
+  // Both failure shapes are checked on purpose: storage.remove() surfaces an
+  // RLS denial as an error in some versions and as a 200 with an empty result
+  // array in others, so `error` alone is not enough to prove a deletion.
   async function handleDelete(row) {
     setDeletingPath(row.storage_path)
-    await supabase.storage.from('documents').remove([row.storage_path])
-    await supabase.from('user_documents').delete().eq('id', row.id)
+    setDeleteError(null)
+
+    const { data: removed, error: storageErr } =
+      await supabase.storage.from('documents').remove([row.storage_path])
+
+    if (storageErr || !removed?.length) {
+      setDeleteError(`We couldn’t delete “${row.file_name}”. Nothing was removed — your file is still here. Please try again.`)
+      setDeletingPath(null)
+      return
+    }
+
+    const { error: rowErr } = await supabase.from('user_documents').delete().eq('id', row.id)
+    if (rowErr) {
+      setDeleteError(`“${row.file_name}” was deleted, but the list didn’t update. Refresh the page.`)
+      setDeletingPath(null)
+      return
+    }
+
     setRows(r => r.filter(x => x.id !== row.id))
     setDeletingPath(null)
   }
@@ -335,6 +362,21 @@ export default function Documents() {
           <button className={`docs-role-tab ${role === 'tenant' ? 'on' : ''}`} onClick={() => setRole('tenant')}>Tenant</button>
           <button className={`docs-role-tab ${role === 'guarantor' ? 'on' : ''}`} onClick={() => setRole('guarantor')}>Guarantor</button>
         </div>
+
+        {deleteError && (
+          <div role="alert" style={{
+            background:'var(--rust-pale)', border:'1px solid var(--rust)', borderRadius:'var(--radius)',
+            padding:'0.85rem 1.1rem', marginBottom:'1.5rem', display:'flex', alignItems:'flex-start',
+            gap:'0.7rem', fontSize:'0.86rem', color:'var(--rust)', lineHeight:1.55,
+          }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" style={{ flexShrink:0, marginTop:2 }}>
+              <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+            <span style={{ flex:1 }}>{deleteError}</span>
+            <button onClick={() => setDeleteError(null)} aria-label="Dismiss"
+              style={{ background:'none', border:'none', color:'var(--rust)', cursor:'pointer', fontSize:'1rem', lineHeight:1, padding:0 }}>×</button>
+          </div>
+        )}
 
         {/* Progress */}
         <div style={{ marginBottom:'1.5rem', maxWidth:400 }}>

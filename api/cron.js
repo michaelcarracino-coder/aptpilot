@@ -96,11 +96,14 @@ async function runDailyDigest() {
       body: JSON.stringify({
         from: 'AptPilot Ops <onboarding@resend.dev>',
         to: ['michael.carracino@gmail.com'],
-        subject: `AptPilot daily: $${mrr.toFixed(0)} MRR · ${signups24h} signups · ${notifsSent24h} alerts sent${alarms.length ? ' · ⚠ ' + alarms.length + ' issue(s)' : ''}`,
+        // There is no MRR to report since 2c15f8e retired the subscription for
+        // a one-time price; `mrr` went away with it but this line kept calling
+        // it, so every digest since has died on a ReferenceError before send.
+        subject: `AptPilot daily: $${revenue24h.toFixed(0)} today · $${revenueTotal.toFixed(0)} lifetime · ${signups24h} signups · ${notifsSent24h} alerts sent${alarms.length ? ' · ⚠ ' + alarms.length + ' issue(s)' : ''}`,
         html,
       }),
     });
-    return { sent: resp.ok, mrr, alarms };
+    return { sent: resp.ok, revenue24h, revenueTotal, alarms };
   } catch (err) {
     console.error('Daily digest email failed:', err.message);
     return { sent: false, error: err.message };
