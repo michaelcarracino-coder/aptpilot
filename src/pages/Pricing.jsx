@@ -12,12 +12,12 @@ const PHOTO = 'https://images.pexels.com/photos/30726437/pexels-photo-30726437.j
 // Ordered deliberately: the price comparison is the argument this page makes,
 // and the first item renders open by default.
 const FAQS = [
-  { q: 'How is this different from a broker?', a: `A broker you hire to represent you asks ${BROKER_COST.percentRange} of the annual rent — $${MEDIAN.toLocaleString()} to $${MEDIAN_BROKER.toLocaleString()} on the median New York apartment. Since the FARE Act the listing agent is paid by the landlord and works for the landlord, so paying that fee yourself is now the only way most renters get anyone on their own side. AptPilot is that side: it tells you what you qualify for, what documents a landlord will demand, and what a listing actually costs you over a year.` },
-  { q: `Why does the same work cost a broker $${MEDIAN_BROKER.toLocaleString()} and you $${PLAN.price}?`, a: 'Because a percentage of rent was never a price for the work — it was a price for being the only door in. Watching listings and checking a document set against a landlord’s requirements is work software does well and does continuously. We charge what it costs us to run, once, rather than a cut of your lease.' },
-  { q: 'What does AptPilot actually do?', a: 'We watch new NYC rental listings around the clock. The moment one appears with no broker fee that matches your budget, bedroom count and neighborhoods, we text and email you — so you can reach the agent before the listing is gone. Then we get your side of the paperwork ready: what you qualify for, whether you need a guarantor, and every document the landlord will ask for.' },
+  { q: 'What does AptPilot actually do?', a: 'It handles the parts of a NYC rental search that are confusing, slow, or easy to get wrong. It works out what you actually qualify for — the 40x rule, guarantor thresholds, combined incomes — instead of leaving you to guess. It tracks every document a landlord will demand and collates them into one package. And it texts you the moment a listing matches, so you get there early with your paperwork already done.' },
+  { q: 'How is this different from hiring a broker?', a: `A broker you hire to represent you asks ${BROKER_COST.floorLabel} at the floor — $${MEDIAN.toLocaleString()} on the median New York apartment — and up to $${MEDIAN_BROKER.toLocaleString()} depending on who you use. For that you get someone who books viewings and walks you through the process in person. AptPilot does the knowing-and-preparing half for $${PLAN.price}. If you want someone physically opening doors with you, hire the broker; you can still do both.` },
+  { q: `Why does guidance cost a broker $${MEDIAN.toLocaleString()} and you $${PLAN.price}?`, a: 'Because a percentage of rent was never a price for the work — it was the price of being the only door in. Working out qualification math and checking a document set against a landlord’s requirements is work software does well, continuously, at almost no marginal cost. We charge what it costs us to run, once, instead of a cut of your lease.' },
   { q: 'Is this really one payment?', a: `Yes. $${PLAN.price} once. Nothing renews, nothing recurs, and there is nothing to cancel. The account stays yours for this search and for the next lease after it.` },
   { q: 'Why not charge monthly?', a: 'Because an apartment search ends. A monthly plan would bill you hardest right when you are still looking and then force you to remember to cancel the week you finally sign. Charging once removes both problems — and means we are not quietly hoping your search drags on.' },
-  { q: 'Why pay when StreetEasy alerts are free?', a: 'Free portal alerts are generally batched and do not filter for no-fee units. In a market where a good no-fee listing can be gone the same day, minutes matter — we push the moment we see a match, and only for listings with no broker fee. Then we help you actually act on it.' },
+  { q: 'Why pay when StreetEasy and Zillow are free?', a: 'Because they are listing portals and this is not. They will show you an apartment; they will not tell you whether you qualify for it, what a guarantor would need to earn, which of your documents a landlord will reject, or whether your file is ready to send. Browse on them all you like. Renters lose apartments on the paperwork, not the browsing.' },
   { q: 'What if my search takes months?', a: 'It costs exactly the same. There is no clock running, so a search that takes twelve weeks and a search that takes two are the same price. If you move again in three years, the account is still there.' },
   { q: 'What areas do you cover?', a: 'All five boroughs. You choose the neighborhoods you care about during setup, and you can change them at any time from your dashboard.' },
 ]
@@ -62,7 +62,7 @@ export default function Pricing() {
     <div style={{ background: 'var(--paper)' }}>
       <SEO
         title="Pricing — AptPilot"
-        description={`A renter's broker in NYC asks ${BROKER_COST.percentRange} of the annual rent. AptPilot is $${PLAN.price} once, for the same work: instant no-fee listing alerts, qualifying, and your application. No subscription, nothing to cancel.`}
+        description={`Guidance through a NYC rental search costs a month's rent if you hire a broker. AptPilot is $${PLAN.price} once: what you qualify for, every document landlord-ready, and a text the moment a listing matches. No subscription, nothing to cancel.`}
         canonical="https://aptpilot.vercel.app/pricing"
       />
 
@@ -72,6 +72,10 @@ export default function Pricing() {
           .price-photo { display: none !important; }
           .close-grid { grid-template-columns: 1fr !important; }
         }
+        /* Four columns cannot compress to phone width without the labels
+           wrapping to one word per line, so the table scrolls inside .compare
+           instead and the page itself never scrolls sideways. */
+        .compare-row { min-width: 640px; }
       `}</style>
 
       {/* Hero */}
@@ -79,13 +83,12 @@ export default function Pricing() {
         <div className="wrap">
           <div className="eyebrow">Pricing</div>
           <h1 className="display display-xl" style={{ margin: '1.4rem 0 1.5rem', maxWidth: 760 }}>
-            ${PLAN.price} instead<br />of ${MEDIAN_BROKER.toLocaleString()}.
+            Help, without<br />the month’s rent.
           </h1>
           <p className="lede" style={{ maxWidth: 540 }}>
-            That is what a renter’s broker asks to represent you on the median New York
-            apartment — {BROKER_COST.typicalPercent}% of a year at ${MEDIAN.toLocaleString()} a month. The work behind that number
-            is finding listings and getting your paperwork in order. We do that part, and
-            you keep the rest.
+            Guidance through a New York rental search has had exactly one price: {BROKER_COST.floorLabel},
+            {' '}${MEDIAN.toLocaleString()} on the median apartment, and up to ${MEDIAN_BROKER.toLocaleString()} depending on the broker.
+            Everyone who wouldn’t pay that has been doing it alone. This is the option in between.
           </p>
         </div>
       </section>
@@ -152,39 +155,43 @@ export default function Pricing() {
         <div className="wrap">
           <div className="eyebrow">The comparison</div>
           <h2 className="display display-lg" style={{ margin: '1.1rem 0 1.2rem', maxWidth: 560 }}>
-            What the fee was buying.
+            Three ways to do this.
           </h2>
           <p style={{ color: 'var(--text-muted)', fontSize: '0.96rem', lineHeight: 1.75, maxWidth: 560, marginBottom: '3rem' }}>
-            Against a broker you hire to act for you — not the landlord’s listing agent,
-            who is already paid by the landlord and does not work for you at all.
+            The middle column is a broker you hire to act for you — not the landlord’s
+            listing agent, who is already paid by the landlord and does not work for you.
           </p>
 
-          <div style={{ maxWidth: 860 }}>
-            <div style={{
-              display: 'grid', gridTemplateColumns: '1.1fr 1fr 1fr', gap: '1rem',
+          {/* Three columns on purpose: the argument IS the gap between doing it
+              alone and paying a month's rent, so both ends have to be visible. */}
+          <div className="compare" style={{ maxWidth: 900, overflowX: 'auto' }}>
+            <div className="compare-row" style={{
+              display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '1rem',
               paddingBottom: '0.9rem', borderBottom: '1px solid var(--line)',
               fontSize: '0.72rem', fontWeight: 600, letterSpacing: '0.13em', textTransform: 'uppercase',
             }}>
               <div />
-              <div style={{ color: 'var(--text-faint)' }}>Your own broker</div>
+              <div style={{ color: 'var(--text-faint)' }}>On your own</div>
+              <div style={{ color: 'var(--text-faint)' }}>Hire a broker</div>
               <div style={{ color: 'var(--clay)' }}>AptPilot</div>
             </div>
             {[
-              ['Cost', `$${MEDIAN.toLocaleString()}–$${MEDIAN_BROKER.toLocaleString()} on the median apartment`, `$${PLAN.price}, once`],
-              ['How the fee is set', `${BROKER_COST.percentRange} of the annual rent`, 'Flat — the same on a studio or a penthouse'],
-              ['Their incentive', 'Paid more the more you spend', 'Paid the same whatever you sign'],
-              ['No-fee listings', 'Rarely their priority', 'The only thing we send'],
-              ['Speed', 'Business hours', 'The moment a match is posted'],
-              ['If your search drags', 'Fee due whenever you sign', 'Costs the same either way'],
-              ['Next time you move', 'Pay it again', 'Account is still yours'],
-            ].map(([feat, broker, us]) => (
-              <div key={feat} style={{
-                display: 'grid', gridTemplateColumns: '1.1fr 1fr 1fr', gap: '1rem',
+              ['Cost', 'Free', `$${MEDIAN.toLocaleString()}–$${MEDIAN_BROKER.toLocaleString()}`, `$${PLAN.price}, once`],
+              ['How it’s priced', '—', `${BROKER_COST.percentRange} of the annual rent`, 'Flat, studio or penthouse'],
+              ['Do you qualify?', 'You guess', 'They tell you', 'Worked out for you, in writing'],
+              ['Your documents', 'You figure it out', 'They chase you', 'Tracked, checked, collated'],
+              ['When a listing drops', 'You refresh the app', 'Business hours', 'Texted the moment it matches'],
+              ['Their incentive', '—', 'Paid more the more you spend', 'Paid the same whatever you sign'],
+              ['Next time you move', 'Start over', 'Pay it again', 'Account is still yours'],
+            ].map(([feat, alone, broker, us]) => (
+              <div key={feat} className="compare-row" style={{
+                display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '1rem',
                 padding: '1.15rem 0', borderBottom: '1px solid var(--line)', alignItems: 'baseline',
               }}>
                 <div style={{ fontWeight: 500, fontSize: '0.93rem' }}>{feat}</div>
-                <div style={{ color: 'var(--text-muted)', fontSize: '0.91rem' }}>{broker}</div>
-                <div style={{ color: 'var(--text)', fontSize: '0.91rem', fontWeight: 500 }}>{us}</div>
+                <div style={{ color: 'var(--text-muted)', fontSize: '0.89rem' }}>{alone}</div>
+                <div style={{ color: 'var(--text-muted)', fontSize: '0.89rem' }}>{broker}</div>
+                <div style={{ color: 'var(--text)', fontSize: '0.89rem', fontWeight: 500 }}>{us}</div>
               </div>
             ))}
           </div>
@@ -209,7 +216,7 @@ export default function Pricing() {
         <div className="wrap">
           <div style={{ background: 'var(--forest)', borderRadius: 6, padding: '4.5rem 3.5rem', textAlign: 'center' }}>
             <h2 className="display display-md" style={{ color: 'var(--paper)' }}>
-              Keep the other ${(MEDIAN_BROKER - PLAN.price).toLocaleString()}.
+              Stop doing this alone.
             </h2>
             {/* rgba on paper, not --text-muted: the muted token is tuned for
                 light backgrounds and is nearly unreadable on forest. */}

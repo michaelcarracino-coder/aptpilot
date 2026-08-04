@@ -22,46 +22,54 @@ export const PLAN = {
   name: 'AptPilot',
   price: 199.99,
   blurb:
-    'Everything a renter’s broker charges 12–15% of a year’s rent for. We watch the market around the clock, tell you the moment a no-fee listing matches, and walk you through qualifying, documents, and the application — for one flat payment instead of a cut of your lease.',
+    'Renting in New York is confusing, fast, and unforgiving, and the only help on offer costs a month’s rent. AptPilot does what that broker would do — tells you what you actually qualify for, gets your paperwork landlord-ready before anyone asks, and moves the moment something matches — for one flat payment instead of a cut of your lease.',
   features: [
-    'Instant SMS + email the moment a no-fee listing matches',
-    'An AI guide that knows the NYC rental process, any hour of the day',
+    'A guide that knows the NYC rental process, awake whenever you are',
     'Know exactly what you qualify for — 40x rule, guarantors, combined incomes',
-    'Your application documents tracked and checked before a landlord asks',
-    'Around-the-clock monitoring of new NYC listings',
+    'Every document a landlord will demand, tracked and checked before they ask',
+    'Your whole application collated into one package, ready to send',
+    'Instant text and email when a listing matches, while you can still be first',
     'Unlimited searches, forever — use it again at your next lease',
   ],
 }
 
-// What hiring a broker actually costs. This is the anchor the whole price
-// argument rests on, so the framing matters as much as the numbers.
+// What hiring a broker costs. This anchors the price, so the framing matters as
+// much as the number.
 //
-// THE HONEST FRAMING — do not drift from this. The FARE Act (June 2025) ended
-// forced tenant-paid fees on landlord-listed apartments. What it did NOT do is
-// give renters representation: the listing agent is paid by, and works for, the
-// landlord. A renter who wants someone on their own side hires that person
-// themselves, and pays the rates below out of pocket.
+// THE FRAMING — do not drift from this. We are NOT selling "save the broker
+// fee." The FARE Act killed forced tenant-paid fees in June 2025 and most
+// renters now pay $0 on a landlord's listing, so a renter who reads "save
+// $7,558" knows it is not their situation and stops trusting the page.
 //
-// So every comparison on the site is to *hiring your own broker* — never to a
-// fee renters are still forced to pay. A NYC renter knows the difference and
-// will catch it instantly, and the honest version is the stronger argument
-// anyway: $199.99 against $4,199–$7,558 for the same work.
+// What the FARE Act did not do is make renting here any easier. A 1.4% vacancy
+// market, ~50 inquiries on a good listing in its first hour, agents who stop
+// reading once two or three complete applications land, and rejections driven
+// by paperwork a landlord cannot verify rather than by affordability. Against
+// all that a renter has exactly two options: go it alone and hope, or hire a
+// tenant-side broker and pay them one month's rent to steer.
 //
-// 12–15% of annual rent, or one month's rent at the floor, are the standard
-// NYC asks. We quote the top of the range in headline numbers and say so.
+// AptPilot is the missing third option. So the comparison is always "the only
+// help that currently exists costs a month's rent" — never "a fee you would
+// otherwise be charged."
+//
+// One month's rent (8.33% of the year) is the FLOOR and the number we quote,
+// because it is the least attackable. Tenant-side asks commonly run higher —
+// roughly 7.5-15% of annual rent depending on the broker.
 export const BROKER_COST = {
-  floorLabel:     "one month's rent",
-  percentRange:   '12–15%',
-  typicalPercent: 15,
-  medianRent:     4199, // StreetEasy median NYC asking rent, May 2026
+  floorLabel:   "one month's rent",
+  floorPercent: 8.33,
+  upperPercent: 15,
+  percentRange: '7.5–15%',
+  medianRent:   4199, // StreetEasy median NYC asking rent, May 2026
+  vacancyRate:  1.4,  // NYC five-borough vacancy, 2026
 }
 
-/** The floor a renter's agent asks: one month's rent. */
+/** What a tenant-side broker asks at the floor: one month's rent. */
 export const brokerFloor = rent => Math.round(rent)
 
-/** The standard ask: 15% of the annual rent. */
+/** The upper end of the tenant-side ask: 15% of the annual rent. */
 export const brokerTypical = rent =>
-  Math.round(rent * 12 * (BROKER_COST.typicalPercent / 100))
+  Math.round(rent * 12 * (BROKER_COST.upperPercent / 100))
 
 export async function redirectToCheckout(userId, userEmail) {
   const res = await fetch('/api/create-checkout-session', {
