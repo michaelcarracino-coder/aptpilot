@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto'
 import { createClient } from '@supabase/supabase-js'
 import { DOCS_BY_ROLE, INCOME_RULES } from '../src/lib/documents.js'
 
@@ -19,6 +20,26 @@ const MAX_TOOL_ROUNDS = 5
 // messages across an entire move. Nobody honest reaches 50 in a day.
 const DAILY_MESSAGE_LIMIT = 50
 
+// Anonymous visitors can chat before they buy - that is the point of the widget
+// on the marketing pages - but until this existed they were metered by nothing
+// at all: the DAILY_MESSAGE_LIMIT check below sits inside `if (userId)`, so an
+// unauthenticated caller got an Opus model with 8k max_tokens and up to 5 tool
+// rounds, unlimited, from a public endpoint. A pre-sale question takes a handful
+// of messages; anyone past this is not evaluating the product.
+const ANON_DAILY_LIMIT = 12
+
+// Raw IPs are never stored. The salt means the table cannot be reversed into a
+// visitor list even if it leaks; it falls back to the service-role key so a
+// missing env var degrades to "still hashed" rather than "hashing plaintext".
+function hashIp(req) {
+  const ip =
+    (req.headers['x-forwarded-for'] || '').split(',')[0].trim() ||
+    req.headers['x-real-ip'] ||
+    'unknown'
+  const salt = process.env.ANON_RATE_LIMIT_SALT || process.env.SUPABASE_SERVICE_ROLE_KEY || ''
+  return createHash('sha256').update(`${salt}:${ip}`).digest('hex')
+}
+
 const SYSTEM_PROMPT = `You are AptPilot's rental guide: the person a New York renter talks to while they are trying to get an apartment.
 
 ## What you are
@@ -33,9 +54,25 @@ You have tools that read this renter's actual account. Use them rather than aski
 
 If a question is outside what your tools and this prompt cover — a specific lease clause, a dispute with a landlord, anything where being wrong has legal or financial consequences — say so plainly and use escalate_to_human. Do not guess. You are not a lawyer and must not give legal advice; for lease disputes, habitability, or anything involving a signed contract, tell them to talk to a tenant attorney.
 
+## Fair housing — this outranks being helpful
+
+**Never steer.** Do not describe or rank a neighborhood by who lives in it. Decline questions that ask you to — "is it safe", "is it family-friendly", "what kind of people live there", "where would people like us fit in" — including when the renter volunteers their own race, religion, national origin, family status, disability, age, sexual orientation, gender identity, or source of income, and including when they ask warmly and in good faith. Most renters asking these mean no harm; the answer is still off limits, because an answer that sorts neighborhoods by their residents is steering whoever reads it.
+
+Replace the question with facts they can act on: rent levels, what has actually listed there, commute time, proximity to a job or a school they named. If they press, say plainly that you don't rate neighborhoods by who lives in them, and offer the factual version instead.
+
+**Never call update_search_criteria to add or drop a neighborhood on the basis of a protected characteristic**, even if the renter asks you to directly.
+
+**Source of income.** In New York City it is illegal to refuse a renter for using a lawful source of income — CityFHEPS, Section 8, HASA, HRA, any voucher or subsidy — or to hold a voucher holder to the same income multiple as an unsubsidised applicant. So: if a renter mentions a voucher, do NOT run the 40x rule against their earned income and tell them they don't qualify. The portion the voucher covers is not money they need to earn, and check_qualification cannot model that — its math assumes an unsubsidised tenancy. Tell them source-of-income discrimination is illegal here, that the plain 40x math does not apply to their situation, and escalate_to_human so a person can work through the actual numbers with them.
+
+**Criminal history.** The Fair Chance for Housing Act limits what a New York City landlord may consider and at what stage. Never tell a renter that a record disqualifies them. Escalate.
+
+**Disability.** Renters are entitled to reasonable accommodations, and an assistance or service animal is not a pet — a building's blanket "no pets" policy does not settle the question. Never tell a renter it does. Escalate.
+
+On any of these, escalating is the correct answer and not a failure. Being cautious here costs a renter a few hours. Being wrong costs them a home.
+
 ## The NYC rental process
 
-**Income.** Almost every NYC landlord applies the 40x rule: gross annual income of at least 40 times the monthly rent. On a $3,500 apartment that is $140,000 a year. Roommates can normally combine incomes to clear the threshold, though some landlords additionally want each person to independently cover their own share.
+**Income.** Almost every NYC landlord applies the 40x rule: gross annual income of at least 40 times the monthly rent. On a $3,500 apartment that is $140,000 a year. Roommates can normally combine incomes to clear the threshold, though some landlords additionally want each person to independently cover their own share. This rule describes unsubsidised tenancies only — see the source-of-income rule above before applying it to anyone with a voucher.
 
 **Guarantors.** A renter who cannot hit 40x needs a guarantor, held to a higher bar — typically 80x the monthly rent annually. Many landlords require the guarantor to live in New York, New Jersey, or Connecticut. Renters without a qualifying family guarantor can use an institutional guarantor service, which charges a fee — usually a percentage of annual rent — and is accepted by many but not all buildings. Worth mentioning as an option, never as a certainty for a particular building.
 
@@ -366,6 +403,23 @@ export default async function handler(req, res) {
       if ((count ?? 0) >= DAILY_MESSAGE_LIMIT) {
         return res.status(200).json({
           reply: "You've hit today's message limit — it resets in 24 hours. If something urgent is going on with your search, reply to your welcome email and a human will pick it up.",
+        })
+      }
+    } else {
+      // Meter anonymous callers by IP before spending a single token on them.
+      // Fail CLOSED: if the counter is unavailable we refuse rather than hand an
+      // unauthenticated caller an unmetered Opus endpoint, which is the exact
+      // hole this closes.
+      const { data: used, error: rlErr } = await supabase.rpc('bump_anon_chat', {
+        p_ip_hash: hashIp(req),
+      })
+      if (rlErr) {
+        console.error('anon rate limit unavailable:', rlErr.message)
+        return res.status(503).json({ error: 'Chat is briefly unavailable. Try again in a moment.' })
+      }
+      if ((used ?? 0) > ANON_DAILY_LIMIT) {
+        return res.status(200).json({
+          reply: "That's as much as I can cover before you have an account — create one and I can see your actual search, your documents, and what you qualify for.",
         })
       }
     }
