@@ -22,7 +22,7 @@ export const PLAN = {
   name: 'AptPilot',
   price: 199.99,
   blurb:
-    'Good no-fee apartments in NYC lease within hours. AptPilot watches the market around the clock, tells you the moment one matches, and then walks you through qualifying, documents, and the application — the part a broker used to handle.',
+    'Everything a renter’s broker charges 12–15% of a year’s rent for. We watch the market around the clock, tell you the moment a no-fee listing matches, and walk you through qualifying, documents, and the application — for one flat payment instead of a cut of your lease.',
   features: [
     'Instant SMS + email the moment a no-fee listing matches',
     'An AI guide that knows the NYC rental process, any hour of the day',
@@ -33,12 +33,35 @@ export const PLAN = {
   ],
 }
 
-// What the renter would otherwise have paid a broker. Used on the pricing page
-// to anchor against the pre-FARE-Act status quo, not invented.
-export const BROKER_FEE_NOTE = {
+// What hiring a broker actually costs. This is the anchor the whole price
+// argument rests on, so the framing matters as much as the numbers.
+//
+// THE HONEST FRAMING — do not drift from this. The FARE Act (June 2025) ended
+// forced tenant-paid fees on landlord-listed apartments. What it did NOT do is
+// give renters representation: the listing agent is paid by, and works for, the
+// landlord. A renter who wants someone on their own side hires that person
+// themselves, and pays the rates below out of pocket.
+//
+// So every comparison on the site is to *hiring your own broker* — never to a
+// fee renters are still forced to pay. A NYC renter knows the difference and
+// will catch it instantly, and the honest version is the stronger argument
+// anyway: $199.99 against $4,199–$7,558 for the same work.
+//
+// 12–15% of annual rent, or one month's rent at the floor, are the standard
+// NYC asks. We quote the top of the range in headline numbers and say so.
+export const BROKER_COST = {
+  floorLabel:     "one month's rent",
+  percentRange:   '12–15%',
   typicalPercent: 15,
-  note: 'Renters historically paid 12–15% of annual rent in broker fees.',
+  medianRent:     4199, // StreetEasy median NYC asking rent, May 2026
 }
+
+/** The floor a renter's agent asks: one month's rent. */
+export const brokerFloor = rent => Math.round(rent)
+
+/** The standard ask: 15% of the annual rent. */
+export const brokerTypical = rent =>
+  Math.round(rent * 12 * (BROKER_COST.typicalPercent / 100))
 
 export async function redirectToCheckout(userId, userEmail) {
   const res = await fetch('/api/create-checkout-session', {

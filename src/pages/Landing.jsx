@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom'
 import { useState } from 'react'
 import SEO from '../components/SEO'
-import { PLAN } from '../lib/stripe'
+import { PLAN, BROKER_COST, brokerFloor, brokerTypical } from '../lib/stripe'
 
 /* ─────────────────────────────────────────────────────────────
    Photography (Pexels — all URLs verified reachable).
@@ -18,24 +18,28 @@ const PHOTOS = {
 
 const FAQS = [
   {
-    q: 'How fast are the alerts, really?',
-    a: 'We check for new no-fee listings around the clock, roughly every ten minutes. When one matches your saved criteria, the text and email go out immediately — typically within a few minutes of the listing appearing.',
+    q: 'Didn’t the FARE Act already end broker fees?',
+    a: 'It ended forced tenant-paid fees. Since June 2025 the landlord’s broker bills the landlord — which is exactly the problem. That agent is paid by the landlord and works for the landlord, so most renters now walk into the biggest transaction of their year with nobody on their side. Hiring someone for your side is still entirely out of your pocket.',
   },
   {
-    q: 'Didn’t the FARE Act already end broker fees?',
-    a: 'It ended forced tenant-paid fees — since June 2025 the landlord’s broker bills the landlord. What it didn’t change is the race. The citywide median asking rent hit a record $4,199 (StreetEasy), and no-fee inventory moves faster than ever. The fee is gone; the competition isn’t.',
+    q: 'So what does a broker cost now?',
+    a: `A renter's agent you hire yourself asks ${BROKER_COST.percentRange} of the annual rent, or one month's rent at the floor. On the $${BROKER_COST.medianRent.toLocaleString()} median that is $${BROKER_COST.medianRent.toLocaleString()} to $${brokerTypical(BROKER_COST.medianRent).toLocaleString()}. That number was never set by the amount of work involved. It was set by the fact that renters had no other option.`,
+  },
+  {
+    q: `Why is that work worth $${PLAN.price} and not $0?`,
+    a: 'Because the listings are the easy half. The half that decides who signs is knowing what you qualify for, whether your income clears the 40x rule, whether you need a guarantor, and having every document a landlord will demand ready before they ask. That is what you were paying a broker thousands to keep track of, and it is what AptPilot does.',
   },
   {
     q: 'Why pay when StreetEasy alerts are free?',
-    a: 'Free portal alerts are generally batched and don’t filter for no-fee units. When a good listing can be gone the same day, minutes matter. We push the moment we see a match, and only for listings with no broker fee.',
+    a: 'Free portal alerts are generally batched and don’t filter for no-fee units. When a good listing can be gone the same day, minutes matter. We push the moment we see a match — and then help you actually act on it, which no portal does.',
   },
   {
     q: 'Is AptPilot a brokerage?',
-    a: 'No. AptPilot is software. We don’t represent landlords, we take no commission, and we have no reason to steer you toward a pricier apartment. You contact the listing agent directly.',
+    a: 'No. AptPilot is software. We don’t represent landlords, we take no commission, and we have no reason to steer you toward a pricier apartment — the price is the same whatever you sign. You contact the listing agent directly.',
   },
   {
     q: 'What if I don’t find a place?',
-    a: `Nothing changes — there is no clock running. You pay once, so a search that takes twelve weeks costs exactly what one that takes two costs. And the account is still yours the next time you move.`,
+    a: 'Nothing changes — there is no clock running. You pay once, so a search that takes twelve weeks costs exactly what one that takes two costs. And the account is still yours the next time you move.',
   },
 ]
 
@@ -96,8 +100,13 @@ function FaqItem({ q, a, open, toggle }) {
 /* ─── Section 3: the broker-fee comparison ─── */
 function TheMath({ navigate }) {
   const [rent, setRent] = useState(3500)
-  const brokerFee = Math.round(rent * 1.0833)
-  const savings = Math.round(brokerFee - PLAN.price)
+  // Two real quotes, not one blended number: the floor a renter's agent asks
+  // (a month's rent) and the standard ask (15% of the year). Showing both is
+  // what keeps the comparison defensible to a renter who has shopped brokers.
+  const floor    = brokerFloor(rent)
+  const typical  = brokerTypical(rent)
+  const keepLow  = Math.round(floor - PLAN.price)
+  const keepHigh = Math.round(typical - PLAN.price)
 
   return (
     <section style={{ position: 'relative', background: 'var(--forest)', overflow: 'hidden' }}>
@@ -117,7 +126,7 @@ function TheMath({ navigate }) {
         <div style={{ maxWidth: 560, marginBottom: '3.5rem' }}>
           <div className="eyebrow" style={{ color: 'var(--sand)' }}>The arithmetic</div>
           <h2 className="display display-lg" style={{ color: 'var(--paper)', marginTop: '1.1rem' }}>
-            What the old way cost.
+            Put your rent in and see it.
           </h2>
         </div>
 
@@ -140,15 +149,16 @@ function TheMath({ navigate }) {
               <span>$1,500</span><span>$15,000</span>
             </div>
             <p style={{ marginTop: '2.2rem', fontSize: '0.9rem', color: 'rgba(250,246,239,0.62)', lineHeight: 1.75, maxWidth: 420 }}>
-              The old standard NYC broker fee ran one month’s rent — about 8.33% of the year. The FARE Act ended
-              forced tenant-paid fees in June 2025, but fee-charging listings still exist, and the no-fee units are
-              the ones everyone races for.
+              The FARE Act ended forced tenant-paid fees in June 2025. It did not give renters anyone on their
+              side — the listing agent is paid by the landlord and works for the landlord. Hiring a broker of
+              your own still costs {BROKER_COST.percentRange} of the annual rent, or a month’s rent at the floor.
             </p>
           </div>
 
           <div style={{ borderLeft: '1px solid rgba(250,246,239,0.16)', paddingLeft: '3rem' }}>
             {[
-              { label: 'Broker fee, one month’s rent', val: `$${brokerFee.toLocaleString()}` },
+              { label: 'A broker of your own, one month’s rent', val: `$${floor.toLocaleString()}` },
+              { label: `The same broker at ${BROKER_COST.typicalPercent}% of the year`, val: `$${typical.toLocaleString()}` },
               { label: 'AptPilot, paid once', val: `$${PLAN.price}` },
               { label: 'Every search after this one', val: '$0' },
             ].map(row => (
@@ -162,12 +172,15 @@ function TheMath({ navigate }) {
             ))}
             <div style={{ paddingTop: '1.8rem' }}>
               <div style={{ fontSize: '0.8rem', letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--sand)', marginBottom: '0.6rem' }}>
-                Difference
+                What you keep
               </div>
               <div className="display" style={{ fontSize: '3.2rem', color: 'var(--paper)', lineHeight: 1 }}>
-                ${savings.toLocaleString()}
+                ${keepHigh.toLocaleString()}
               </div>
-              <button className="btn btn-cream btn-lg" onClick={() => navigate('/signup')} style={{ marginTop: '2rem' }}>
+              <p style={{ fontSize: '0.85rem', color: 'rgba(250,246,239,0.55)', marginTop: '0.7rem', lineHeight: 1.6 }}>
+                And ${keepLow.toLocaleString()} even if they only ask a month.
+              </p>
+              <button className="btn btn-cream btn-lg" onClick={() => navigate('/signup')} style={{ marginTop: '1.8rem' }}>
                 Get lifetime access
               </button>
             </div>
@@ -185,8 +198,8 @@ export default function Landing() {
   return (
     <div style={{ background: 'var(--paper)' }}>
       <SEO
-        title="AptPilot — Instant alerts for no-fee NYC apartments"
-        description={`No-fee apartments in New York lease within hours. AptPilot texts you the moment a listing matches, then walks you through qualifying and the application — $${PLAN.price} once, no subscription.`}
+        title="AptPilot — A broker charges one month's rent. We charge $199.99."
+        description={`Hiring a renter's broker in NYC costs ${BROKER_COST.percentRange} of the annual rent. AptPilot does the same job — instant no-fee listing alerts, qualifying, documents, the application — for $${PLAN.price} once, no subscription.`}
         canonical="https://aptpilot.vercel.app/"
       />
 
@@ -212,15 +225,23 @@ export default function Landing() {
       {/* ── 1. HERO ─────────────────────────────────────────── */}
       <section className="hero-section" style={{ padding: '9rem 0 6.5rem' }}>
         <div className="wrap">
-          <div className="hero-grid" style={{ display: 'grid', gridTemplateColumns: '1.02fr 0.98fr', gap: '5rem', alignItems: 'center' }}>
+          <div className="hero-grid" style={{ display: 'grid', gridTemplateColumns: '1.12fr 0.88fr', gap: '5rem', alignItems: 'center' }}>
             <div className="fade-up">
-              <div className="eyebrow">New York City · No broker fee</div>
+              <div className="eyebrow">New York City</div>
+              {/* Kept short on purpose: at display-xl the left column is ~580px,
+                  and a line like "A broker charges" measures 571px in Fraunces —
+                  it survives on this machine and breaks to four lines on the
+                  Georgia fallback. Short lines, big number. */}
               <h1 className="display display-xl" style={{ margin: '1.5rem 0 1.6rem' }}>
-                The good ones go<br />before lunch.
+                A broker wants<br />${brokerTypical(BROKER_COST.medianRent).toLocaleString()}.
               </h1>
-              <p className="lede" style={{ maxWidth: 460 }}>
-                No-fee apartments in New York lease within hours of listing. AptPilot watches the market around
-                the clock and texts you the moment one matches — while you can still be the first call the agent takes.
+              <p className="lede" style={{ maxWidth: 470 }}>
+                That is {BROKER_COST.typicalPercent}% of a year at New York’s ${BROKER_COST.medianRent.toLocaleString()} median rent — the standard ask
+                from a broker you hire to represent you. For finding listings and walking your
+                paperwork to a landlord.
+              </p>
+              <p className="lede" style={{ maxWidth: 470, marginTop: '1.1rem' }}>
+                AptPilot does that for <strong style={{ color: 'var(--text)', fontWeight: 600 }}>${PLAN.price}</strong>. Once.
               </p>
 
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.85rem', margin: '2.4rem 0 1.1rem' }}>
@@ -260,9 +281,10 @@ export default function Landing() {
             marginTop: '7rem', paddingTop: '2.2rem', borderTop: '1px solid var(--line)',
           }}>
             {[
-              ['$4,199', 'Median asking rent, NYC — StreetEasy, May 2026'],
-              ['Every 10 min', 'How often we check for new no-fee listings'],
-              ['Hours', 'How long a good no-fee unit typically lasts'],
+              [`$${BROKER_COST.medianRent.toLocaleString()}–$${brokerTypical(BROKER_COST.medianRent).toLocaleString()}`,
+               `What a renter's broker asks to represent you on the median New York apartment — a month's rent at the floor, ${BROKER_COST.percentRange} of the year at the standard`],
+              [`$${PLAN.price}`, 'What AptPilot asks. Paid once, and the account is still yours at your next lease'],
+              ['Every 10 min', 'How often we check for new no-fee listings — nothing is batched into a daily digest'],
             ].map(([v, l]) => (
               <div key={l} style={{ flex: '1 1 200px', maxWidth: 300 }}>
                 <div className="display" style={{ fontSize: '1.85rem', marginBottom: '0.5rem' }}>{v}</div>
@@ -279,15 +301,15 @@ export default function Landing() {
           <div style={{ maxWidth: 560, marginBottom: '4.5rem' }}>
             <div className="eyebrow">How it works</div>
             <h2 className="display display-lg" style={{ marginTop: '1.1rem' }}>
-              Three steps, then you wait for your phone to buzz.
+              The same job. Without the fee.
             </h2>
           </div>
 
           <div className="steps-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '3.5rem' }}>
             {[
               { n: 'One', t: 'Tell us what you want', d: 'Budget, bedrooms, neighborhoods, move-in window. It takes about two minutes, and you can change any of it later from your dashboard.' },
-              { n: 'Two', t: 'We watch, continuously', d: 'New no-fee listings are checked roughly every ten minutes — overnight, weekends, holidays. Nothing is batched into a daily digest.' },
-              { n: 'Three', t: 'You hear first', d: 'A text and an email with the address, the price, and a direct link — while the listing is still new enough that calling actually gets you a viewing.' },
+              { n: 'Two', t: 'You hear first', d: 'We check for new no-fee listings roughly every ten minutes — overnight, weekends, holidays — and text you the address, the price, and a direct link the moment one matches.' },
+              { n: 'Three', t: 'You show up ready', d: 'What decides who gets the apartment is whose file was complete. We tell you what you qualify for, whether you need a guarantor, and which documents to have in hand before a landlord asks.' },
             ].map(step => (
               <div key={step.n}>
                 <div className="display" style={{ fontSize: '1.5rem', color: 'var(--clay)', marginBottom: '1.1rem' }}>
@@ -354,7 +376,7 @@ export default function Landing() {
           }}>
             <div style={{ background: 'var(--forest)', padding: '4.5rem 3.5rem' }}>
               <h2 className="display display-md" style={{ color: 'var(--paper)' }}>
-                Start before the next one lists.
+                Keep the other ${(brokerTypical(BROKER_COST.medianRent) - PLAN.price).toLocaleString()}.
               </h2>
               <p style={{ color: 'rgba(250,246,239,0.65)', fontSize: '0.98rem', lineHeight: 1.75, margin: '1.2rem 0 2.2rem', maxWidth: 380 }}>
                 Two minutes to set up. ${PLAN.price} once, and the account stays yours —
