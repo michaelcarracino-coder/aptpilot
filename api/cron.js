@@ -1,6 +1,18 @@
+import { MODEL } from './ai-chat.js';
+
 // Consolidated cron endpoint (Vercel Hobby allows max 12 functions + daily crons).
 // The Railway scraper's 5-minute heartbeat POSTs here with { job: 'scrape-jobs' };
 // the daily Vercel cron GETs with no job and runs everything as a backstop.
+//
+// The health probe lives here rather than in its own api/health.js on purpose:
+// api/ sits at 11 of the 12 functions Hobby allows, and spending the last slot
+// on a status page would mean the next real endpoint silently breaks deploys.
+//
+// Every customer-facing email still goes out from Resend's shared test sender,
+// which only ever delivers to the account owner. Kept in one constant so the
+// health probe reports the real state instead of a guess.
+const MAIL_FROM = 'AptPilot Ops <onboarding@resend.dev>';
+
 export default async function handler(req, res) {
   if (req.method !== 'GET' && req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
@@ -19,8 +31,118 @@ export default async function handler(req, res) {
   if (job === 'digest' || job === 'all') {
     out.digest = await runDailyDigest();
   }
+  if (job === 'health' || job === 'all') {
+    out.health = await runHealth();
+  }
 
   return res.status(200).json(out);
+}
+
+// Readiness probe: /api/cron?job=health
+//
+// Answers one question — could a renter who paid today actually receive what
+// they bought? Each check is the cheapest thing that would genuinely fail if
+// the dependency were broken, not a ping that passes while the feature is dead.
+//
+// /api/cron is unauthenticated, so this reports STATUS ONLY: never a key, never
+// a key fragment, never a provider's raw error body. Error *types* are fine.
+async function runHealth() {
+  const checks = {};
+  const alarms = [];
+
+  // Stripe mode is readable straight off the key prefix, so this creates no
+  // checkout session and costs nothing.
+  const sk = process.env.STRIPE_SECRET_KEY || '';
+  checks.stripeMode = sk.startsWith('sk_live_') ? 'live'
+    : (sk.startsWith('sk_test_') || sk.startsWith('sb_')) ? 'TEST'
+    : 'MISSING';
+  if (checks.stripeMode !== 'live') {
+    alarms.push(`Stripe key is ${checks.stripeMode} — no real payment can complete.`);
+  }
+
+  // The expensive failure: a live secret key paired with a test-mode webhook
+  // secret charges the customer, fails signature verification, and leaves
+  // profiles.paid false. We can prove the secret is present and live-shaped;
+  // only a real delivery proves it matches the endpoint.
+  const whsec = process.env.STRIPE_WEBHOOK_SECRET || '';
+  checks.stripeWebhookSecret = whsec.startsWith('whsec_') ? 'configured' : 'MISSING';
+  if (checks.stripeWebhookSecret !== 'configured') {
+    alarms.push('STRIPE_WEBHOOK_SECRET missing — buyers would be charged and never marked paid.');
+  }
+
+  // Anthropic: one token against the model ai-chat actually uses, so this
+  // catches an exhausted balance AND a retired model id.
+  if (!process.env.ANTHROPIC_API_KEY) {
+    checks.anthropic = 'MISSING KEY';
+    alarms.push('ANTHROPIC_API_KEY missing — the guide errors for every user.');
+  } else {
+    try {
+      const r = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'x-api-key': process.env.ANTHROPIC_API_KEY,
+          'anthropic-version': '2023-06-01',
+          'content-type': 'application/json',
+        },
+        body: JSON.stringify({ model: MODEL, max_tokens: 1, messages: [{ role: 'user', content: 'ping' }] }),
+      });
+      if (r.ok) {
+        checks.anthropic = 'ok';
+      } else {
+        const body = await r.json().catch(() => ({}));
+        checks.anthropic = `ERROR ${r.status} ${body?.error?.type || ''}`.trim();
+        alarms.push(`Anthropic rejected the call (${checks.anthropic}) — the guide errors for every user.`);
+      }
+    } catch {
+      checks.anthropic = 'UNREACHABLE';
+      alarms.push('Anthropic unreachable — the guide errors for every user.');
+    }
+  }
+
+  checks.emailSender = MAIL_FROM.includes('onboarding@resend.dev')
+    ? 'SHARED TEST SENDER — reaches only the account owner'
+    : 'verified domain';
+  if (checks.emailSender.startsWith('SHARED')) {
+    alarms.push('Email still sends from Resend\'s test sender — customers receive nothing. Needs a verified domain.');
+  }
+  if (!process.env.RESEND_API_KEY) alarms.push('RESEND_API_KEY missing — no email of any kind sends.');
+  if (!process.env.TWILIO_AUTH_TOKEN) checks.twilio = 'no key set';
+
+  // Supabase, plus the two numbers that say whether the alert pipeline has ever
+  // done its job. seen_listings is the crawler's own output: if it is empty the
+  // scrape -> match -> notify chain has never completed, whatever else is green.
+  try {
+    const { createClient } = await import('@supabase/supabase-js');
+    const supabase = createClient(process.env.VITE_SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
+
+    const [{ count: seenTotal }, newest, { count: paidUsers }, { count: alertsSent }] = await Promise.all([
+      supabase.from('seen_listings').select('id', { count: 'exact', head: true }),
+      supabase.from('seen_listings').select('first_seen').order('first_seen', { ascending: false }).limit(1),
+      supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('paid', true),
+      supabase.from('alert_notifications').select('id', { count: 'exact', head: true }),
+    ]);
+
+    checks.supabase = 'ok';
+    checks.paidUsers = paidUsers ?? 0;
+    checks.alertsEverSent = alertsSent ?? 0;
+
+    const last = newest?.data?.[0]?.first_seen || null;
+    checks.crawlerLastSaw = last;
+    if (!seenTotal) {
+      checks.crawler = 'NEVER RAN';
+      alarms.push('Crawler has never ingested a listing — the alert pipeline has no successful run in its history.');
+    } else {
+      const ageH = (Date.now() - new Date(last).getTime()) / 3600000;
+      checks.crawler = ageH > 24 ? `STALE (${Math.round(ageH)}h)` : 'ok';
+      if (ageH > 24) alarms.push(`Crawler last ingested a listing ${Math.round(ageH)}h ago — likely blocked or down.`);
+    }
+  } catch (err) {
+    checks.supabase = 'ERROR';
+    alarms.push(`Supabase unreachable: ${err.message}`);
+  }
+
+  // Green means a renter who paid today would actually get what they bought.
+  return { ok: alarms.length === 0, checks, alarms };
 }
 
 // Daily ops + P&L digest emailed to the founder. Runs with the daily Vercel cron.
@@ -94,7 +216,7 @@ async function runDailyDigest() {
       method: 'POST',
       headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        from: 'AptPilot Ops <onboarding@resend.dev>',
+        from: MAIL_FROM,
         to: ['michael.carracino@gmail.com'],
         // There is no MRR to report since 2c15f8e retired the subscription for
         // a one-time price; `mrr` went away with it but this line kept calling

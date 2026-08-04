@@ -11,7 +11,9 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY
 )
 
-const MODEL = 'claude-opus-4-8'
+// Exported so the health probe in api/cron.js tests the model this endpoint
+// actually calls, rather than a copy that can drift out of step with it.
+export const MODEL = 'claude-opus-4-8'
 const MAX_TOOL_ROUNDS = 5
 
 // AptPilot is sold once and promised "forever", so inference is a perpetual
